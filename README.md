@@ -1,3 +1,3 @@
 # Record Process
 
-The process of listening to records.
+The process of listening to records and re-evaluating.
