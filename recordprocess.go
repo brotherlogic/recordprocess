@@ -1,19 +1,74 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"io/ioutil"
 	"log"
+	"strconv"
+	"time"
 
 	"github.com/brotherlogic/goserver"
 	"google.golang.org/grpc"
 
 	pbg "github.com/brotherlogic/goserver/proto"
+	pbrc "github.com/brotherlogic/recordcollection/proto"
 )
 
 //Server main server type
 type Server struct {
 	*goserver.GoServer
+	getter getter
+}
+
+type prodGetter struct {
+	getIP func(string) (string, int, error)
+}
+
+func (p prodGetter) getRecords() ([]*pbrc.Record, error) {
+	ip, port, err := p.getIP("recordcollection")
+	if err != nil {
+		return nil, err
+	}
+
+	conn, err := grpc.Dial(ip+":"+strconv.Itoa(int(port)), grpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := pbrc.NewRecordCollectionServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	resp, err := client.GetRecords(ctx, &pbrc.GetRecordsRequest{Filter: &pbrc.Record{}})
+	if err != nil {
+		return nil, err
+	}
+	return resp.GetRecords(), nil
+}
+
+func (p prodGetter) updateRecord(r *pbrc.Record) error {
+	ip, port, err := p.getIP("recordcollection")
+	if err != nil {
+		return err
+	}
+
+	conn, err := grpc.Dial(ip+":"+strconv.Itoa(int(port)), grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client := pbrc.NewRecordCollectionServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	_, err = client.UpdateRecord(ctx, &pbrc.UpdateRecordRequest{Update: r})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // Init builds the server
