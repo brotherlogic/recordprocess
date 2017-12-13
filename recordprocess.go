@@ -12,6 +12,7 @@ import (
 	"google.golang.org/grpc"
 
 	pbg "github.com/brotherlogic/goserver/proto"
+	"github.com/brotherlogic/goserver/utils"
 	pbrc "github.com/brotherlogic/recordcollection/proto"
 )
 
@@ -22,7 +23,7 @@ type Server struct {
 }
 
 type prodGetter struct {
-	getIP func(string) (string, int, error)
+	getIP func(string) (string, int32, error)
 }
 
 func (p prodGetter) getRecords() ([]*pbrc.Record, error) {
@@ -74,7 +75,7 @@ func (p prodGetter) update(r *pbrc.Record) error {
 // Init builds the server
 func Init() *Server {
 	s := &Server{GoServer: &goserver.GoServer{}}
-	s.getter = &prodGetter{}
+	s.getter = &prodGetter{getIP: utils.Resolve}
 	return s
 }
 
