@@ -48,7 +48,7 @@ func (p prodGetter) getRecords() ([]*pbrc.Record, error) {
 	return resp.GetRecords(), nil
 }
 
-func (p prodGetter) updateRecord(r *pbrc.Record) error {
+func (p prodGetter) update(r *pbrc.Record) error {
 	ip, port, err := p.getIP("recordcollection")
 	if err != nil {
 		return err
@@ -74,6 +74,7 @@ func (p prodGetter) updateRecord(r *pbrc.Record) error {
 // Init builds the server
 func Init() *Server {
 	s := &Server{GoServer: &goserver.GoServer{}}
+	s.getter = &prodGetter{}
 	return s
 }
 
