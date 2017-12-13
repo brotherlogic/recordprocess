@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	pbrc "github.com/brotherlogic/recordcollection/proto"
 )
@@ -12,6 +13,7 @@ type getter interface {
 }
 
 func (s *Server) processRecords() {
+	t := time.Now()
 	records, err := s.getter.getRecords()
 
 	if err != nil {
@@ -26,6 +28,8 @@ func (s *Server) processRecords() {
 			s.Log(fmt.Sprintf("Error updating record: %v", err))
 		}
 	}
+
+	s.Log(fmt.Sprintf("Processed %v records in %v", len(records), time.Now().Sub(t)))
 }
 
 func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {

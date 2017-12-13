@@ -110,7 +110,7 @@ func main() {
 	server.PrepServer()
 	server.Register = server
 
-	server.RegisterServer("recordprocess", true)
+	server.RegisterServer("recordprocess", false)
 	server.Log("Starting!")
 	server.Serve()
 }
