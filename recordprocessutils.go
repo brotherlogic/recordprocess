@@ -21,6 +21,7 @@ func (s *Server) processRecords() {
 		return
 	}
 
+	s.Log(fmt.Sprintf("About to process %v records", len(records)))
 	for _, record := range records {
 		update := s.processRecord(record)
 		err := s.getter.update(update)
