@@ -91,3 +91,13 @@ func TestProcessUnpurchasedRecord(t *testing.T) {
 		t.Fatalf("Error in processing record: %v", nr)
 	}
 }
+
+func TestEmptyUpdate(t *testing.T) {
+	s := InitTest()
+	r := &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PURCHASED}, Release: &pbgd.Release{FolderId: 1}}
+	nr := s.processRecord(r)
+
+	if nr != nil {
+		t.Fatalf("Error in processing record: %v", nr)
+	}
+}

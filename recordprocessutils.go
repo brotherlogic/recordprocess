@@ -24,9 +24,11 @@ func (s *Server) processRecords() {
 	s.Log(fmt.Sprintf("About to process %v records", len(records)))
 	for _, record := range records {
 		update := s.processRecord(record)
-		err := s.getter.update(update)
-		if err != nil {
-			s.Log(fmt.Sprintf("Error updating record: %v", err))
+		if update != nil {
+			err := s.getter.update(update)
+			if err != nil {
+				s.Log(fmt.Sprintf("Error updating record: %v", err))
+			}
 		}
 	}
 
@@ -38,9 +40,10 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		r.Metadata = &pbrc.ReleaseMetadata{}
 	}
 
-	if r.GetRelease().FolderId == 1 {
+	if r.GetRelease().FolderId == 1 && r.GetMetadata().Category != pbrc.ReleaseMetadata_PURCHASED {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_PURCHASED
+		return r
 	}
 
-	return r
+	return nil
 }
