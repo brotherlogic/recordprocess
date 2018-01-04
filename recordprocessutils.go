@@ -36,7 +36,7 @@ func (s *Server) processRecords() {
 
 	s.lastProc = time.Now()
 	s.lastCount = count
-	s.Log(fmt.Sprintf("Processed %v records in %v", len(records), time.Now().Sub(t)))
+	s.Log(fmt.Sprintf("Processed %v records (touched %v) in %v", len(records), count, time.Now().Sub(t)))
 }
 
 func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
