@@ -19,7 +19,8 @@ import (
 //Server main server type
 type Server struct {
 	*goserver.GoServer
-	getter getter
+	getter   getter
+	lastProc time.Time
 }
 
 type prodGetter struct {
@@ -96,7 +97,7 @@ func (s *Server) Mote(master bool) error {
 
 // GetState gets the state of the server
 func (s *Server) GetState() []*pbg.State {
-	return []*pbg.State{}
+	return []*pbg.State{&pbg.State{Key: "last_proc", TimeValue: s.lastProc.Unix()}}
 }
 
 func main() {

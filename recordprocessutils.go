@@ -32,6 +32,7 @@ func (s *Server) processRecords() {
 		}
 	}
 
+	s.lastProc = time.Now()
 	s.Log(fmt.Sprintf("Processed %v records in %v", len(records), time.Now().Sub(t)))
 }
 
