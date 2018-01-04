@@ -22,9 +22,11 @@ func (s *Server) processRecords() {
 	}
 
 	s.Log(fmt.Sprintf("About to process %v records", len(records)))
+	count := int64(0)
 	for _, record := range records {
 		update := s.processRecord(record)
 		if update != nil {
+			count++
 			err := s.getter.update(update)
 			if err != nil {
 				s.Log(fmt.Sprintf("Error updating record: %v", err))
@@ -33,6 +35,7 @@ func (s *Server) processRecords() {
 	}
 
 	s.lastProc = time.Now()
+	s.lastCount = count
 	s.Log(fmt.Sprintf("Processed %v records in %v", len(records), time.Now().Sub(t)))
 }
 
