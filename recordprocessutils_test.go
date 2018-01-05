@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"testing"
+	"time"
 
 	pbgd "github.com/brotherlogic/godiscogs"
 	pbrc "github.com/brotherlogic/recordcollection/proto"
@@ -10,10 +11,11 @@ import (
 
 type testGetter struct {
 	lastCategory *pbrc.ReleaseMetadata_Category
+	rec          *pbrc.Record
 }
 
 func (t *testGetter) getRecords() ([]*pbrc.Record, error) {
-	return []*pbrc.Record{&pbrc.Record{Release: &pbgd.Release{FolderId: 1}}}, nil
+	return []*pbrc.Record{t.rec}, nil
 }
 
 func (t *testGetter) update(r *pbrc.Record) error {
@@ -51,11 +53,33 @@ func InitTest() *Server {
 
 func TestUpdate(t *testing.T) {
 	s := InitTest()
-	tg := testGetter{}
+	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{FolderId: 1}}}
 	s.getter = &tg
 	s.processRecords()
 
 	if *tg.lastCategory != pbrc.ReleaseMetadata_PURCHASED {
+		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
+	}
+}
+
+func TestUpdateToUnlistened(t *testing.T) {
+	s := InitTest()
+	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{FolderId: 812}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().Unix()}}}
+	s.getter = &tg
+	s.processRecords()
+
+	if *tg.lastCategory != pbrc.ReleaseMetadata_UNLISTENED {
+		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
+	}
+}
+
+func TestUpdateToStaged(t *testing.T) {
+	s := InitTest()
+	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().Unix()}}}
+	s.getter = &tg
+	s.processRecords()
+
+	if *tg.lastCategory != pbrc.ReleaseMetadata_STAGED {
 		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
 	}
 }
