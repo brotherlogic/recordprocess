@@ -50,7 +50,7 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 	}
 
 	if r.GetRelease().Id == 3331113 {
-		s.Log(fmt.Sprintf("TORU MOVE: %v, %v", r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -3, 0).Unix()), r.GetRelease().Rating))
+		s.Log(fmt.Sprintf("TORU PROC: %v, %v", r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -3, 0).Unix()), r.GetRelease().Rating))
 	}
 	if r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -3, 0).Unix()) {
 		if r.GetRelease().Rating == 0 {
