@@ -147,3 +147,15 @@ func TestEmptyUpdate(t *testing.T) {
 		t.Fatalf("Error in processing record: %v", nr)
 	}
 }
+
+func TestPromoteToStaged(t *testing.T) {
+	s := InitTest()
+	rec := &pbrc.Record{Release: &pbgd.Release{FolderId: 812802, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_UNLISTENED, DateAdded: time.Now().Unix()}}
+	tg := testGetter{rec: rec}
+	s.getter = &tg
+	s.processRecords()
+
+	if rec.GetMetadata().GetCategory() != pbrc.ReleaseMetadata_STAGED {
+		t.Errorf("Folder has not been updated: %v", rec)
+	}
+}
