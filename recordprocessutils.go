@@ -49,9 +49,6 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		return r
 	}
 
-	if r.GetRelease().Id == 3331113 {
-		s.Log(fmt.Sprintf("TORU PROC: %v, %v", r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -3, 0).Unix()), r.GetRelease().Rating))
-	}
 	if r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -3, 0).Unix()) {
 		if r.GetRelease().Rating == 0 {
 			r.GetMetadata().Category = pbrc.ReleaseMetadata_UNLISTENED
@@ -68,6 +65,17 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 				return r
 			}
 			r.GetMetadata().Category = pbrc.ReleaseMetadata_FRESHMAN
+			return r
+		}
+	}
+
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN {
+		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-3, 0, 0).Unix()) {
+			if r.GetRelease().Rating == 0 {
+				r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_PROFESSOR
+				return r
+			}
+			r.GetMetadata().Category = pbrc.ReleaseMetadata_PROFESSOR
 			return r
 		}
 	}
