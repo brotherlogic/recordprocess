@@ -128,6 +128,28 @@ func TestUpdateToProfessor(t *testing.T) {
 	}
 }
 
+func TestUpdateToPrePostdoc(t *testing.T) {
+	s := InitTest()
+	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{FolderId: 812, Rating: 0}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}}
+	s.getter = &tg
+	s.processRecords()
+
+	if *tg.lastCategory != pbrc.ReleaseMetadata_PRE_POSTDOC {
+		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
+	}
+}
+
+func TestUpdateToPostdoc(t *testing.T) {
+	s := InitTest()
+	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}}
+	s.getter = &tg
+	s.processRecords()
+
+	if *tg.lastCategory != pbrc.ReleaseMetadata_POSTDOC {
+		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
+	}
+}
+
 func TestUpdateFailOnGet(t *testing.T) {
 	s := InitTest()
 	tg := testFailGetter{}

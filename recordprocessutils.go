@@ -90,5 +90,16 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		}
 	}
 
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_POSTDOC {
+		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-2, 0, 0).Unix()) {
+			if r.GetRelease().Rating == 0 {
+				r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_POSTDOC
+				return r
+			}
+			r.GetMetadata().Category = pbrc.ReleaseMetadata_POSTDOC
+			return r
+		}
+	}
+
 	return nil
 }
