@@ -49,13 +49,23 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		return r
 	}
 
-	if r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -3, 0).Unix()) {
-		if r.GetRelease().Rating == 0 {
-			r.GetMetadata().Category = pbrc.ReleaseMetadata_UNLISTENED
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN {
+		if r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -3, 0).Unix()) {
+			if r.GetRelease().Rating == 0 {
+				r.GetMetadata().Category = pbrc.ReleaseMetadata_UNLISTENED
+				return r
+			}
+			r.GetMetadata().Category = pbrc.ReleaseMetadata_STAGED
 			return r
 		}
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_STAGED
-		return r
+	}
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNLISTENED {
+		if r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -3, 0).Unix()) {
+			if r.GetRelease().Rating > 0 {
+				r.GetMetadata().Category = pbrc.ReleaseMetadata_STAGED
+				return r
+			}
+		}
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN {
