@@ -79,7 +79,7 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		}
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_FRESHMAN {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_PROFESSOR {
 		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-3, 0, 0).Unix()) {
 			if r.GetRelease().Rating == 0 {
 				r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_PROFESSOR
