@@ -172,6 +172,28 @@ func TestUpdateToGraduate(t *testing.T) {
 	}
 }
 
+func TestUpdateToPreSophmore(t *testing.T) {
+	s := InitTest()
+	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{FolderId: 812, Rating: 0}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(0, -7, 0).Unix()}}}
+	s.getter = &tg
+	s.processRecords()
+
+	if *tg.lastCategory != pbrc.ReleaseMetadata_PRE_SOPHMORE {
+		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
+	}
+}
+
+func TestUpdateToSophmore(t *testing.T) {
+	s := InitTest()
+	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(0, -7, 0).Unix()}}}
+	s.getter = &tg
+	s.processRecords()
+
+	if *tg.lastCategory != pbrc.ReleaseMetadata_SOPHMORE {
+		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
+	}
+}
+
 func TestUpdateFailOnGet(t *testing.T) {
 	s := InitTest()
 	tg := testFailGetter{}
