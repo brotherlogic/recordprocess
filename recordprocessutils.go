@@ -61,7 +61,7 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNLISTENED {
-		if r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -5, 0).Unix()) {
+		if r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -3, 0).Unix()) {
 			if r.GetRelease().Rating > 0 {
 				r.GetMetadata().Category = pbrc.ReleaseMetadata_STAGED
 				return r
