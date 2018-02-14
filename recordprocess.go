@@ -10,6 +10,7 @@ import (
 
 	"github.com/brotherlogic/goserver"
 	"github.com/brotherlogic/goserver/utils"
+	"github.com/brotherlogic/keystore/client"
 	"google.golang.org/grpc"
 
 	pbg "github.com/brotherlogic/goserver/proto"
@@ -85,6 +86,7 @@ func (p prodGetter) update(r *pbrc.Record) error {
 func Init() *Server {
 	s := &Server{GoServer: &goserver.GoServer{}}
 	s.getter = &prodGetter{getIP: utils.Resolve}
+	s.GoServer.KSclient = *keystoreclient.GetClient(s.GetIP)
 	return s
 }
 
