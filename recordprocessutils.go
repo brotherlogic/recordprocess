@@ -5,6 +5,7 @@ import (
 	"time"
 
 	pbrc "github.com/brotherlogic/recordcollection/proto"
+	pb "github.com/brotherlogic/recordprocess/proto"
 )
 
 type getter interface {
@@ -12,7 +13,24 @@ type getter interface {
 	update(*pbrc.Record) error
 }
 
+func (s *Server) saveRecordScore(record *pbrc.Record) bool {
+	found := false
+	for _, score := range s.scores.GetScores() {
+		if score.GetCategory() == record.GetMetadata().GetCategory() && score.GetInstanceId() == record.GetRelease().InstanceId {
+			found = true
+			break
+		}
+	}
+
+	if !found && record.GetRelease().Rating > 0 {
+		s.scores.Scores = append(s.scores.Scores, &pb.RecordScore{InstanceId: record.GetRelease().InstanceId, Rating: record.GetRelease().Rating, Category: record.GetMetadata().GetCategory()})
+	}
+
+	return !found
+}
+
 func (s *Server) processRecords() {
+	scoresUpdated := false
 	t := time.Now()
 	records, err := s.getter.getRecords()
 
@@ -24,6 +42,7 @@ func (s *Server) processRecords() {
 	s.Log(fmt.Sprintf("About to process %v records", len(records)))
 	count := int64(0)
 	for _, record := range records {
+		scoresUpdated = s.saveRecordScore(record) || scoresUpdated
 		update := s.processRecord(record)
 		if update != nil {
 			count++
@@ -37,6 +56,10 @@ func (s *Server) processRecords() {
 	s.lastProc = time.Now()
 	s.lastCount = count
 	s.Log(fmt.Sprintf("Processed %v records (touched %v) in %v", len(records), count, time.Now().Sub(t)))
+
+	if scoresUpdated {
+		s.saveScores()
+	}
 }
 
 func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {

@@ -9,11 +9,17 @@ import (
 	"time"
 
 	"github.com/brotherlogic/goserver"
+	"github.com/brotherlogic/goserver/utils"
 	"google.golang.org/grpc"
 
 	pbg "github.com/brotherlogic/goserver/proto"
-	"github.com/brotherlogic/goserver/utils"
 	pbrc "github.com/brotherlogic/recordcollection/proto"
+	pb "github.com/brotherlogic/recordprocess/proto"
+)
+
+const (
+	// KEY used to save scores
+	KEY = "github.com/brotherlogic/recordprocess/scores"
 )
 
 //Server main server type
@@ -22,6 +28,7 @@ type Server struct {
 	getter    getter
 	lastProc  time.Time
 	lastCount int64
+	scores    *pb.Scores
 }
 
 type prodGetter struct {
@@ -91,8 +98,29 @@ func (s *Server) ReportHealth() bool {
 	return true
 }
 
+func (s *Server) saveScores() {
+	s.KSclient.Save(KEY, s.scores)
+}
+
+func (s *Server) readScores() error {
+	scores := &pb.Scores{}
+	data, _, err := s.KSclient.Read(KEY, scores)
+
+	if err != nil {
+		return err
+	}
+
+	s.scores = data.(*pb.Scores)
+	return nil
+}
+
 // Mote promotes/demotes this server
 func (s *Server) Mote(master bool) error {
+	if master {
+		err := s.readScores()
+		return err
+	}
+
 	return nil
 }
 
