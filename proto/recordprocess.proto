@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package recordprocessor;
+
+import "github.com/brotherlogic/recordcollection/proto/recordcollection.proto";
+
+message Scores {
+  repeated RecordScore scores = 1;
+}
+
+message RecordScore {
+  int32 instance_id = 1;
+  int32 rating = 2;
+  recordcollection.ReleaseMetadata.Category category = 3;
+}

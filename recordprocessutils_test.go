@@ -5,8 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/brotherlogic/keystore/client"
+
 	pbgd "github.com/brotherlogic/godiscogs"
 	pbrc "github.com/brotherlogic/recordcollection/proto"
+	pb "github.com/brotherlogic/recordprocess/proto"
 )
 
 type testGetter struct {
@@ -47,8 +50,24 @@ func InitTest() *Server {
 	s := Init()
 	s.SkipLog = true
 	s.getter = &testGetter{}
+	s.scores = &pb.Scores{}
+	s.GoServer.KSclient = *keystoreclient.GetTestClient(".testing")
 
 	return s
+}
+
+func TestSaveRecordTwice(t *testing.T) {
+	s := InitTest()
+	val := s.saveRecordScore(&pbrc.Record{Release: &pbgd.Release{InstanceId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_FRESHMAN}})
+
+	if !val {
+		t.Fatalf("First save failed")
+	}
+
+	val2 := s.saveRecordScore(&pbrc.Record{Release: &pbgd.Release{InstanceId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_FRESHMAN}})
+	if val2 {
+		t.Errorf("Second save did not fail")
+	}
 }
 
 func TestUpdate(t *testing.T) {
