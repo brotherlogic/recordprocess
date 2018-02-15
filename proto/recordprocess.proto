@@ -13,3 +13,15 @@ message RecordScore {
   int32 rating = 2;
   recordcollection.ReleaseMetadata.Category category = 3;
 }
+
+message GetScoreRequest {
+  int32 instance_id = 1;
+}
+
+message GetScoreResponse {
+  repeated RecordScore scores = 1;
+}
+
+service ScoreService {
+  rpc GetScore(GetScoreRequest) returns (GetScoreResponse) {};
+}
