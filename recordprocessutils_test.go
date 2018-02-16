@@ -56,6 +56,26 @@ func InitTest() *Server {
 	return s
 }
 
+var movetests = []struct {
+	in  *pbrc.Record
+	out pbrc.ReleaseMetadata_Category
+}{
+	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1234}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_STAGED, DateAdded: time.Now().AddDate(0, -4, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_FRESHMAN},
+}
+
+func TestMoveTests(t *testing.T) {
+	for _, test := range movetests {
+		s := InitTest()
+		tg := testGetter{rec: test.in}
+		s.getter = &tg
+		s.processRecords()
+
+		if *tg.lastCategory != test.out {
+			t.Fatalf("Test move failed %v -> %v (should have been %v)", test.in, tg.lastCategory, test.out)
+		}
+	}
+}
+
 func TestSaveRecordTwice(t *testing.T) {
 	s := InitTest()
 	val := s.saveRecordScore(&pbrc.Record{Release: &pbgd.Release{InstanceId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_FRESHMAN}})
