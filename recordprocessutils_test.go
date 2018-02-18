@@ -61,6 +61,7 @@ var movetests = []struct {
 	out pbrc.ReleaseMetadata_Category
 }{
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1234}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_STAGED, DateAdded: time.Now().AddDate(0, -4, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_FRESHMAN},
+	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1234}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_FRESHMAN, DateAdded: time.Now().AddDate(0, -7, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_SOPHMORE},
 }
 
 func TestMoveTests(t *testing.T) {
@@ -70,7 +71,7 @@ func TestMoveTests(t *testing.T) {
 		s.getter = &tg
 		s.processRecords()
 
-		if *tg.lastCategory != test.out {
+		if tg.lastCategory == nil || *tg.lastCategory != test.out {
 			t.Fatalf("Test move failed %v -> %v (should have been %v)", test.in, tg.lastCategory, test.out)
 		}
 	}
