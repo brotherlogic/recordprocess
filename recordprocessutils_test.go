@@ -124,17 +124,6 @@ func TestUpdateToStaged(t *testing.T) {
 	}
 }
 
-func TestUpdateToPreFreshman(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{FolderId: 812, Rating: 0}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(0, -4, 0).Unix()}}}
-	s.getter = &tg
-	s.processRecords()
-
-	if *tg.lastCategory != pbrc.ReleaseMetadata_PRE_FRESHMAN {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
-	}
-}
-
 func TestUpdateToFreshman(t *testing.T) {
 	s := InitTest()
 	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(0, -4, 0).Unix()}}}
@@ -142,17 +131,6 @@ func TestUpdateToFreshman(t *testing.T) {
 	s.processRecords()
 
 	if *tg.lastCategory != pbrc.ReleaseMetadata_FRESHMAN {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
-	}
-}
-
-func TestUpdateToPreProfessor(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{FolderId: 812, Rating: 0}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(-3, -1, 0).Unix()}}}
-	s.getter = &tg
-	s.processRecords()
-
-	if *tg.lastCategory != pbrc.ReleaseMetadata_PRE_PROFESSOR {
 		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
 	}
 }
@@ -168,17 +146,6 @@ func TestUpdateToProfessor(t *testing.T) {
 	}
 }
 
-func TestUpdateToPrePostdoc(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{FolderId: 812, Rating: 0}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}}
-	s.getter = &tg
-	s.processRecords()
-
-	if *tg.lastCategory != pbrc.ReleaseMetadata_PRE_POSTDOC {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
-	}
-}
-
 func TestUpdateToPostdoc(t *testing.T) {
 	s := InitTest()
 	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}}
@@ -190,17 +157,6 @@ func TestUpdateToPostdoc(t *testing.T) {
 	}
 }
 
-func TestUpdateToPreGraduate(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{FolderId: 812, Rating: 0}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(-1, -1, 0).Unix()}}}
-	s.getter = &tg
-	s.processRecords()
-
-	if *tg.lastCategory != pbrc.ReleaseMetadata_PRE_GRADUATE {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
-	}
-}
-
 func TestUpdateToGraduate(t *testing.T) {
 	s := InitTest()
 	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(-1, -1, 0).Unix()}}}
@@ -208,17 +164,6 @@ func TestUpdateToGraduate(t *testing.T) {
 	s.processRecords()
 
 	if *tg.lastCategory != pbrc.ReleaseMetadata_GRADUATE {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
-	}
-}
-
-func TestUpdateToPreSophmore(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{FolderId: 812, Rating: 0}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(0, -7, 0).Unix()}}}
-	s.getter = &tg
-	s.processRecords()
-
-	if *tg.lastCategory != pbrc.ReleaseMetadata_PRE_SOPHMORE {
 		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
 	}
 }
