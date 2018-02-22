@@ -92,56 +92,36 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		}
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_FRESHMAN {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN {
 		if r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -6, 0).Unix()) && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -3, 0).Unix()) {
-			if r.GetRelease().Rating == 0 {
-				r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_FRESHMAN
-				return r
-			}
 			r.GetMetadata().Category = pbrc.ReleaseMetadata_FRESHMAN
 			return r
 		}
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_PROFESSOR {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN {
 		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-3, 0, 0).Unix()) {
-			if r.GetRelease().Rating == 0 {
-				r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_PROFESSOR
-				return r
-			}
 			r.GetMetadata().Category = pbrc.ReleaseMetadata_PROFESSOR
 			return r
 		}
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_POSTDOC {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN {
 		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-2, 0, 0).Unix()) {
-			if r.GetRelease().Rating == 0 {
-				r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_POSTDOC
-				return r
-			}
 			r.GetMetadata().Category = pbrc.ReleaseMetadata_POSTDOC
 			return r
 		}
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_GRADUATE {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN {
 		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-1, 0, 0).Unix()) {
-			if r.GetRelease().Rating == 0 {
-				r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_GRADUATE
-				return r
-			}
 			r.GetMetadata().Category = pbrc.ReleaseMetadata_GRADUATE
 			return r
 		}
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_SOPHMORE {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN {
 		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -6, 0).Unix()) {
-			if r.GetRelease().Rating == 0 {
-				r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_SOPHMORE
-				return r
-			}
 			r.GetMetadata().Category = pbrc.ReleaseMetadata_SOPHMORE
 			return r
 		}
