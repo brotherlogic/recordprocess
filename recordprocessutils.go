@@ -67,11 +67,6 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		r.Metadata = &pbrc.ReleaseMetadata{}
 	}
 
-	if r.GetRelease().FolderId == 268147 && r.GetMetadata().Category != pbrc.ReleaseMetadata_DIGITAL {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_DIGITAL
-		return r
-	}
-
 	if r.GetRelease().FolderId == 1 && r.GetMetadata().Category != pbrc.ReleaseMetadata_PURCHASED {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_PURCHASED
 		return r
