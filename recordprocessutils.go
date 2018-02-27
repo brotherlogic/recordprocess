@@ -92,7 +92,7 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		}
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_FRESHMAN && r.GetRelease().Rating > 0) {
 		if r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -6, 0).Unix()) && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -3, 0).Unix()) {
 			r.GetMetadata().Category = pbrc.ReleaseMetadata_FRESHMAN
 			return r
