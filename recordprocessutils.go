@@ -32,15 +32,12 @@ func (s *Server) saveRecordScore(record *pbrc.Record) bool {
 
 func (s *Server) processRecords() {
 	scoresUpdated := false
-	t := time.Now()
 	records, err := s.getter.getRecords()
 
 	if err != nil {
-		s.Log(fmt.Sprintf("Error processing records: %v", err))
 		return
 	}
 
-	s.Log(fmt.Sprintf("About to process %v records", len(records)))
 	count := int64(0)
 	for _, record := range records {
 		scoresUpdated = s.saveRecordScore(record) || scoresUpdated
@@ -56,7 +53,6 @@ func (s *Server) processRecords() {
 
 	s.lastProc = time.Now()
 	s.lastCount = count
-	s.Log(fmt.Sprintf("Processed %v records (touched %v) in %v", len(records), count, time.Now().Sub(t)))
 
 	if scoresUpdated {
 		s.saveScores()
@@ -68,6 +64,12 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		r.Metadata = &pbrc.ReleaseMetadata{}
 	}
 
+	if r.GetMetadata().Purgatory == pbrc.Purgatory_NEEDS_STOCK_CHECK && r.GetMetadata().LastStockCheck > time.Now().AddDate(0, -3, 0).Unix() {
+		r.GetMetadata().Purgatory = pbrc.Purgatory_UNKNOWN
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_FRESHMAN
+		return r
+	}
+	
 	if r.GetRelease().FolderId == 1 && r.GetMetadata().Category != pbrc.ReleaseMetadata_PURCHASED {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_PURCHASED
 		return r
