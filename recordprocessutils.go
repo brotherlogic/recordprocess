@@ -24,7 +24,12 @@ func (s *Server) saveRecordScore(record *pbrc.Record) bool {
 	}
 
 	if !found && record.GetRelease().Rating > 0 && !strings.HasPrefix(record.GetMetadata().GetCategory().String(), "PRE") {
-		s.scores.Scores = append(s.scores.Scores, &pb.RecordScore{InstanceId: record.GetRelease().InstanceId, Rating: record.GetRelease().Rating, Category: record.GetMetadata().GetCategory()})
+		s.scores.Scores = append(s.scores.Scores, &pb.RecordScore{
+			InstanceId: record.GetRelease().InstanceId,
+			Rating: record.GetRelease().Rating,
+			Category: record.GetMetadata().GetCategory(),
+			ScoreTime: time.Now().Unix(),
+		})
 	}
 
 	return !found
