@@ -13,7 +13,7 @@ import (
 )
 
 type testGetter struct {
-	lastCategory *pbrc.ReleaseMetadata_Category
+	lastCategory pbrc.ReleaseMetadata_Category
 	rec          *pbrc.Record
 }
 
@@ -22,7 +22,7 @@ func (t *testGetter) getRecords() ([]*pbrc.Record, error) {
 }
 
 func (t *testGetter) update(r *pbrc.Record) error {
-	t.lastCategory = &r.GetMetadata().Category
+	t.lastCategory = r.GetMetadata().Category
 	return nil
 }
 
@@ -60,6 +60,7 @@ var movetests = []struct {
 	in  *pbrc.Record
 	out pbrc.ReleaseMetadata_Category
 }{
+	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{SetRating: 5}}, pbrc.ReleaseMetadata_UNKNOWN},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PRE_FRESHMAN, DateAdded: time.Now().AddDate(-10, 0, 0).Unix()}}, pbrc.ReleaseMetadata_PROFESSOR},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 268147}, Metadata: &pbrc.ReleaseMetadata{Purgatory: pbrc.Purgatory_NEEDS_STOCK_CHECK, LastStockCheck: time.Now().Unix()}}, pbrc.ReleaseMetadata_PRE_FRESHMAN},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1234}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_STAGED, DateAdded: time.Now().AddDate(0, -4, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_FRESHMAN},
@@ -76,7 +77,7 @@ func TestMoveTests(t *testing.T) {
 		s.getter = &tg
 		s.processRecords()
 
-		if tg.lastCategory == nil || *tg.lastCategory != test.out {
+		if tg.lastCategory != test.out {
 			t.Fatalf("Test move failed %v -> %v (should have been %v)", test.in, tg.lastCategory, test.out)
 		}
 	}
@@ -98,11 +99,11 @@ func TestSaveRecordTwice(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{FolderId: 1}}}
+	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{FolderId: 1}}}
 	s.getter = &tg
 	s.processRecords()
 
-	if *tg.lastCategory != pbrc.ReleaseMetadata_PURCHASED {
+	if tg.lastCategory != pbrc.ReleaseMetadata_PURCHASED {
 		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
 	}
 }
@@ -113,7 +114,7 @@ func TestUpdateToUnlistened(t *testing.T) {
 	s.getter = &tg
 	s.processRecords()
 
-	if *tg.lastCategory != pbrc.ReleaseMetadata_UNLISTENED {
+	if tg.lastCategory != pbrc.ReleaseMetadata_UNLISTENED {
 		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
 	}
 }
@@ -124,7 +125,7 @@ func TestUpdateToStaged(t *testing.T) {
 	s.getter = &tg
 	s.processRecords()
 
-	if *tg.lastCategory != pbrc.ReleaseMetadata_STAGED {
+	if tg.lastCategory != pbrc.ReleaseMetadata_STAGED {
 		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
 	}
 }
@@ -135,7 +136,7 @@ func TestUpdateToFreshman(t *testing.T) {
 	s.getter = &tg
 	s.processRecords()
 
-	if *tg.lastCategory != pbrc.ReleaseMetadata_FRESHMAN {
+	if tg.lastCategory != pbrc.ReleaseMetadata_FRESHMAN {
 		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
 	}
 }
@@ -146,7 +147,7 @@ func TestUpdateToProfessor(t *testing.T) {
 	s.getter = &tg
 	s.processRecords()
 
-	if *tg.lastCategory != pbrc.ReleaseMetadata_PROFESSOR {
+	if tg.lastCategory != pbrc.ReleaseMetadata_PROFESSOR {
 		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
 	}
 }
@@ -157,7 +158,7 @@ func TestUpdateToPostdoc(t *testing.T) {
 	s.getter = &tg
 	s.processRecords()
 
-	if *tg.lastCategory != pbrc.ReleaseMetadata_POSTDOC {
+	if tg.lastCategory != pbrc.ReleaseMetadata_POSTDOC {
 		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
 	}
 }
@@ -168,7 +169,7 @@ func TestUpdateToGraduate(t *testing.T) {
 	s.getter = &tg
 	s.processRecords()
 
-	if *tg.lastCategory != pbrc.ReleaseMetadata_GRADUATE {
+	if tg.lastCategory != pbrc.ReleaseMetadata_GRADUATE {
 		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
 	}
 }
@@ -179,7 +180,7 @@ func TestUpdateToSophmore(t *testing.T) {
 	s.getter = &tg
 	s.processRecords()
 
-	if *tg.lastCategory != pbrc.ReleaseMetadata_SOPHMORE {
+	if tg.lastCategory != pbrc.ReleaseMetadata_SOPHMORE {
 		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
 	}
 }
