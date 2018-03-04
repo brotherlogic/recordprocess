@@ -60,6 +60,7 @@ var movetests = []struct {
 	in  *pbrc.Record
 	out pbrc.ReleaseMetadata_Category
 }{
+	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1433217, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_UNKNOWN}}, pbrc.ReleaseMetadata_GOOGLE_PLAY},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_STAGED_TO_SELL}}, pbrc.ReleaseMetadata_PRE_FRESHMAN},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1234, Rating: 3}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_STAGED_TO_SELL}}, pbrc.ReleaseMetadata_SOLD},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{SetRating: 5}}, pbrc.ReleaseMetadata_UNKNOWN},
