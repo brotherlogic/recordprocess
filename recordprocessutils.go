@@ -74,6 +74,18 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		r.Metadata = &pbrc.ReleaseMetadata{}
 	}
 
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_STAGED_TO_SELL && r.GetRelease().Rating > 0 {
+		if r.GetRelease().Rating <= 3 {
+			r.GetMetadata().Category = pbrc.ReleaseMetadata_SOLD
+			return r
+		}
+
+		if r.GetRelease().Rating == 5 {
+			r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_FRESHMAN
+			return r
+		}
+	}
+	
 	if r.GetMetadata().Purgatory == pbrc.Purgatory_NEEDS_STOCK_CHECK && r.GetMetadata().LastStockCheck > time.Now().AddDate(0, -3, 0).Unix() {
 		r.GetMetadata().Purgatory = pbrc.Purgatory_ALL_GOOD
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_FRESHMAN
