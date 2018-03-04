@@ -60,6 +60,8 @@ var movetests = []struct {
 	in  *pbrc.Record
 	out pbrc.ReleaseMetadata_Category
 }{
+	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_STAGED_TO_SELL}}, pbrc.ReleaseMetadata_PRE_FRESHMAN},
+	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1234, Rating: 3}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_STAGED_TO_SELL}}, pbrc.ReleaseMetadata_SOLD},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{SetRating: 5}}, pbrc.ReleaseMetadata_UNKNOWN},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PRE_FRESHMAN, DateAdded: time.Now().AddDate(-10, 0, 0).Unix()}}, pbrc.ReleaseMetadata_PROFESSOR},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 268147}, Metadata: &pbrc.ReleaseMetadata{Purgatory: pbrc.Purgatory_NEEDS_STOCK_CHECK, LastStockCheck: time.Now().Unix()}}, pbrc.ReleaseMetadata_PRE_FRESHMAN},
