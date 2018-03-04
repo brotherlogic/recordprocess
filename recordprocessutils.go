@@ -74,6 +74,12 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		r.Metadata = &pbrc.ReleaseMetadata{}
 	}
 
+	// If the record is in google play, set the category to GOOGLE_PLAY
+	if r.GetRelease().FolderId == 1433217 && r.GetMetadata().Category != pbrc.ReleaseMetadata_GOOGLE_PLAY {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_GOOGLE_PLAY
+		return r
+	}
+
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_STAGED_TO_SELL && r.GetRelease().Rating > 0 {
 		if r.GetRelease().Rating <= 3 {
 			r.GetMetadata().Category = pbrc.ReleaseMetadata_SOLD
