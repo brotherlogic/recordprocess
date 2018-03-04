@@ -60,6 +60,11 @@ func (s *Server) processRecords() {
 }
 
 func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
+	// Don't process a record that has a pending score
+	if r.GetMetadata() != nil && r.GetMetadata().SetRating > 0 {
+		return nil
+	}
+
 	if r.GetMetadata() == nil {
 		r.Metadata = &pbrc.ReleaseMetadata{}
 	}
