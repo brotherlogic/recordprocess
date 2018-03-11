@@ -26,9 +26,9 @@ func (s *Server) saveRecordScore(record *pbrc.Record) bool {
 	if !found && record.GetRelease().Rating > 0 && !strings.HasPrefix(record.GetMetadata().GetCategory().String(), "PRE") {
 		s.scores.Scores = append(s.scores.Scores, &pb.RecordScore{
 			InstanceId: record.GetRelease().InstanceId,
-			Rating: record.GetRelease().Rating,
-			Category: record.GetMetadata().GetCategory(),
-			ScoreTime: time.Now().Unix(),
+			Rating:     record.GetRelease().Rating,
+			Category:   record.GetMetadata().GetCategory(),
+			ScoreTime:  time.Now().Unix(),
 		})
 	}
 
@@ -80,6 +80,18 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		return r
 	}
 
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PREPARE_TO_SELL {
+		if r.GetRelease().Rating > 0 {
+			if r.GetMetadata().SetRating == 0 {
+				r.GetMetadata().SetRating = -1
+				return r
+			}
+		} else {
+			r.GetMetadata().Category = pbrc.ReleaseMetadata_STAGED_TO_SELL
+			return r
+		}
+	}
+
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_STAGED_TO_SELL && r.GetRelease().Rating > 0 {
 		if r.GetRelease().Rating <= 3 {
 			r.GetMetadata().Category = pbrc.ReleaseMetadata_SOLD
@@ -91,13 +103,13 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 			return r
 		}
 	}
-	
+
 	if r.GetMetadata().Purgatory == pbrc.Purgatory_NEEDS_STOCK_CHECK && r.GetMetadata().LastStockCheck > time.Now().AddDate(0, -3, 0).Unix() {
 		r.GetMetadata().Purgatory = pbrc.Purgatory_ALL_GOOD
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_FRESHMAN
 		return r
 	}
-	
+
 	if r.GetRelease().FolderId == 1 && r.GetMetadata().Category != pbrc.ReleaseMetadata_PURCHASED {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_PURCHASED
 		return r
