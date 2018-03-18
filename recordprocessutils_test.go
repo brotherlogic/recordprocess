@@ -72,6 +72,7 @@ var movetests = []struct {
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PRE_SOPHMORE, DateAdded: time.Now().AddDate(0, -7, 0).Unix()}}, pbrc.ReleaseMetadata_SOPHMORE},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_SOPHMORE, DateAdded: time.Now().AddDate(0, -13, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_GRADUATE},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PRE_GRADUATE, DateAdded: time.Now().AddDate(0, -13, 0).Unix()}}, pbrc.ReleaseMetadata_GRADUATE},
+	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_GRADUATE, DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_POSTDOC},
 }
 
 func TestMoveTests(t *testing.T) {
@@ -82,7 +83,7 @@ func TestMoveTests(t *testing.T) {
 		s.processRecords()
 
 		if tg.lastCategory != test.out {
-			t.Fatalf("Test move failed %v -> %v (should have been %v)", test.in, tg.lastCategory, test.out)
+			t.Fatalf("Test move failed %v -> %v (should have been %v (from %v))", test.in, tg.lastCategory, test.out, tg.rec)
 		}
 	}
 }

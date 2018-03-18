@@ -192,5 +192,11 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		return r
 	}
 
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_GRADUATE && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-2, 0, 0).Unix()) {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_POSTDOC
+		r.GetMetadata().SetRating = -1
+		return r
+	}
+
 	return nil
 }
