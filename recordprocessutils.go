@@ -66,7 +66,7 @@ func (s *Server) processRecords() {
 
 func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 	// Don't process a record that has a pending score
-	if r.GetMetadata() != nil && r.GetMetadata().SetRating > 0 {
+	if r.GetMetadata() != nil && r.GetMetadata().SetRating != 0 {
 		return nil
 	}
 
@@ -90,6 +90,11 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 			r.GetMetadata().Category = pbrc.ReleaseMetadata_STAGED_TO_SELL
 			return r
 		}
+	}
+
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_DIGITAL && r.GetMetadata().GoalFolder != 268147 && r.GetMetadata().GoalFolder != 0 {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_UNKNOWN
+		return r
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_STAGED_TO_SELL && r.GetRelease().Rating > 0 {
