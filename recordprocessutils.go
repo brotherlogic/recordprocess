@@ -93,7 +93,7 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_DIGITAL && r.GetMetadata().GoalFolder != 268147 && r.GetMetadata().GoalFolder != 0 {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_UNKNOWN
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_ASSESS
 		return r
 	}
 
