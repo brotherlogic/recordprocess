@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/net/context"
+
 	pbrc "github.com/brotherlogic/recordcollection/proto"
 	pb "github.com/brotherlogic/recordprocess/proto"
 )
@@ -35,7 +37,7 @@ func (s *Server) saveRecordScore(record *pbrc.Record) bool {
 	return !found
 }
 
-func (s *Server) processRecords() {
+func (s *Server) processRecords(ctx context.Context) {
 	scoresUpdated := false
 	records, err := s.getter.getRecords()
 
@@ -72,6 +74,12 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 
 	if r.GetMetadata() == nil {
 		r.Metadata = &pbrc.ReleaseMetadata{}
+	}
+
+	// If the record has no labels move it to NO_LABELS
+	if len(r.GetRelease().Labels) == 0 {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_NO_LABELS
+		return r
 	}
 
 	// If the record is in google play, set the category to GOOGLE_PLAY
