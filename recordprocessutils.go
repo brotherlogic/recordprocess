@@ -84,7 +84,7 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_NO_LABELS && len(r.GetRelease().Labels) > 0 {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_UNKNOWN
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_FRESHMAN
 		r.GetMetadata().Purgatory = pbrc.Purgatory_ALL_GOOD
 		return r
 	}
