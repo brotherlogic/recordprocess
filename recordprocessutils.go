@@ -51,10 +51,7 @@ func (s *Server) processRecords(ctx context.Context) {
 		update := s.processRecord(record)
 		if update != nil {
 			count++
-			err := s.getter.update(update)
-			if err != nil {
-				s.Log(fmt.Sprintf("Error updating record: %v", err))
-			}
+			s.getter.update(update)
 		}
 	}
 
@@ -78,6 +75,7 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 
 	// If the record has no labels move it to NO_LABELS
 	if len(r.GetRelease().Labels) == 0 {
+		s.Log(fmt.Sprintf("Release has no labels: %v", r))
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_NO_LABELS
 		r.GetMetadata().Purgatory = pbrc.Purgatory_NEEDS_LABELS
 		return r
