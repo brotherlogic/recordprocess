@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"log"
 	"testing"
 	"time"
 
@@ -61,6 +62,7 @@ var movetests = []struct {
 	in  *pbrc.Record
 	out pbrc.ReleaseMetadata_Category
 }{
+	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1112, Rating: 0, Formats: []*pbgd.Format{&pbgd.Format{Name: "CD"}}, Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PREPARE_TO_SELL}}, pbrc.ReleaseMetadata_RIP_THEN_SELL},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1111, Rating: 0}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_GRADUATE}}, pbrc.ReleaseMetadata_NO_LABELS},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1111, Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}, Rating: 0}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_NO_LABELS}}, pbrc.ReleaseMetadata_PRE_FRESHMAN},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1111, Rating: 0}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_DIGITAL}}, pbrc.ReleaseMetadata_UNKNOWN},
@@ -82,6 +84,7 @@ var movetests = []struct {
 
 func TestMoveTests(t *testing.T) {
 	for _, test := range movetests {
+		log.Printf("TESTING: %v", test.in)
 		s := InitTest()
 		tg := testGetter{rec: test.in}
 		s.getter = &tg
