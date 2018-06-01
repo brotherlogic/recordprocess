@@ -63,6 +63,18 @@ func (s *Server) processRecords(ctx context.Context) {
 	}
 }
 
+func recordNeedsRip(r *pbrc.Record) bool {
+	hasCD := false
+	// Needs a rip if it has a CD in the formats
+	for _, format := range r.GetRelease().Formats {
+		if format.Name == "CD" {
+			hasCD = true
+		}
+	}
+
+	return hasCD && r.GetMetadata().FilePath == ""
+}
+
 func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 	// Don't process a record that has a pending score
 	if r.GetMetadata() != nil && r.GetMetadata().SetRating != 0 {
@@ -95,6 +107,12 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PREPARE_TO_SELL {
+
+		if recordNeedsRip(r) {
+			r.GetMetadata().Category = pbrc.ReleaseMetadata_RIP_THEN_SELL
+			return r
+		}
+
 		if r.GetRelease().Rating > 0 {
 			if r.GetMetadata().SetRating == 0 {
 				r.GetMetadata().SetRating = -1
