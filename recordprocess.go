@@ -52,10 +52,12 @@ func (p prodGetter) getRecords() ([]*pbrc.Record, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
-	resp, err := client.GetRecords(ctx, &pbrc.GetRecordsRequest{Filter: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{Dirty: false}}}, grpc.MaxCallRecvMsgSize(1024*1024*1024))
+	req := &pbrc.GetRecordsRequest{Filter: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{Dirty: false}}}
+	resp, err := client.GetRecords(ctx, req, grpc.MaxCallRecvMsgSize(1024*1024*1024))
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("%v -> %v", req, resp)
 	return resp.GetRecords(), nil
 }
 
