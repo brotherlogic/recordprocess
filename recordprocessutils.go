@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -88,8 +86,6 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 
 	// If the record has no labels move it to NO_LABELS
 	if len(r.GetRelease().Labels) == 0 {
-		s.Log(fmt.Sprintf("Release has no labels: %v", r))
-		log.Fatalf(fmt.Sprintf("Release has no labels: %v", r))
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_NO_LABELS
 		r.GetMetadata().Purgatory = pbrc.Purgatory_NEEDS_LABELS
 		return r
