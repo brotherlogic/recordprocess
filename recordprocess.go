@@ -57,7 +57,7 @@ func (p prodGetter) getRecords() ([]*pbrc.Record, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("%v -> %v", req, resp)
+
 	return resp.GetRecords(), nil
 }
 
