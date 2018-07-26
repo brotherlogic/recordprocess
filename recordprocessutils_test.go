@@ -17,6 +17,7 @@ import (
 type testGetter struct {
 	lastCategory pbrc.ReleaseMetadata_Category
 	rec          *pbrc.Record
+	sold         *pbrc.Record
 }
 
 func (t *testGetter) getRecords() ([]*pbrc.Record, error) {
@@ -26,6 +27,10 @@ func (t *testGetter) getRecords() ([]*pbrc.Record, error) {
 func (t *testGetter) update(r *pbrc.Record) error {
 	t.lastCategory = r.GetMetadata().Category
 	return nil
+}
+
+func (t *testGetter) moveToSold(r *pbrc.Record) {
+	t.sold = r
 }
 
 type testFailGetter struct {
@@ -46,6 +51,10 @@ func (t testFailGetter) update(r *pbrc.Record) error {
 		return nil
 	}
 	return errors.New("Built to fail")
+}
+
+func (t testFailGetter) moveToSold(r *pbrc.Record) {
+	// Pass
 }
 
 func InitTest() *Server {
@@ -107,6 +116,20 @@ func TestSaveRecordTwice(t *testing.T) {
 	val2 := s.saveRecordScore(&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, InstanceId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_FRESHMAN}})
 	if val2 {
 		t.Errorf("Second save did not fail")
+	}
+}
+
+func TestSaveRecordWithSold(t *testing.T) {
+	s := InitTest()
+	val := s.saveRecordScore(&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, InstanceId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_SOLD}})
+
+	if !val {
+		t.Fatalf("First save failed")
+	}
+
+	s.saveRecordScore(&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, InstanceId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_FRESHMAN}})
+	if (s.getter.(*testGetter)).sold.GetRelease().InstanceId != 1234 {
+		t.Errorf("Record has not been sold: %v", (s.getter.(*testGetter)).sold.GetRelease().Id)
 	}
 }
 

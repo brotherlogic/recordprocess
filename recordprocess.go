@@ -84,6 +84,26 @@ func (p prodGetter) update(r *pbrc.Record) error {
 	return nil
 }
 
+func (p prodGetter) moveToSold(r *pbrc.Record) {
+	ip, port, err := p.getIP("recordcollection")
+	if err != nil {
+		return
+	}
+
+	conn, err := grpc.Dial(ip+":"+strconv.Itoa(int(port)), grpc.WithInsecure())
+	if err != nil {
+		return
+	}
+	defer conn.Close()
+
+	client := pbrc.NewRecordCollectionServiceClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	r.GetMetadata().Category = pbrc.ReleaseMetadata_SOLD
+	client.UpdateRecord(ctx, &pbrc.UpdateRecordRequest{NoSell: true, Requestor: "recordprocess", Update: r})
+}
+
 // Init builds the server
 func Init() *Server {
 	s := &Server{GoServer: &goserver.GoServer{}}
