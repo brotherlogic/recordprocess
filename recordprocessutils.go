@@ -13,6 +13,7 @@ import (
 type getter interface {
 	getRecords() ([]*pbrc.Record, error)
 	update(*pbrc.Record) error
+	moveToSold(*pbrc.Record)
 }
 
 func (s *Server) saveRecordScore(record *pbrc.Record) bool {
@@ -31,6 +32,14 @@ func (s *Server) saveRecordScore(record *pbrc.Record) bool {
 			Category:   record.GetMetadata().GetCategory(),
 			ScoreTime:  time.Now().Unix(),
 		})
+	}
+
+	if record.GetMetadata() != nil && record.GetMetadata().Category != pbrc.ReleaseMetadata_SOLD {
+		for _, sc := range s.scores.GetScores() {
+			if sc.InstanceId == record.GetRelease().InstanceId && sc.Category == pbrc.ReleaseMetadata_SOLD {
+				s.getter.moveToSold(record)
+			}
+		}
 	}
 
 	return !found
