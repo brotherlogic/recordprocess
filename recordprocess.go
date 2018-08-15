@@ -139,7 +139,7 @@ func (s *Server) readScores() error {
 }
 
 // Mote promotes/demotes this server
-func (s *Server) Mote(master bool) error {
+func (s *Server) Mote(ctx context.Context, master bool) error {
 	if master {
 		err := s.readScores()
 		return err
