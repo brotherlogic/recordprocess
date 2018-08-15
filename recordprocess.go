@@ -122,13 +122,13 @@ func (s *Server) ReportHealth() bool {
 	return true
 }
 
-func (s *Server) saveScores() {
-	s.KSclient.Save(KEY, s.scores)
+func (s *Server) saveScores(ctx context.Context) {
+	s.KSclient.Save(ctx, KEY, s.scores)
 }
 
-func (s *Server) readScores() error {
+func (s *Server) readScores(ctx context.Context) error {
 	scores := &pb.Scores{}
-	data, _, err := s.KSclient.Read(KEY, scores)
+	data, _, err := s.KSclient.Read(ctx, KEY, scores)
 
 	if err != nil {
 		return err
@@ -141,7 +141,7 @@ func (s *Server) readScores() error {
 // Mote promotes/demotes this server
 func (s *Server) Mote(ctx context.Context, master bool) error {
 	if master {
-		err := s.readScores()
+		err := s.readScores(ctx)
 		return err
 	}
 

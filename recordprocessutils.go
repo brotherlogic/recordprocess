@@ -67,7 +67,7 @@ func (s *Server) processRecords(ctx context.Context) {
 	s.lastCount = count
 
 	if scoresUpdated {
-		s.saveScores()
+		s.saveScores(ctx)
 	}
 }
 
