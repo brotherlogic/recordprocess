@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
@@ -11,13 +10,18 @@ import (
 	"github.com/brotherlogic/goserver/utils"
 	"google.golang.org/grpc"
 
+	pbgs "github.com/brotherlogic/goserver/proto"
 	pb "github.com/brotherlogic/recordprocess/proto"
+	pbt "github.com/brotherlogic/tracer/proto"
 
 	//Needed to pull in gzip encoding init
 	_ "google.golang.org/grpc/encoding/gzip"
 )
 
 func main() {
+	ctx, cancel := utils.BuildContext("recordmover_cli_"+os.Args[1], "recordmover", pbgs.ContextType_MEDIUM)
+	defer cancel()
+
 	host, port, err := utils.Resolve("recordprocess")
 	if err != nil {
 		log.Fatalf("Unable to reach organiser: %v", err)
@@ -30,9 +34,6 @@ func main() {
 	}
 
 	client := pb.NewScoreServiceClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
-
 	switch os.Args[1] {
 	case "get":
 		val, _ := strconv.Atoi(os.Args[2])
@@ -44,4 +45,6 @@ func main() {
 			fmt.Printf("%v. -> %v\n", i, score)
 		}
 	}
+
+	utils.SendTrace(ctx, "recordmover_cli_"+os.Args[1], time.Now(), pbt.Milestone_END, "recordmover")
 }

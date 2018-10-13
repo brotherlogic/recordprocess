@@ -36,7 +36,7 @@ type prodGetter struct {
 	getIP func(string) (string, int32, error)
 }
 
-func (p prodGetter) getRecords() ([]*pbrc.Record, error) {
+func (p prodGetter) getRecords(ctx context.Context) ([]*pbrc.Record, error) {
 	ip, port, err := p.getIP("recordcollection")
 	if err != nil {
 		return nil, err
@@ -49,9 +49,6 @@ func (p prodGetter) getRecords() ([]*pbrc.Record, error) {
 	defer conn.Close()
 
 	client := pbrc.NewRecordCollectionServiceClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
-
 	req := &pbrc.GetRecordsRequest{Filter: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{Dirty: false}}}
 	resp, err := client.GetRecords(ctx, req, grpc.MaxCallRecvMsgSize(1024*1024*1024))
 	if err != nil {
@@ -61,7 +58,7 @@ func (p prodGetter) getRecords() ([]*pbrc.Record, error) {
 	return resp.GetRecords(), nil
 }
 
-func (p prodGetter) update(r *pbrc.Record) error {
+func (p prodGetter) update(ctx context.Context, r *pbrc.Record) error {
 	ip, port, err := p.getIP("recordcollection")
 	if err != nil {
 		return err
@@ -74,9 +71,6 @@ func (p prodGetter) update(r *pbrc.Record) error {
 	defer conn.Close()
 
 	client := pbrc.NewRecordCollectionServiceClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
 	_, err = client.UpdateRecord(ctx, &pbrc.UpdateRecordRequest{Requestor: "recordprocess", Update: r})
 	if err != nil {
 		return err
@@ -84,7 +78,7 @@ func (p prodGetter) update(r *pbrc.Record) error {
 	return nil
 }
 
-func (p prodGetter) moveToSold(r *pbrc.Record) {
+func (p prodGetter) moveToSold(ctx context.Context, r *pbrc.Record) {
 	ip, port, err := p.getIP("recordcollection")
 	if err != nil {
 		return
@@ -97,9 +91,6 @@ func (p prodGetter) moveToSold(r *pbrc.Record) {
 	defer conn.Close()
 
 	client := pbrc.NewRecordCollectionServiceClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
 	r.GetMetadata().Category = pbrc.ReleaseMetadata_SOLD
 	client.UpdateRecord(ctx, &pbrc.UpdateRecordRequest{NoSell: true, Requestor: "recordprocess", Update: r})
 }
