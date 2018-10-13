@@ -11,12 +11,12 @@ import (
 )
 
 type getter interface {
-	getRecords() ([]*pbrc.Record, error)
-	update(*pbrc.Record) error
-	moveToSold(*pbrc.Record)
+	getRecords(ctx context.Context) ([]*pbrc.Record, error)
+	update(ctx context.Context, r *pbrc.Record) error
+	moveToSold(ctx context.Context, r *pbrc.Record)
 }
 
-func (s *Server) saveRecordScore(record *pbrc.Record) bool {
+func (s *Server) saveRecordScore(ctx context.Context, record *pbrc.Record) bool {
 	found := false
 	for _, score := range s.scores.GetScores() {
 		if score.GetCategory() == record.GetMetadata().GetCategory() && score.GetInstanceId() == record.GetRelease().InstanceId {
@@ -37,7 +37,7 @@ func (s *Server) saveRecordScore(record *pbrc.Record) bool {
 	if record.GetMetadata() != nil && record.GetMetadata().Category != pbrc.ReleaseMetadata_SOLD {
 		for _, sc := range s.scores.GetScores() {
 			if sc.InstanceId == record.GetRelease().InstanceId && sc.Category == pbrc.ReleaseMetadata_SOLD {
-				s.getter.moveToSold(record)
+				s.getter.moveToSold(ctx, record)
 			}
 		}
 	}
@@ -47,7 +47,7 @@ func (s *Server) saveRecordScore(record *pbrc.Record) bool {
 
 func (s *Server) processRecords(ctx context.Context) {
 	scoresUpdated := false
-	records, err := s.getter.getRecords()
+	records, err := s.getter.getRecords(ctx)
 
 	if err != nil {
 		return
@@ -55,11 +55,11 @@ func (s *Server) processRecords(ctx context.Context) {
 
 	count := int64(0)
 	for _, record := range records {
-		scoresUpdated = s.saveRecordScore(record) || scoresUpdated
+		scoresUpdated = s.saveRecordScore(ctx, record) || scoresUpdated
 		update := s.processRecord(record)
 		if update != nil {
 			count++
-			s.getter.update(update)
+			s.getter.update(ctx, update)
 		}
 	}
 
@@ -109,6 +109,11 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 	// If the record is in google play, set the category to GOOGLE_PLAY
 	if r.GetRelease().FolderId == 1433217 && r.GetMetadata().Category != pbrc.ReleaseMetadata_GOOGLE_PLAY {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_GOOGLE_PLAY
+		return r
+	}
+
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_RIP_THEN_SELL && !recordNeedsRip(r) {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_SOLD
 		return r
 	}
 

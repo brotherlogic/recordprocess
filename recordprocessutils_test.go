@@ -20,16 +20,16 @@ type testGetter struct {
 	sold         *pbrc.Record
 }
 
-func (t *testGetter) getRecords() ([]*pbrc.Record, error) {
+func (t *testGetter) getRecords(ctx context.Context) ([]*pbrc.Record, error) {
 	return []*pbrc.Record{t.rec}, nil
 }
 
-func (t *testGetter) update(r *pbrc.Record) error {
+func (t *testGetter) update(ctx context.Context, r *pbrc.Record) error {
 	t.lastCategory = r.GetMetadata().Category
 	return nil
 }
 
-func (t *testGetter) moveToSold(r *pbrc.Record) {
+func (t *testGetter) moveToSold(ctx context.Context, r *pbrc.Record) {
 	t.sold = r
 }
 
@@ -38,14 +38,14 @@ type testFailGetter struct {
 	lastCategory pbrc.ReleaseMetadata_Category
 }
 
-func (t testFailGetter) getRecords() ([]*pbrc.Record, error) {
+func (t testFailGetter) getRecords(ctx context.Context) ([]*pbrc.Record, error) {
 	if t.grf {
 		return []*pbrc.Record{&pbrc.Record{Release: &pbgd.Release{FolderId: 1}}}, nil
 	}
 	return nil, errors.New("Built to fail")
 }
 
-func (t testFailGetter) update(r *pbrc.Record) error {
+func (t testFailGetter) update(ctx context.Context, r *pbrc.Record) error {
 	if !t.grf {
 		t.lastCategory = r.GetMetadata().GetCategory()
 		return nil
@@ -53,7 +53,7 @@ func (t testFailGetter) update(r *pbrc.Record) error {
 	return errors.New("Built to fail")
 }
 
-func (t testFailGetter) moveToSold(r *pbrc.Record) {
+func (t testFailGetter) moveToSold(ctx context.Context, r *pbrc.Record) {
 	// Pass
 }
 
@@ -89,6 +89,7 @@ var movetests = []struct {
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_SOPHMORE, DateAdded: time.Now().AddDate(0, -13, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_GRADUATE},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PRE_GRADUATE, DateAdded: time.Now().AddDate(0, -13, 0).Unix()}}, pbrc.ReleaseMetadata_GRADUATE},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_GRADUATE, DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_POSTDOC},
+	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{FilePath: "1234", Category: pbrc.ReleaseMetadata_RIP_THEN_SELL, DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}, pbrc.ReleaseMetadata_SOLD},
 }
 
 func TestMoveTests(t *testing.T) {
@@ -107,13 +108,13 @@ func TestMoveTests(t *testing.T) {
 
 func TestSaveRecordTwice(t *testing.T) {
 	s := InitTest()
-	val := s.saveRecordScore(&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, InstanceId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_FRESHMAN}})
+	val := s.saveRecordScore(context.Background(), &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, InstanceId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_FRESHMAN}})
 
 	if !val {
 		t.Fatalf("First save failed")
 	}
 
-	val2 := s.saveRecordScore(&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, InstanceId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_FRESHMAN}})
+	val2 := s.saveRecordScore(context.Background(), &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, InstanceId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_FRESHMAN}})
 	if val2 {
 		t.Errorf("Second save did not fail")
 	}
@@ -121,13 +122,13 @@ func TestSaveRecordTwice(t *testing.T) {
 
 func TestSaveRecordWithSold(t *testing.T) {
 	s := InitTest()
-	val := s.saveRecordScore(&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, InstanceId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_SOLD}})
+	val := s.saveRecordScore(context.Background(), &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, InstanceId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_SOLD}})
 
 	if !val {
 		t.Fatalf("First save failed")
 	}
 
-	s.saveRecordScore(&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, InstanceId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_FRESHMAN}})
+	s.saveRecordScore(context.Background(), &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, InstanceId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_FRESHMAN}})
 	if (s.getter.(*testGetter)).sold.GetRelease().InstanceId != 1234 {
 		t.Errorf("Record has not been sold: %v", (s.getter.(*testGetter)).sold.GetRelease().Id)
 	}
