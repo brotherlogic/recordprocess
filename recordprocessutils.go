@@ -112,6 +112,11 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		return r
 	}
 
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_SOLD && r.GetMetadata().SaleId > 0 {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_LISTED_TO_SELL
+		return r
+	}
+
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_RIP_THEN_SELL && !recordNeedsRip(r) {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_SOLD
 		return r
