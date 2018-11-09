@@ -92,7 +92,7 @@ func (p prodGetter) moveToSold(ctx context.Context, r *pbrc.Record) {
 
 	client := pbrc.NewRecordCollectionServiceClient(conn)
 	r.GetMetadata().Category = pbrc.ReleaseMetadata_SOLD
-	client.UpdateRecord(ctx, &pbrc.UpdateRecordRequest{NoSell: true, Requestor: "recordprocess", Update: r})
+	client.UpdateRecord(ctx, &pbrc.UpdateRecordRequest{Requestor: "recordprocess", Update: r})
 }
 
 // Init builds the server

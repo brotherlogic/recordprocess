@@ -34,14 +34,6 @@ func (s *Server) saveRecordScore(ctx context.Context, record *pbrc.Record) bool 
 		})
 	}
 
-	if record.GetMetadata() != nil && record.GetMetadata().Category != pbrc.ReleaseMetadata_SOLD {
-		for _, sc := range s.scores.GetScores() {
-			if sc.InstanceId == record.GetRelease().InstanceId && sc.Category == pbrc.ReleaseMetadata_SOLD {
-				s.getter.moveToSold(ctx, record)
-			}
-		}
-	}
-
 	return !found
 }
 
@@ -118,7 +110,7 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_RIP_THEN_SELL && !recordNeedsRip(r) {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_SOLD
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_PREPARE_TO_SELL
 		return r
 	}
 
