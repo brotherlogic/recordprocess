@@ -121,6 +121,11 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PREPARE_TO_SELL {
 
+		if time.Now().Sub(time.Unix(r.GetMetadata().LastStockCheck, 0)) > time.Hour*24*30 {
+			r.GetMetadata().Category = pbrc.ReleaseMetadata_ASSESS_FOR_SALE
+			return r
+		}
+
 		if recordNeedsRip(r) {
 			r.GetMetadata().Category = pbrc.ReleaseMetadata_RIP_THEN_SELL
 			return r
