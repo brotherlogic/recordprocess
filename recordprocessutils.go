@@ -119,6 +119,10 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		return r
 	}
 
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_ASSESS_FOR_SALE && r.GetMetadata().LastStockCheck > time.Now().AddDate(0, -3, 0).Unix() {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_PREPARE_TO_SELL
+	}
+
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PREPARE_TO_SELL {
 
 		if time.Now().Sub(time.Unix(r.GetMetadata().LastStockCheck, 0)) > time.Hour*24*30 {
