@@ -163,12 +163,6 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		}
 	}
 
-	if r.GetMetadata().Purgatory == pbrc.Purgatory_NEEDS_STOCK_CHECK && r.GetMetadata().LastStockCheck > time.Now().AddDate(0, -3, 0).Unix() {
-		r.GetMetadata().Purgatory = pbrc.Purgatory_ALL_GOOD
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_FRESHMAN
-		return r
-	}
-
 	if r.GetRelease().FolderId == 1 && r.GetMetadata().Category != pbrc.ReleaseMetadata_PURCHASED {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_PURCHASED
 		return r
