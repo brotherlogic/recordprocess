@@ -230,7 +230,20 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		}
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_STAGED && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -3, 0).Unix()) {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL && r.GetRelease().Rating > 0) {
+		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, 2, 0).Unix()) {
+			r.GetMetadata().Category = pbrc.ReleaseMetadata_HIGH_SCHOOL
+			return r
+		}
+	}
+
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_STAGED && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -2, 0).Unix()) {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL
+		r.GetMetadata().SetRating = -1
+		return r
+	}
+
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_HIGH_SCHOOL && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -3, 0).Unix()) {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_FRESHMAN
 		r.GetMetadata().SetRating = -1
 		return r
