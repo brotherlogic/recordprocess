@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"strconv"
@@ -26,10 +27,11 @@ const (
 //Server main server type
 type Server struct {
 	*goserver.GoServer
-	getter    getter
-	lastProc  time.Time
-	lastCount int64
-	scores    *pb.Scores
+	getter           getter
+	lastProc         time.Time
+	lastCount        int64
+	lastProcDuration time.Duration
+	scores           *pb.Scores
 }
 
 type prodGetter struct {
@@ -141,7 +143,10 @@ func (s *Server) Mote(ctx context.Context, master bool) error {
 
 // GetState gets the state of the server
 func (s *Server) GetState() []*pbg.State {
-	return []*pbg.State{&pbg.State{Key: "last_proc", TimeValue: s.lastProc.Unix(), Value: s.lastCount}}
+	return []*pbg.State{
+		&pbg.State{Key: "last_proc", TimeValue: s.lastProc.Unix(), Value: s.lastCount},
+		&pbg.State{Key: "last_proc_time", Text: fmt.Sprintf("%v", s.lastProcDuration)},
+	}
 }
 
 func main() {
