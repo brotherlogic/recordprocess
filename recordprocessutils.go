@@ -57,6 +57,7 @@ func (s *Server) processRecords(ctx context.Context) {
 		if update != nil {
 			count++
 			s.getter.update(ctx, update)
+			break
 		}
 	}
 
