@@ -39,6 +39,7 @@ func (s *Server) saveRecordScore(ctx context.Context, record *pbrc.Record) bool 
 }
 
 func (s *Server) processRecords(ctx context.Context) {
+	s.updates++
 	startTime := time.Now()
 	scoresUpdated := false
 	records, err := s.getter.getRecords(ctx)
