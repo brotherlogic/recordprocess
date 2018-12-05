@@ -63,6 +63,8 @@ func (s *Server) processRecords(ctx context.Context) {
 			} else {
 				s.Log(fmt.Sprintf("BUT BUT %v", update))
 			}
+		} else {
+			s.Log(fmt.Sprintf("Adjust %v", record.GetRelease().InstanceId))
 		}
 
 		if update != nil {
