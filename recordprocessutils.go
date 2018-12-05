@@ -51,6 +51,15 @@ func (s *Server) processRecords(ctx context.Context) {
 		return
 	}
 
+	seen := make(map[int32]bool)
+	for _, r := range records {
+		if seen[r.GetRelease().InstanceId] {
+			s.Log(fmt.Sprintf("WHAT %v", r.GetRelease().InstanceId))
+		} else {
+			seen[r.GetRelease().InstanceId] = true
+		}
+	}
+
 	count := int64(0)
 	s.recordsInUpdate = int64(len(records))
 	for _, record := range records {
