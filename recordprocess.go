@@ -33,6 +33,7 @@ type Server struct {
 	lastProcDuration time.Duration
 	scores           *pb.Scores
 	updates          int64
+	recordsInUpdate  int64
 }
 
 type prodGetter struct {
@@ -148,6 +149,7 @@ func (s *Server) GetState() []*pbg.State {
 		&pbg.State{Key: "last_proc", TimeValue: s.lastProc.Unix(), Value: s.lastCount},
 		&pbg.State{Key: "last_proc_time", Text: fmt.Sprintf("%v", s.lastProcDuration)},
 		&pbg.State{Key: "updates", Value: s.updates},
+		&pbg.State{Key: "records_in_update", Value: s.recordsInUpdate},
 	}
 }
 

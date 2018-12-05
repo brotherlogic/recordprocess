@@ -52,6 +52,7 @@ func (s *Server) processRecords(ctx context.Context) {
 	}
 
 	count := int64(0)
+	s.recordsInUpdate = int64(len(records))
 	for _, record := range records {
 		scoresUpdated = s.saveRecordScore(ctx, record) || scoresUpdated
 		update := s.processRecord(record)
