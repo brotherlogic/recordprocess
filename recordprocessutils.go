@@ -65,6 +65,10 @@ func (s *Server) processRecords(ctx context.Context) {
 			}
 		}
 
+		if strings.Contains(record.GetRelease().Title, "Rabbit") {
+			s.Log(fmt.Sprintf("WHAAA %v -> %v", record.GetRelease().Title, record.GetRelease().InstanceId))
+		}
+
 		if update != nil {
 			count++
 			s.getter.update(ctx, update)
