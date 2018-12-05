@@ -74,7 +74,7 @@ func (s *Server) processRecords(ctx context.Context) {
 			}
 		}
 
-		if strings.Contains(record.GetRelease().Title, "Rabbit") {
+		if strings.Contains(record.GetRelease().Title, "Wind") {
 			s.Log(fmt.Sprintf("WHAAA %v -> %v", record.GetRelease().Title, record.GetRelease().InstanceId))
 		}
 
