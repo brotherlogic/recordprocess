@@ -66,19 +66,8 @@ func (s *Server) processRecords(ctx context.Context) {
 		scoresUpdated = s.saveRecordScore(ctx, record) || scoresUpdated
 		update := s.processRecord(record)
 
-		if record.GetRelease().InstanceId == 336914109 {
-			if update != nil {
-				s.Log(fmt.Sprintf("NOW %v", update.GetMetadata().Category))
-			} else {
-				s.Log(fmt.Sprintf("BUT BUT %v", update))
-			}
-		}
-
-		if strings.Contains(record.GetRelease().Title, "Wind") {
-			s.Log(fmt.Sprintf("WHAAA %v -> %v", record.GetRelease().Title, record.GetRelease().InstanceId))
-		}
-
 		if update != nil {
+			s.Log(fmt.Sprintf("Updating %v and %v", update.GetRelease().Title, update.GetRelease().InstanceId))
 			count++
 			s.getter.update(ctx, update)
 			break
