@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -54,6 +55,11 @@ func (s *Server) processRecords(ctx context.Context) {
 	for _, record := range records {
 		scoresUpdated = s.saveRecordScore(ctx, record) || scoresUpdated
 		update := s.processRecord(record)
+
+		if update.GetRelease().InstanceId == 336914109 {
+			s.Log(fmt.Sprintf("NOW %v", update.GetMetadata().Category))
+		}
+
 		if update != nil {
 			count++
 			s.getter.update(ctx, update)
