@@ -63,12 +63,12 @@ func (s *Server) processRecords(ctx context.Context) {
 	count := int64(0)
 	s.recordsInUpdate = int64(len(records))
 	for _, record := range records {
+		count++
 		scoresUpdated = s.saveRecordScore(ctx, record) || scoresUpdated
 		update := s.processRecord(record)
 
 		if update != nil {
 			s.Log(fmt.Sprintf("Updating %v and %v", update.GetRelease().Title, update.GetRelease().InstanceId))
-			count++
 			s.getter.update(ctx, update)
 			break
 		}
