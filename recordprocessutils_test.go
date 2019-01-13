@@ -95,6 +95,7 @@ var movetests = []struct {
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1249, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{SaleId: 1234, FilePath: "1234", Category: pbrc.ReleaseMetadata_SOLD, DateAdded: time.Now().AddDate(-2, -1, 0).Unix(), SalePrice: 1234}}, pbrc.ReleaseMetadata_SOLD_ARCHIVE},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1249, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{SaleId: 1234, FilePath: "1234", Category: pbrc.ReleaseMetadata_PREPARE_TO_SELL, DateAdded: time.Now().AddDate(-2, -1, 0).Unix(), SalePrice: 1234}}, pbrc.ReleaseMetadata_ASSESS_FOR_SALE},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1249, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{SaleId: 1234, FilePath: "1234", Category: pbrc.ReleaseMetadata_ASSESS_FOR_SALE, DateAdded: time.Now().AddDate(-2, -1, 0).Unix(), SalePrice: 1234, LastStockCheck: time.Now().Unix()}}, pbrc.ReleaseMetadata_PREPARE_TO_SELL},
+	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1249, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{SaleId: 1234, FilePath: "1234", Category: pbrc.ReleaseMetadata_LISTED_TO_SELL, SaleState: pbgd.SaleState_SOLD, DateAdded: time.Now().AddDate(-2, -1, 0).Unix(), SalePrice: 1234, LastStockCheck: time.Now().Unix()}}, pbrc.ReleaseMetadata_SOLD_ARCHIVE},
 }
 
 func TestMoveTests(t *testing.T) {

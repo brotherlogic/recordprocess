@@ -7,6 +7,7 @@ import (
 
 	"golang.org/x/net/context"
 
+	pbgd "github.com/brotherlogic/godiscogs"
 	pbrc "github.com/brotherlogic/recordcollection/proto"
 	pb "github.com/brotherlogic/recordprocess/proto"
 	pbt "github.com/brotherlogic/tracer/proto"
@@ -53,11 +54,7 @@ func (s *Server) processRecords(ctx context.Context) {
 
 	seen := make(map[int32]bool)
 	for _, r := range records {
-		if seen[r.GetRelease().InstanceId] {
-			s.Log(fmt.Sprintf("WHAT %v", r.GetRelease().InstanceId))
-		} else {
-			seen[r.GetRelease().InstanceId] = true
-		}
+		seen[r.GetRelease().InstanceId] = true
 	}
 
 	count := int64(0)
@@ -121,6 +118,11 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 	// If the record is in google play, set the category to GOOGLE_PLAY
 	if r.GetRelease().FolderId == 1433217 && r.GetMetadata().Category != pbrc.ReleaseMetadata_GOOGLE_PLAY {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_GOOGLE_PLAY
+		return r
+	}
+
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_LISTED_TO_SELL && r.GetMetadata().SaleState == pbgd.SaleState_SOLD {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_SOLD_ARCHIVE
 		return r
 	}
 
