@@ -162,6 +162,7 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 				r.GetMetadata().SetRating = -1
 				return r
 			}
+			return r
 		} else {
 			r.GetMetadata().Category = pbrc.ReleaseMetadata_STAGED_TO_SELL
 			return r
