@@ -10,7 +10,6 @@ import (
 	pbgd "github.com/brotherlogic/godiscogs"
 	pbrc "github.com/brotherlogic/recordcollection/proto"
 	pb "github.com/brotherlogic/recordprocess/proto"
-	pbt "github.com/brotherlogic/tracer/proto"
 )
 
 type getter interface {
@@ -45,8 +44,6 @@ func (s *Server) processRecords(ctx context.Context) {
 	startTime := time.Now()
 	scoresUpdated := false
 	records, err := s.getter.getRecords(ctx)
-
-	ctx = s.LogTrace(ctx, "processRecords-gotRecords", time.Now(), pbt.Milestone_MARKER)
 
 	if err != nil {
 		return
