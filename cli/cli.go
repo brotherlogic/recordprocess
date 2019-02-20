@@ -5,21 +5,18 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/brotherlogic/goserver/utils"
 	"google.golang.org/grpc"
 
-	pbgs "github.com/brotherlogic/goserver/proto"
 	pb "github.com/brotherlogic/recordprocess/proto"
-	pbt "github.com/brotherlogic/tracer/proto"
 
 	//Needed to pull in gzip encoding init
 	_ "google.golang.org/grpc/encoding/gzip"
 )
 
 func main() {
-	ctx, cancel := utils.BuildContext("recordmover_cli_"+os.Args[1], "recordmover", pbgs.ContextType_MEDIUM)
+	ctx, cancel := utils.BuildContext("recordmover_cli_"+os.Args[1], "recordmover")
 	defer cancel()
 
 	host, port, err := utils.Resolve("recordprocess")
@@ -45,6 +42,4 @@ func main() {
 			fmt.Printf("%v. -> %v\n", i, score)
 		}
 	}
-
-	utils.SendTrace(ctx, "recordmover_cli_"+os.Args[1], time.Now(), pbt.Milestone_END, "recordmover")
 }
