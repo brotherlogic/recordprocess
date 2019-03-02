@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/brotherlogic/goserver"
-	"github.com/brotherlogic/goserver/utils"
 	"github.com/brotherlogic/keystore/client"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -37,16 +35,11 @@ type Server struct {
 }
 
 type prodGetter struct {
-	getIP func(string) (string, int32, error)
+	dial func(server string) (*grpc.ClientConn, error)
 }
 
 func (p prodGetter) getRecords(ctx context.Context) ([]*pbrc.Record, error) {
-	ip, port, err := p.getIP("recordcollection")
-	if err != nil {
-		return nil, err
-	}
-
-	conn, err := grpc.Dial(ip+":"+strconv.Itoa(int(port)), grpc.WithInsecure())
+	conn, err := p.dial("recordcollection")
 	if err != nil {
 		return nil, err
 	}
@@ -63,12 +56,7 @@ func (p prodGetter) getRecords(ctx context.Context) ([]*pbrc.Record, error) {
 }
 
 func (p prodGetter) update(ctx context.Context, r *pbrc.Record) error {
-	ip, port, err := p.getIP("recordcollection")
-	if err != nil {
-		return err
-	}
-
-	conn, err := grpc.Dial(ip+":"+strconv.Itoa(int(port)), grpc.WithInsecure())
+	conn, err := p.dial("recordcollection")
 	if err != nil {
 		return err
 	}
@@ -83,12 +71,7 @@ func (p prodGetter) update(ctx context.Context, r *pbrc.Record) error {
 }
 
 func (p prodGetter) moveToSold(ctx context.Context, r *pbrc.Record) {
-	ip, port, err := p.getIP("recordcollection")
-	if err != nil {
-		return
-	}
-
-	conn, err := grpc.Dial(ip+":"+strconv.Itoa(int(port)), grpc.WithInsecure())
+	conn, err := p.dial("recordcollection")
 	if err != nil {
 		return
 	}
@@ -102,7 +85,7 @@ func (p prodGetter) moveToSold(ctx context.Context, r *pbrc.Record) {
 // Init builds the server
 func Init() *Server {
 	s := &Server{GoServer: &goserver.GoServer{}}
-	s.getter = &prodGetter{getIP: utils.Resolve}
+	s.getter = &prodGetter{s.DialMaster}
 	s.GoServer.KSclient = *keystoreclient.GetClient(s.GetIP)
 	return s
 }
