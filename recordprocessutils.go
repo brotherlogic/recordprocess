@@ -112,6 +112,12 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		return r
 	}
 
+	// Deal with parents records
+	if r.GetRelease().FolderId == 1727264 && r.GetMetadata().Category != pbrc.ReleaseMetadata_PARENTS {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_PARENTS
+		return r
+	}
+
 	// If the record is in google play, set the category to GOOGLE_PLAY
 	if r.GetRelease().FolderId == 1433217 && r.GetMetadata().Category != pbrc.ReleaseMetadata_GOOGLE_PLAY {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_GOOGLE_PLAY
