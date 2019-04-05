@@ -39,14 +39,14 @@ func (s *Server) saveRecordScore(ctx context.Context, record *pbrc.Record) bool 
 	return !found
 }
 
-func (s *Server) processRecords(ctx context.Context) {
+func (s *Server) processRecords(ctx context.Context) error {
 	s.updates++
 	startTime := time.Now()
 	scoresUpdated := false
 	records, err := s.getter.getRecords(ctx)
 
 	if err != nil {
-		return
+		return err
 	}
 
 	seen := make(map[int32]bool)
@@ -75,6 +75,8 @@ func (s *Server) processRecords(ctx context.Context) {
 	if scoresUpdated {
 		s.saveScores(ctx)
 	}
+
+	return nil
 }
 
 func recordNeedsRip(r *pbrc.Record) bool {
