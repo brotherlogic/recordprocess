@@ -158,6 +158,7 @@ func main() {
 	server.Register = server
 
 	server.RegisterServer("recordprocess", false)
+
 	server.RegisterRepeatingTask(server.processRecords, "process_records", time.Minute)
 	server.Serve()
 }
