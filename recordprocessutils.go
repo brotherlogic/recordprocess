@@ -190,6 +190,11 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		}
 	}
 
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PURCHASED && r.GetMetadata().Cost > 0 {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_UNLISTENED
+		return r
+	}
+
 	if r.GetRelease().FolderId == 1 && r.GetMetadata().Category != pbrc.ReleaseMetadata_PURCHASED {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_PURCHASED
 		return r
