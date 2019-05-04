@@ -141,6 +141,19 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		return r
 	}
 
+	if r.GetMetadata().SaleId > 0 && (r.GetMetadata().Category != pbrc.ReleaseMetadata_SOLD &&
+		r.GetMetadata().Category != pbrc.ReleaseMetadata_SOLD_ARCHIVE &&
+		r.GetMetadata().Category != pbrc.ReleaseMetadata_SOLD_OFFLINE &&
+		r.GetMetadata().Category != pbrc.ReleaseMetadata_STALE_SALE &&
+		r.GetMetadata().Category != pbrc.ReleaseMetadata_LISTED_TO_SELL &&
+		r.GetMetadata().Category != pbrc.ReleaseMetadata_RIP_THEN_SELL &&
+		r.GetMetadata().Category != pbrc.ReleaseMetadata_STAGED_TO_SELL &&
+		r.GetMetadata().Category != pbrc.ReleaseMetadata_ASSESS_FOR_SALE &&
+		r.GetMetadata().Category != pbrc.ReleaseMetadata_PREPARE_TO_SELL) {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_LISTED_TO_SELL
+		return r
+	}
+
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_RIP_THEN_SELL && !recordNeedsRip(r) {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_PREPARE_TO_SELL
 		return r
