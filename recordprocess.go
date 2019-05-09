@@ -33,6 +33,7 @@ type Server struct {
 	updates          int64
 	recordsInUpdate  int64
 	lastUpdate       int64
+	updateCount      int
 }
 
 type prodGetter struct {
@@ -135,7 +136,9 @@ func (s *Server) Mote(ctx context.Context, master bool) error {
 
 // GetState gets the state of the server
 func (s *Server) GetState() []*pbg.State {
+
 	return []*pbg.State{
+		&pbg.State{Key: "update_count", Value: int64(s.updateCount)},
 		&pbg.State{Key: "last_proc", TimeValue: s.lastProc.Unix(), Value: s.lastCount},
 		&pbg.State{Key: "last_proc_time", Text: fmt.Sprintf("%v", s.lastProcDuration)},
 		&pbg.State{Key: "updates", Value: s.updates},
