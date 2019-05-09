@@ -65,7 +65,16 @@ func (s *Server) processRecords(ctx context.Context) error {
 		if update != nil {
 			s.Log(fmt.Sprintf("PRE  %v", pre))
 			s.Log(fmt.Sprintf("POST %v", update.GetMetadata()))
+			if int64(update.GetRelease().Id) == s.lastUpdate {
+				s.updateCount++
+				if s.updateCount > 20 {
+					s.RaiseIssue(ctx, "Stuck Process", fmt.Sprintf("%v is stuck in process", update.GetRelease().Id), false)
+				}
+			} else {
+				s.updateCount = 0
+			}
 			s.lastUpdate = int64(update.GetRelease().Id)
+
 			s.Log(fmt.Sprintf("Updating %v and %v", update.GetRelease().Title, update.GetRelease().InstanceId))
 			s.getter.update(ctx, update)
 			break
