@@ -10,6 +10,7 @@ import (
 	pbgd "github.com/brotherlogic/godiscogs"
 	pbrc "github.com/brotherlogic/recordcollection/proto"
 	pb "github.com/brotherlogic/recordprocess/proto"
+	"github.com/golang/protobuf/proto"
 )
 
 type getter interface {
@@ -59,8 +60,11 @@ func (s *Server) processRecords(ctx context.Context) error {
 	for _, record := range records {
 		count++
 		scoresUpdated = s.saveRecordScore(ctx, record) || scoresUpdated
+		pre := proto.Clone(record.GetMetadata())
 		update := s.processRecord(record)
 		if update != nil {
+			s.Log(fmt.Sprintf("PRE  %v", pre))
+			s.Log(fmt.Sprintf("POST %v", update.GetMetadata()))
 			s.lastUpdate = int64(update.GetRelease().Id)
 			s.Log(fmt.Sprintf("Updating %v and %v", update.GetRelease().Title, update.GetRelease().InstanceId))
 			s.getter.update(ctx, update)
@@ -103,6 +107,7 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 
 	if r.GetMetadata().GoalFolder == 268147 && r.GetMetadata().Category != pbrc.ReleaseMetadata_DIGITAL {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_DIGITAL
+
 		return r
 	}
 
@@ -110,6 +115,7 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 	if len(r.GetRelease().Labels) == 0 {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_NO_LABELS
 		r.GetMetadata().Purgatory = pbrc.Purgatory_NEEDS_LABELS
+
 		return r
 	}
 
