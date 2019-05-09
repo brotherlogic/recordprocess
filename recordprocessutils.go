@@ -101,6 +101,11 @@ func (s *Server) processRecord(r *pbrc.Record) *pbrc.Record {
 		r.Metadata = &pbrc.ReleaseMetadata{}
 	}
 
+	if r.GetMetadata().GoalFolder == 268147 && r.GetMetadata().Category != pbrc.ReleaseMetadata_DIGITAL {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_DIGITAL
+		return r
+	}
+
 	// If the record has no labels move it to NO_LABELS
 	if len(r.GetRelease().Labels) == 0 {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_NO_LABELS
