@@ -64,7 +64,10 @@ func (s *Server) processRecords(ctx context.Context) error {
 		update, rule := s.processRecord(record)
 
 		if record.GetRelease().Id == 8043369 {
-			s.Log(fmt.Sprintf("Processing -> %v (%v)", update, rule))
+			s.Log(fmt.Sprintf("Processing -> %v (%v), %v, %v, %v", update, rule,
+				r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNLISTENED,
+				r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -3, 0).Unix()),
+				r.GetRelease().Rating > 0))
 		}
 
 		if update != nil {
