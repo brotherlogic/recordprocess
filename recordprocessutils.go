@@ -61,14 +61,7 @@ func (s *Server) processRecords(ctx context.Context) error {
 		count++
 		scoresUpdated = s.saveRecordScore(ctx, record) || scoresUpdated
 		pre := proto.Clone(record.GetMetadata())
-		update, rule := s.processRecord(record)
-
-		if record.GetRelease().Id == 8043369 {
-			s.Log(fmt.Sprintf("Processing -> %v (%v), %v, %v, %v", update, rule,
-				record.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNLISTENED,
-				record.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -3, 0).Unix()),
-				record.GetRelease().Rating > 0))
-		}
+		update, _ := s.processRecord(record)
 
 		if update != nil {
 			s.Log(fmt.Sprintf("PRE  %v", pre))
@@ -252,10 +245,13 @@ func (s *Server) processRecord(r *pbrc.Record) (*pbrc.Record, string) {
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNLISTENED {
-		if r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -3, 0).Unix()) {
-			if r.GetRelease().Rating > 0 {
+		if r.GetRelease().Rating > 0 {
+			if r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -3, 0).Unix()) {
 				r.GetMetadata().Category = pbrc.ReleaseMetadata_STAGED
 				return r, "Staged"
+			} else {
+				r.GetMetadata().Category = pbrc.ReleaseMetadata_UNKNOWN
+				return r, "Uknowned"
 			}
 		}
 	}
