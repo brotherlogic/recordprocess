@@ -62,6 +62,11 @@ func (s *Server) processRecords(ctx context.Context) error {
 		scoresUpdated = s.saveRecordScore(ctx, record) || scoresUpdated
 		pre := proto.Clone(record.GetMetadata())
 		update := s.processRecord(record)
+
+		if record.GetRelease().Id == 8043369 {
+			s.Log(fmt.Sprintf("Processing -> %v", update))
+		}
+
 		if update != nil {
 			s.Log(fmt.Sprintf("PRE  %v", pre))
 			s.Log(fmt.Sprintf("POST %v", update.GetMetadata()))
