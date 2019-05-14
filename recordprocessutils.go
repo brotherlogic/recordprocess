@@ -143,6 +143,7 @@ func (s *Server) processRecord(r *pbrc.Record) (*pbrc.Record, string) {
 	// If the record is in google play, set the category to GOOGLE_PLAY
 	if r.GetRelease().FolderId == 1433217 && r.GetMetadata().Category != pbrc.ReleaseMetadata_GOOGLE_PLAY {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_GOOGLE_PLAY
+		r.GetMetadata().GoalFolder = 1433217
 		return r, "Google Play"
 	}
 
