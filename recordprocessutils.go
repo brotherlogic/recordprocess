@@ -61,10 +61,11 @@ func (s *Server) processRecords(ctx context.Context) error {
 		count++
 		scoresUpdated = s.saveRecordScore(ctx, record) || scoresUpdated
 		pre := proto.Clone(record.GetMetadata())
-		update, _ := s.processRecord(record)
+		update, rule := s.processRecord(record)
 
 		if update != nil {
 			s.Log(fmt.Sprintf("PRE  %v", pre))
+			s.Log(fmt.Sprintf("APPL %v", rule))
 			s.Log(fmt.Sprintf("POST %v", update.GetMetadata()))
 			if int64(update.GetRelease().Id) == s.lastUpdate {
 				s.updateCount++
