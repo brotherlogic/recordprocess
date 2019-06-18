@@ -231,7 +231,7 @@ func (s *Server) processRecord(r *pbrc.Record) (*pbrc.Record, string) {
 		return r, "New Record"
 	}
 
-	if r.GetRelease().FolderId == 1 && r.GetMetadata().Category != pbrc.ReleaseMetadata_PURCHASED {
+	if r.GetRelease().FolderId == 1 && r.GetMetadata().Category != pbrc.ReleaseMetadata_PURCHASED && r.GetMetadata().GoalFolder <= 1 {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_PURCHASED
 		return r, "Uncategorized record"
 	}
