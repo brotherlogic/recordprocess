@@ -132,12 +132,30 @@ func TestSaveRecordTwice(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}}
+	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{Id: 10, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}}
 	s.getter = &tg
 	s.processRecords(context.Background())
 
 	if tg.lastCategory != pbrc.ReleaseMetadata_PURCHASED {
 		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
+	}
+}
+
+func TestMultiUpdate(t *testing.T) {
+	s := InitTest()
+
+	for i := 0; i < 100; i++ {
+		tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{Id: 10, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}}
+		s.getter = &tg
+		s.processRecords(context.Background())
+	}
+
+	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{Id: 11, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}}
+	s.getter = &tg
+	s.processRecords(context.Background())
+
+	if s.updateCount != 0 {
+		t.Errorf("Error in update count")
 	}
 }
 
@@ -243,7 +261,7 @@ func TestUpdateFailOnUpdate(t *testing.T) {
 func TestProcessUnpurchasedRecord(t *testing.T) {
 	s := InitTest()
 	r := &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}
-	nr := s.processRecord(r)
+	nr, _ := s.processRecord(r)
 
 	if nr.GetMetadata().GetCategory() != pbrc.ReleaseMetadata_PURCHASED {
 		t.Fatalf("Error in processing record: %v", nr)
@@ -253,7 +271,7 @@ func TestProcessUnpurchasedRecord(t *testing.T) {
 func TestEmptyUpdate(t *testing.T) {
 	s := InitTest()
 	r := &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PURCHASED}, Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}
-	nr := s.processRecord(r)
+	nr, _ := s.processRecord(r)
 
 	if nr != nil {
 		t.Fatalf("Error in processing record: %v", nr)
