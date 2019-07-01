@@ -131,7 +131,6 @@ func (s *Server) processRecord(r *pbrc.Record) (*pbrc.Record, string) {
 	if len(r.GetRelease().Labels) == 0 {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_NO_LABELS
 		r.GetMetadata().Purgatory = pbrc.Purgatory_NEEDS_LABELS
-
 		return r, "No Labels"
 	}
 
@@ -257,6 +256,11 @@ func (s *Server) processRecord(r *pbrc.Record) (*pbrc.Record, string) {
 			r.GetMetadata().Category = pbrc.ReleaseMetadata_STAGED
 			return r, "Staged"
 		}
+	}
+
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_FRESHMAN && r.GetMetadata().GetDateAdded() > time.Now().AddDate(0, -3, 0).Unix() {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_UNKNOWN
+		return r, "PRE_FRESHMAN wrong"
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_FRESHMAN && r.GetRelease().Rating > 0 {

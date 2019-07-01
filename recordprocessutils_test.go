@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/brotherlogic/goserver/utils"
 	"github.com/brotherlogic/keystore/client"
 	"golang.org/x/net/context"
 
@@ -67,6 +68,31 @@ func InitTest() *Server {
 	return s
 }
 
+var fulltests = []struct {
+	in  *pbrc.Record
+	out *pbrc.Record
+}{
+	{&pbrc.Record{Release: &pbgd.Release{Formats: []*pbgd.Format{&pbgd.Format{Name: "CD"}}, Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}},
+		Metadata: &pbrc.ReleaseMetadata{DateAdded: 1369672260, Others: true, LastCache: 1552578483, Category: pbrc.ReleaseMetadata_RIP_THEN_SELL, GoalFolder: 267115, LastSyncTime: 1561989524, LastStockCheck: 1561971732, OverallScore: 4.75, InstanceId: 19868005, Keep: pbrc.ReleaseMetadata_NOT_KEEPER, Match: pbrc.ReleaseMetadata_FULL_MATCH, CurrentSalePrice: 2241, SalePriceUpdate: 1559853487}},
+		&pbrc.Record{Release: &pbgd.Release{Formats: []*pbgd.Format{&pbgd.Format{Name: "CD"}}, Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}},
+			Metadata: &pbrc.ReleaseMetadata{DateAdded: 1369672260, Others: true, LastCache: 1552578483, Category: pbrc.ReleaseMetadata_RIP_THEN_SELL, GoalFolder: 267115, LastSyncTime: 1561989524, LastStockCheck: 1561971732, OverallScore: 4.75, InstanceId: 19868005, Keep: pbrc.ReleaseMetadata_NOT_KEEPER, Match: pbrc.ReleaseMetadata_FULL_MATCH, CurrentSalePrice: 2241, SalePriceUpdate: 1559853487}},
+	},
+}
+
+func TestFullTests(t *testing.T) {
+	for _, test := range fulltests {
+		s := InitTest()
+		rec := test.in
+		tg := testGetter{rec: test.in}
+		s.getter = &tg
+		_, appl := s.processRecord(rec)
+
+		if !utils.FuzzyMatch(rec, test.out) {
+			t.Errorf("Full Test move failed \n%v\n %v \n%v\n (should have been %v)", rec, appl, test.out)
+		}
+	}
+}
+
 var movetests = []struct {
 	in  *pbrc.Record
 	out pbrc.ReleaseMetadata_Category
@@ -111,7 +137,7 @@ func TestMoveTests(t *testing.T) {
 		s.processRecords(context.Background())
 
 		if tg.lastCategory != test.out {
-			t.Fatalf("Test move failed %v -> %v (should have been %v (from %v))", test.in, tg.lastCategory, test.out, tg.rec)
+			t.Fatalf("Full move failed \n%v\n vs. \n%v\n (should have been %v (from %v))", test.in, tg.lastCategory, test.out, tg.rec)
 		}
 	}
 }
@@ -154,8 +180,8 @@ func TestMultiUpdate(t *testing.T) {
 	s.getter = &tg
 	s.processRecords(context.Background())
 
-	if s.updateCount != 0 {
-		t.Errorf("Error in update count")
+	if s.updateCount != 101 {
+		t.Errorf("Error in update count: %v", s.updateCount)
 	}
 }
 
