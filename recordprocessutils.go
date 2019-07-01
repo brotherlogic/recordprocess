@@ -187,7 +187,7 @@ func (s *Server) processRecord(r *pbrc.Record) (*pbrc.Record, string) {
 		return r, "Preping for sale"
 	}
 
-	if r.GetMetadata().Category == pbrc.ReleaseMetadata_ASSESS_FOR_SALE && r.GetMetadata().LastStockCheck > time.Now().AddDate(0, -3, 0).Unix() {
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_ASSESS_FOR_SALE && (r.GetMetadata().LastStockCheck > time.Now().AddDate(-1, 0, 0).Unix() || r.GetMetadata().Match == pbrc.ReleaseMetadata_FULL_MATCH) {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_PREPARE_TO_SELL
 	}
 
