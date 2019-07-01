@@ -76,7 +76,7 @@ func (s *Server) processRecords(ctx context.Context) error {
 			} else {
 				s.updateCount = 0
 			}
-			s.lastUpdate = int64(update.GetRelease().Id)
+			s.lastUpdate = int64(update.GetRelease().InstanceId)
 
 			s.Log(fmt.Sprintf("Updating %v and %v", update.GetRelease().Title, update.GetRelease().InstanceId))
 			s.getter.update(ctx, update)
