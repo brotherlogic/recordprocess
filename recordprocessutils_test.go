@@ -180,8 +180,8 @@ func TestMultiUpdate(t *testing.T) {
 	s.getter = &tg
 	s.processRecords(context.Background())
 
-	if s.updateCount != 0 {
-		t.Errorf("Error in update count")
+	if s.updateCount != 101 {
+		t.Errorf("Error in update count: %v", s.updateCount)
 	}
 }
 
