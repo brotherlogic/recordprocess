@@ -68,7 +68,7 @@ func (s *Server) processRecords(ctx context.Context) error {
 			s.Log(fmt.Sprintf("APPL %v", rule))
 			s.Log(fmt.Sprintf("POST %v", update.GetMetadata()))
 
-			if int64(update.GetRelease().Id) == s.lastUpdate {
+			if int64(update.GetRelease().InstanceId) == s.lastUpdate {
 				s.updateCount++
 				if s.updateCount > 20 {
 					s.RaiseIssue(ctx, "Stuck Process", fmt.Sprintf("%v is stuck in process", update.GetRelease().Id), false)
