@@ -117,6 +117,11 @@ func (s *Server) processRecord(r *pbrc.Record) (*pbrc.Record, string) {
 		r.Metadata = &pbrc.ReleaseMetadata{}
 	}
 
+	if r.GetRelease().FolderId == 1782105 && r.GetMetadata().GoalFolder == 0 {
+		r.GetMetadata().GoalFolder = 1782105
+		return r, "Bandcamp"
+	}
+
 	if r.GetMetadata().GoalFolder == 268147 && r.GetMetadata().Category != pbrc.ReleaseMetadata_DIGITAL {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_DIGITAL
 		return r, "Digital"

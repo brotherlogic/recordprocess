@@ -301,3 +301,15 @@ func TestClearRatingOnPrepToSell(t *testing.T) {
 		t.Errorf("Folder has not been updated: %v", rec)
 	}
 }
+
+func TestBandcamp(t *testing.T) {
+	s := InitTest()
+	rec := &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1782105, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PREPARE_TO_SELL, DateAdded: time.Now().Unix(), LastStockCheck: time.Now().Unix()}}
+	tg := testGetter{rec: rec}
+	s.getter = &tg
+	s.processRecords(context.Background())
+
+	if rec.GetMetadata().GoalFolder != 1782105 {
+		t.Errorf("Folder has not been updated: %v", rec)
+	}
+}
