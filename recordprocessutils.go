@@ -76,7 +76,7 @@ func (s *Server) processRecords(ctx context.Context) error {
 			} else {
 				s.updateCount = 0
 			}
-			s.lastUpdate = int64(update.GetRelease().Id)
+			s.lastUpdate = int64(update.GetRelease().InstanceId)
 
 			s.Log(fmt.Sprintf("Updating %v and %v", update.GetRelease().Title, update.GetRelease().InstanceId))
 			s.getter.update(ctx, update)
@@ -115,6 +115,11 @@ func (s *Server) processRecord(r *pbrc.Record) (*pbrc.Record, string) {
 
 	if r.GetMetadata() == nil {
 		r.Metadata = &pbrc.ReleaseMetadata{}
+	}
+
+	if r.GetRelease().FolderId == 1782105 && r.GetMetadata().GoalFolder == 0 {
+		r.GetMetadata().GoalFolder = 1782105
+		return r, "Bandcamp"
 	}
 
 	if r.GetMetadata().GoalFolder == 268147 && r.GetMetadata().Category != pbrc.ReleaseMetadata_DIGITAL {
