@@ -88,7 +88,7 @@ func (p prodGetter) moveToSold(ctx context.Context, r *pbrc.Record) {
 func Init() *Server {
 	s := &Server{GoServer: &goserver.GoServer{}}
 	s.getter = &prodGetter{s.DialMaster}
-	s.GoServer.KSclient = *keystoreclient.GetClient(s.GetIP)
+	s.GoServer.KSclient = *keystoreclient.GetClient(s.DialMaster)
 	return s
 }
 

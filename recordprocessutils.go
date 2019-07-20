@@ -276,7 +276,14 @@ func (s *Server) processRecord(r *pbrc.Record) (*pbrc.Record, string) {
 		}
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_DISTINGUISHED && r.GetRelease().Rating > 0) {
+		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-4, 0, 0).Unix()) {
+			r.GetMetadata().Category = pbrc.ReleaseMetadata_DISTINGUISHED
+			return r, "DIST"
+		}
+	}
+
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_PROFESSOR && r.GetRelease().Rating > 0) {
 		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-3, 0, 0).Unix()) {
 			r.GetMetadata().Category = pbrc.ReleaseMetadata_PROFESSOR
 			return r, "PROF"
@@ -339,6 +346,18 @@ func (s *Server) processRecord(r *pbrc.Record) (*pbrc.Record, string) {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_POSTDOC
 		r.GetMetadata().SetRating = -1
 		return r, "PRE P"
+	}
+
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_POSTDOC && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-3, 0, 0).Unix()) {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_PROFESSOR
+		r.GetMetadata().SetRating = -1
+		return r, "PRE PREOG"
+	}
+
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PROFESSOR && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-4, 0, 0).Unix()) {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_DISTINGUISHED
+		r.GetMetadata().SetRating = -1
+		return r, "PRE DISTIN"
 	}
 
 	return nil, "No rules applied"
