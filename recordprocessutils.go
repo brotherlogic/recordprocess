@@ -71,7 +71,7 @@ func (s *Server) processRecords(ctx context.Context) error {
 			if int64(update.GetRelease().InstanceId) == s.lastUpdate {
 				s.updateCount++
 				if s.updateCount > 20 {
-					s.RaiseIssue(ctx, "Stuck Process", fmt.Sprintf("%v is stuck in process", update.GetRelease().Id), false)
+					s.RaiseIssue(ctx, "Stuck Process", fmt.Sprintf("%v is stuck in process [Last rule applied: %v]", update.GetRelease().Id, rule), false)
 				}
 			} else {
 				s.updateCount = 0
