@@ -79,7 +79,8 @@ func (s *Server) processRecords(ctx context.Context) error {
 			s.lastUpdate = int64(update.GetRelease().InstanceId)
 
 			s.Log(fmt.Sprintf("Updating %v and %v", update.GetRelease().Title, update.GetRelease().InstanceId))
-			s.getter.update(ctx, update)
+			err := s.getter.update(ctx, update)
+			s.Log(fmt.Sprintf("FAILURE TO UPDATE: %v", err))
 			break
 		}
 	}
