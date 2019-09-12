@@ -236,6 +236,9 @@ func (s *Server) processRecord(r *pbrc.Record) (*pbrc.Record, string) {
 			r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_FRESHMAN
 			return r, "Returning to fold"
 		}
+
+		r.GetMetadata().SetRating = -1
+		return r, "Clearing Rating when Staged"
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PURCHASED && r.GetMetadata().Cost > 0 {
