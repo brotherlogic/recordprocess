@@ -161,6 +161,6 @@ func main() {
 	server.Register = server
 
 	server.RegisterServer("recordprocess", false)
-	server.RegisterRepeatingTask(server.processRecords, "process_records", time.Second*5)
+	server.RegisterRepeatingTask(server.processRecords, "process_records", time.Hour)
 	server.Serve()
 }
