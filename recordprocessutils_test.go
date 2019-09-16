@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"testing"
 	"time"
@@ -19,10 +20,18 @@ type testGetter struct {
 	lastCategory pbrc.ReleaseMetadata_Category
 	rec          *pbrc.Record
 	sold         *pbrc.Record
+	getFail      bool
 }
 
-func (t *testGetter) getRecords(ctx context.Context) ([]*pbrc.Record, error) {
-	return []*pbrc.Record{t.rec}, nil
+func (t *testGetter) getRecords(ctx context.Context) ([]int32, error) {
+	return []int32{t.rec.GetRelease().InstanceId}, nil
+}
+
+func (t *testGetter) getRecord(ctx context.Context, instanceID int32) (*pbrc.Record, error) {
+	if t.getFail {
+		return nil, fmt.Errorf("Built to fail")
+	}
+	return t.rec, nil
 }
 
 func (t *testGetter) update(ctx context.Context, r *pbrc.Record) error {
@@ -39,9 +48,16 @@ type testFailGetter struct {
 	lastCategory pbrc.ReleaseMetadata_Category
 }
 
-func (t testFailGetter) getRecords(ctx context.Context) ([]*pbrc.Record, error) {
+func (t testFailGetter) getRecords(ctx context.Context) ([]int32, error) {
 	if t.grf {
-		return []*pbrc.Record{&pbrc.Record{Release: &pbgd.Release{FolderId: 1}}}, nil
+		return []int32{1}, nil
+	}
+	return nil, errors.New("Built to fail")
+}
+
+func (t testFailGetter) getRecord(ctx context.Context, instanceID int32) (*pbrc.Record, error) {
+	if t.grf {
+		return &pbrc.Record{}, nil
 	}
 	return nil, errors.New("Built to fail")
 }
@@ -171,6 +187,18 @@ func TestUpdate(t *testing.T) {
 	}
 }
 
+func TestUpdateWithFailonRecordGet(t *testing.T) {
+	s := InitTest()
+	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{Id: 10, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}}
+	tg.getFail = true
+	s.getter = &tg
+	err := s.processRecords(context.Background())
+
+	if err == nil {
+		t.Errorf("Did not fail")
+	}
+}
+
 func TestMultiUpdate(t *testing.T) {
 	s := InitTest()
 
@@ -270,17 +298,6 @@ func TestUpdateToSophmore(t *testing.T) {
 func TestUpdateFailOnGet(t *testing.T) {
 	s := InitTest()
 	tg := testFailGetter{}
-	s.getter = tg
-	s.processRecords(context.Background())
-
-	if tg.lastCategory == pbrc.ReleaseMetadata_PURCHASED {
-		t.Errorf("Folder has been updated: %v", tg.lastCategory)
-	}
-}
-
-func TestUpdateFailOnUpdate(t *testing.T) {
-	s := InitTest()
-	tg := testFailGetter{grf: true}
 	s.getter = tg
 	s.processRecords(context.Background())
 
