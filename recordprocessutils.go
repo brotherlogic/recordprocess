@@ -14,7 +14,8 @@ import (
 )
 
 type getter interface {
-	getRecords(ctx context.Context) ([]*pbrc.Record, error)
+	getRecords(ctx context.Context) ([]int32, error)
+	getRecord(ctx context.Context, instanceID int32) (*pbrc.Record, error)
 	update(ctx context.Context, r *pbrc.Record) error
 	moveToSold(ctx context.Context, r *pbrc.Record)
 }
@@ -50,14 +51,13 @@ func (s *Server) processRecords(ctx context.Context) error {
 		return err
 	}
 
-	seen := make(map[int32]bool)
-	for _, r := range records {
-		seen[r.GetRelease().InstanceId] = true
-	}
-
 	count := int64(0)
 	s.recordsInUpdate = int64(len(records))
-	for _, record := range records {
+	for _, instanceID := range records {
+		record, err := s.getter.getRecord(ctx, instanceID)
+		if err != nil {
+			return err
+		}
 		count++
 		scoresUpdated = s.saveRecordScore(ctx, record) || scoresUpdated
 		pre := proto.Clone(record.GetMetadata())

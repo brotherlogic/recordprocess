@@ -40,7 +40,7 @@ type prodGetter struct {
 	dial func(server string) (*grpc.ClientConn, error)
 }
 
-func (p prodGetter) getRecords(ctx context.Context) ([]*pbrc.Record, error) {
+func (p prodGetter) getRecords(ctx context.Context) ([]int32, error) {
 	conn, err := p.dial("recordcollection")
 	if err != nil {
 		return nil, err
@@ -48,13 +48,29 @@ func (p prodGetter) getRecords(ctx context.Context) ([]*pbrc.Record, error) {
 	defer conn.Close()
 
 	client := pbrc.NewRecordCollectionServiceClient(conn)
-	req := &pbrc.GetRecordsRequest{Caller: "recordprocess", Filter: &pbrc.Record{}}
-	resp, err := client.GetRecords(ctx, req, grpc.MaxCallRecvMsgSize(1024*1024*1024))
+	req := &pbrc.QueryRecordsRequest{Query: &pbrc.QueryRecordsRequest_UpdateTime{time.Now().Unix()}}
+	resp, err := client.QueryRecords(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	return resp.GetRecords(), nil
+	return resp.GetInstanceIds(), nil
+}
+
+func (p prodGetter) getRecord(ctx context.Context, instanceID int32) (*pbrc.Record, error) {
+	conn, err := p.dial("recordcollection")
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := pbrc.NewRecordCollectionServiceClient(conn)
+	resp, err := client.GetRecord(ctx, &pbrc.GetRecordRequest{InstanceId: instanceID})
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.GetRecord(), nil
 }
 
 func (p prodGetter) update(ctx context.Context, r *pbrc.Record) error {
