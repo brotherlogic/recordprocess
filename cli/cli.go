@@ -19,7 +19,7 @@ func main() {
 	ctx, cancel := utils.BuildContext("recordmover_cli_"+os.Args[1], "recordmover")
 	defer cancel()
 
-	host, port, err := utils.Resolve("recordprocess")
+	host, port, err := utils.Resolve("recordprocess", "recordprocess-cli")
 	if err != nil {
 		log.Fatalf("Unable to reach organiser: %v", err)
 	}
