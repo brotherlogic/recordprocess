@@ -64,9 +64,7 @@ func (s *Server) processRecords(ctx context.Context) error {
 		update, rule := s.processRecord(record)
 
 		if update != nil {
-			s.Log(fmt.Sprintf("PRE  %v", pre))
-			s.Log(fmt.Sprintf("APPL %v", rule))
-			s.Log(fmt.Sprintf("POST %v", update.GetMetadata()))
+			s.Log(fmt.Sprintf("APPL %v -> %v -> %v", pre, rule, update.GetMetadata()))
 
 			if int64(update.GetRelease().InstanceId) == s.lastUpdate {
 				s.updateCount++
