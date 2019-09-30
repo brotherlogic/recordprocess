@@ -9,6 +9,7 @@ import (
 
 	"github.com/brotherlogic/goserver"
 	"github.com/brotherlogic/keystore/client"
+	"github.com/golang/protobuf/proto"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
@@ -154,6 +155,8 @@ func (s *Server) Mote(ctx context.Context, master bool) error {
 func (s *Server) GetState() []*pbg.State {
 
 	return []*pbg.State{
+		&pbg.State{Key: "size_scores", Value: int64(proto.Size(s.scores))},
+		&pbg.State{Key: "num_scores", Value: int64(len(s.scores.Scores))},
 		&pbg.State{Key: "update_count", Value: int64(s.updateCount)},
 		&pbg.State{Key: "last_proc", TimeValue: s.lastProc.Unix(), Value: s.lastCount},
 		&pbg.State{Key: "last_proc_time", Text: fmt.Sprintf("%v", s.lastProcDuration)},
