@@ -140,6 +140,11 @@ func (s *Server) processRecord(r *pbrc.Record) (*pbrc.Record, string) {
 	}
 
 	// Deal with parents records
+	if r.GetRelease().FolderId == 1727264 && r.GetMetadata().Category == pbrc.ReleaseMetadata_PARENTS && r.GetMetadata().GoalFolder != 1727264 {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_FRESHMAN
+		return r, "OutOfParents"
+	}
+
 	if r.GetRelease().FolderId == 1727264 && r.GetMetadata().Category != pbrc.ReleaseMetadata_PARENTS && (r.GetMetadata().GoalFolder == 1727264 || r.GetMetadata().GoalFolder == 0) {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_PARENTS
 		return r, "Parents"
