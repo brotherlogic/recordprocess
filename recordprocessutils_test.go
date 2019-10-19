@@ -23,7 +23,7 @@ type testGetter struct {
 	getFail      bool
 }
 
-func (t *testGetter) getRecords(ctx context.Context) ([]int32, error) {
+func (t *testGetter) getRecords(ctx context.Context, ti int64) ([]int32, error) {
 	return []int32{t.rec.GetRelease().InstanceId}, nil
 }
 
@@ -48,7 +48,7 @@ type testFailGetter struct {
 	lastCategory pbrc.ReleaseMetadata_Category
 }
 
-func (t testFailGetter) getRecords(ctx context.Context) ([]int32, error) {
+func (t testFailGetter) getRecords(ctx context.Context, ti int64) ([]int32, error) {
 	if t.grf {
 		return []int32{1}, nil
 	}

@@ -14,7 +14,7 @@ import (
 )
 
 type getter interface {
-	getRecords(ctx context.Context) ([]int32, error)
+	getRecords(ctx context.Context, t int64) ([]int32, error)
 	getRecord(ctx context.Context, instanceID int32) (*pbrc.Record, error)
 	update(ctx context.Context, r *pbrc.Record) error
 	moveToSold(ctx context.Context, r *pbrc.Record)
@@ -45,7 +45,7 @@ func (s *Server) processRecords(ctx context.Context) error {
 	s.updates++
 	startTime := time.Now()
 	scoresUpdated := false
-	records, err := s.getter.getRecords(ctx)
+	records, err := s.getter.getRecords(ctx, s.config.LastRunTime)
 
 	if err != nil {
 		return err

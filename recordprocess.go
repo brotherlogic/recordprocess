@@ -45,7 +45,7 @@ type prodGetter struct {
 	dial func(server string) (*grpc.ClientConn, error)
 }
 
-func (p prodGetter) getRecords(ctx context.Context) ([]int32, error) {
+func (p prodGetter) getRecords(ctx context.Context, t int64) ([]int32, error) {
 	conn, err := p.dial("recordcollection")
 	if err != nil {
 		return nil, err
@@ -53,7 +53,7 @@ func (p prodGetter) getRecords(ctx context.Context) ([]int32, error) {
 	defer conn.Close()
 
 	client := pbrc.NewRecordCollectionServiceClient(conn)
-	req := &pbrc.QueryRecordsRequest{Query: &pbrc.QueryRecordsRequest_UpdateTime{time.Now().Unix()}}
+	req := &pbrc.QueryRecordsRequest{Query: &pbrc.QueryRecordsRequest_UpdateTime{t}}
 	resp, err := client.QueryRecords(ctx, req)
 	if err != nil {
 		return nil, err
