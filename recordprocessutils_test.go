@@ -80,6 +80,7 @@ func InitTest() *Server {
 	s.getter = &testGetter{}
 	s.scores = &pb.Scores{}
 	s.GoServer.KSclient = *keystoreclient.GetTestClient(".testing")
+	s.config = &pb.Config{}
 
 	return s
 }
@@ -103,8 +104,8 @@ func TestFullTests(t *testing.T) {
 		s.getter = &tg
 		_, appl := s.processRecord(rec)
 
-		if !utils.FuzzyMatch(rec, test.out) {
-			t.Errorf("Full Test move failed \n%v\n %v \n%v\n (should have been %v)", rec, appl, test.out)
+		if utils.FuzzyMatch(rec, test.out) != nil {
+			t.Errorf("Full Test move failed \n%v\n %v \n%v\n (should have been %v)", utils.FuzzyMatch(rec, test.out), rec, appl, test.out)
 		}
 	}
 }

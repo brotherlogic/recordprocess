@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/brotherlogic/goserver/utils"
 	"google.golang.org/grpc"
@@ -39,7 +40,7 @@ func main() {
 			log.Fatalf("Error on GET: %v", err)
 		}
 		for i, score := range res.GetScores() {
-			fmt.Printf("%v. -> %v\n", i, score)
+			fmt.Printf("%v. [%v] -> %v,%v\n", i, time.Unix(score.ScoreTime, 0), score.Rating, score.Category)
 		}
 	}
 }

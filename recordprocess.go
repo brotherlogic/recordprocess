@@ -21,11 +21,15 @@ import (
 const (
 	// KEY used to save scores
 	KEY = "github.com/brotherlogic/recordprocess/scores"
+
+	// CONFIG where we store the config
+	CONFIG = "github.com/brotherlogic/recordprocess/config"
 )
 
 //Server main server type
 type Server struct {
 	*goserver.GoServer
+	config           *pb.Config
 	getter           getter
 	lastProc         time.Time
 	lastCount        int64
@@ -123,6 +127,10 @@ func (s *Server) saveScores(ctx context.Context) {
 	s.KSclient.Save(ctx, KEY, s.scores)
 }
 
+func (s *Server) saveConfig(ctx context.Context) {
+	s.KSclient.Save(ctx, CONFIG, s.config)
+}
+
 func (s *Server) readScores(ctx context.Context) error {
 	scores := &pb.Scores{}
 	data, _, err := s.KSclient.Read(ctx, KEY, scores)
@@ -135,9 +143,22 @@ func (s *Server) readScores(ctx context.Context) error {
 	return nil
 }
 
+func (s *Server) readConfig(ctx context.Context) error {
+	config := &pb.Config{}
+	data, _, err := s.KSclient.Read(ctx, KEY, config)
+
+	if err != nil {
+		return err
+	}
+
+	s.config = data.(*pb.Config)
+	return nil
+}
+
 // Shutdown the server
 func (s *Server) Shutdown(ctx context.Context) error {
 	s.saveScores(ctx)
+	s.saveConfig(ctx)
 	return nil
 }
 
@@ -145,6 +166,9 @@ func (s *Server) Shutdown(ctx context.Context) error {
 func (s *Server) Mote(ctx context.Context, master bool) error {
 	if master {
 		err := s.readScores(ctx)
+		if err == nil {
+			err = s.readConfig(ctx)
+		}
 		return err
 	}
 
@@ -155,6 +179,7 @@ func (s *Server) Mote(ctx context.Context, master bool) error {
 func (s *Server) GetState() []*pbg.State {
 
 	return []*pbg.State{
+		&pbg.State{Key: "last_run_time", TimeValue: s.config.LastRunTime},
 		&pbg.State{Key: "size_scores", Value: int64(proto.Size(s.scores))},
 		&pbg.State{Key: "num_scores", Value: int64(len(s.scores.Scores))},
 		&pbg.State{Key: "update_count", Value: int64(s.updateCount)},

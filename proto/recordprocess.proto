@@ -8,6 +8,10 @@ message Scores {
   repeated RecordScore scores = 1;
 }
 
+message Config {
+  int64 last_run_time = 1;
+}
+
 message RecordScore {
   int32 instance_id = 1;
   int32 rating = 2;
