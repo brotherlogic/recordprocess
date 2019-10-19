@@ -87,8 +87,10 @@ func (s *Server) processRecords(ctx context.Context) error {
 	s.lastCount = count
 	s.lastProcDuration = time.Now().Sub(startTime)
 
+	s.config.LastRunTime = time.Now().Unix()
 	if scoresUpdated {
 		s.saveScores(ctx)
+		s.saveConfig(ctx)
 	}
 
 	return nil
