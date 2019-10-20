@@ -47,6 +47,8 @@ func (s *Server) processRecords(ctx context.Context) error {
 	scoresUpdated := false
 	records, err := s.getter.getRecords(ctx, s.config.LastRunTime)
 
+	s.Log(fmt.Sprintf("Found %v records to update", len(records)))
+
 	if err != nil {
 		return err
 	}
