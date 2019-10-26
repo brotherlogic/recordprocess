@@ -10,6 +10,7 @@ message Scores {
 
 message Config {
   int64 last_run_time = 1;
+  map<int32, int64> next_update_time = 2;
 }
 
 message RecordScore {

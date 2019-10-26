@@ -77,6 +77,7 @@ func (t testFailGetter) moveToSold(ctx context.Context, r *pbrc.Record) {
 func InitTest() *Server {
 	s := Init()
 	s.SkipLog = true
+	s.SkipIssue = true
 	s.getter = &testGetter{}
 	s.scores = &pb.Scores{}
 	s.GoServer.KSclient = *keystoreclient.GetTestClient(".testing")

@@ -152,6 +152,11 @@ func (s *Server) readConfig(ctx context.Context) error {
 	}
 
 	s.config = data.(*pb.Config)
+
+	if s.config.NextUpdateTime == nil {
+		s.config.NextUpdateTime = make(map[int32]int64)
+	}
+
 	return nil
 }
 
@@ -169,6 +174,7 @@ func (s *Server) Mote(ctx context.Context, master bool) error {
 		if err == nil {
 			err = s.readConfig(ctx)
 		}
+
 		return err
 	}
 
