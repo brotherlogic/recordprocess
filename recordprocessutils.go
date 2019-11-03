@@ -376,5 +376,11 @@ func (s *Server) processRecord(r *pbrc.Record) (*pbrc.Record, string) {
 		return r, "PRE DISTIN"
 	}
 
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_ASSESS && r.GetMetadata().GetPurgatory() == pbrc.Purgatory_NEEDS_STOCK_CHECK && time.Now().Sub(time.Unix(r.GetMetadata().GetLastStockCheck(), 0)) < time.Hour*24*7*4 {
+		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_FRESHMAN
+		r.GetMetadata().Purgatory = -1
+		return r, "ASSESSED"
+	}
+
 	return nil, "No rules applied"
 }

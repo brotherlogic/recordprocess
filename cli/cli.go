@@ -42,5 +42,10 @@ func main() {
 		for i, score := range res.GetScores() {
 			fmt.Printf("%v. [%v] -> %v,%v\n", i, time.Unix(score.ScoreTime, 0), score.Rating, score.Category)
 		}
+	case "force":
+		val, _ := strconv.Atoi(os.Args[2])
+		res, err := client.Force(ctx, &pb.ForceRequest{InstanceId: int32(val)})
+		fmt.Printf("%v\n%v", res, err)
+
 	}
 }
