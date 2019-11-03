@@ -28,6 +28,15 @@ message GetScoreResponse {
   repeated RecordScore scores = 1;
 }
 
+message ForceRequest {
+  int32 instance_id = 1;
+}
+
+message ForceResponse {
+  recordcollection.Record result = 1;
+}
+
 service ScoreService {
   rpc GetScore(GetScoreRequest) returns (GetScoreResponse) {};
+  rpc Force(ForceRequest) returns (ForceResponse) {};
 }
