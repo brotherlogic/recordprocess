@@ -184,10 +184,14 @@ func (s *Server) Mote(ctx context.Context, master bool) error {
 // GetState gets the state of the server
 func (s *Server) GetState() []*pbg.State {
 
+	numScores := int64(0)
+	if s.scores != nil {
+		numScores = int64(len(s.scores.Scores))
+	}
 	return []*pbg.State{
 		&pbg.State{Key: "last_run_time", TimeValue: s.config.LastRunTime},
 		&pbg.State{Key: "size_scores", Value: int64(proto.Size(s.scores))},
-		&pbg.State{Key: "num_scores", Value: int64(len(s.scores.Scores))},
+		&pbg.State{Key: "num_scores", Value: numScores},
 		&pbg.State{Key: "update_count", Value: int64(s.updateCount)},
 		&pbg.State{Key: "last_proc", TimeValue: s.lastProc.Unix(), Value: s.lastCount},
 		&pbg.State{Key: "last_proc_time", Text: fmt.Sprintf("%v", s.lastProcDuration)},
