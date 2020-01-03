@@ -210,7 +210,11 @@ func main() {
 	server.PrepServer()
 	server.Register = server
 
-	server.RegisterServer("recordprocess", false)
+	err := server.RegisterServerV2("recordprocess", false, false)
+	if err != nil {
+		return
+	}
+
 	server.RegisterRepeatingTask(server.processRecords, "process_records", time.Minute*5)
 	server.Serve()
 }
