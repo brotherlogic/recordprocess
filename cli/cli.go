@@ -8,23 +8,24 @@ import (
 	"time"
 
 	"github.com/brotherlogic/goserver/utils"
-	"google.golang.org/grpc"
-
 	pb "github.com/brotherlogic/recordprocess/proto"
 
 	//Needed to pull in gzip encoding init
+	"google.golang.org/grpc"
 	_ "google.golang.org/grpc/encoding/gzip"
+	"google.golang.org/grpc/resolver"
 )
 
-func main() {
-	ctx, cancel := utils.BuildContext("recordmover_cli_"+os.Args[1], "recordmover")
-	defer cancel()
+func init() {
+	resolver.Register(&utils.DiscoveryClientResolverBuilder{})
+}
 
-	host, port, err := utils.Resolve("recordprocess", "recordprocess-cli")
+func main() {
+	conn, err := grpc.Dial("discovery:///recordprocess", grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("Unable to reach organiser: %v", err)
+		log.Fatalf("Can't dial getter: %v", err)
 	}
-	conn, err := grpc.Dial(host+":"+strconv.Itoa(int(port)), grpc.WithInsecure())
+
 	defer conn.Close()
 
 	if err != nil {
@@ -32,6 +33,8 @@ func main() {
 	}
 
 	client := pb.NewScoreServiceClient(conn)
+	ctx, cancel := utils.ManualContext("recordprocess-cli", "recordprocess-cli", time.Minute)
+	defer cancel()
 	switch os.Args[1] {
 	case "get":
 		val, _ := strconv.Atoi(os.Args[2])
