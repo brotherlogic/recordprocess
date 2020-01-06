@@ -20,6 +20,16 @@ type getter interface {
 	moveToSold(ctx context.Context, r *pbrc.Record)
 }
 
+func (s *Server) isJustCd(ctx context.Context, record *pbrc.Record) bool {
+	for _, format := range record.GetRelease().GetFormats() {
+		if format.GetName() != "CD" {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (s *Server) saveRecordScore(ctx context.Context, record *pbrc.Record) bool {
 	found := false
 	for _, score := range s.scores.GetScores() {
@@ -63,7 +73,7 @@ func (s *Server) processRecords(ctx context.Context) error {
 		count++
 		scoresUpdated = s.saveRecordScore(ctx, record) || scoresUpdated
 		pre := proto.Clone(record.GetMetadata())
-		update, rule := s.processRecord(record)
+		update, rule := s.processRecord(ctx, record)
 
 		if update != nil {
 			s.Log(fmt.Sprintf("APPL %v -> %v -> %v", pre, rule, update.GetMetadata()))
@@ -110,7 +120,7 @@ func recordNeedsRip(r *pbrc.Record) bool {
 	return hasCD && r.GetMetadata().FilePath == ""
 }
 
-func (s *Server) processRecord(r *pbrc.Record) (*pbrc.Record, string) {
+func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (*pbrc.Record, string) {
 	// Don't process a record that has a pending score
 	if r.GetMetadata() != nil && r.GetMetadata().SetRating != 0 {
 		return nil, "Pending Score"
@@ -201,7 +211,7 @@ func (s *Server) processRecord(r *pbrc.Record) (*pbrc.Record, string) {
 		return r, "Preping for sale"
 	}
 
-	if r.GetMetadata().Category == pbrc.ReleaseMetadata_ASSESS_FOR_SALE && (r.GetMetadata().LastStockCheck > time.Now().AddDate(-1, 0, 0).Unix() || r.GetMetadata().Match == pbrc.ReleaseMetadata_FULL_MATCH) {
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_ASSESS_FOR_SALE && (r.GetMetadata().LastStockCheck > time.Now().AddDate(-1, 0, 0).Unix() || r.GetMetadata().Match == pbrc.ReleaseMetadata_FULL_MATCH || s.isJustCd(ctx, r)) {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_PREPARE_TO_SELL
 	}
 
@@ -376,7 +386,8 @@ func (s *Server) processRecord(r *pbrc.Record) (*pbrc.Record, string) {
 		return r, "PRE DISTIN"
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_ASSESS && r.GetMetadata().GetPurgatory() == pbrc.Purgatory_NEEDS_STOCK_CHECK && time.Now().Sub(time.Unix(r.GetMetadata().GetLastStockCheck(), 0)) < time.Hour*24*7*4 {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_ASSESS && r.GetMetadata().GetPurgatory() == pbrc.Purgatory_NEEDS_STOCK_CHECK &&
+		(time.Now().Sub(time.Unix(r.GetMetadata().GetLastStockCheck(), 0)) < time.Hour*24*7*4) {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_FRESHMAN
 		r.GetMetadata().Purgatory = -1
 		return r, "ASSESSED"
