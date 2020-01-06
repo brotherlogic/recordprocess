@@ -103,7 +103,7 @@ func TestFullTests(t *testing.T) {
 		rec := test.in
 		tg := testGetter{rec: test.in}
 		s.getter = &tg
-		_, appl := s.processRecord(rec)
+		_, appl := s.processRecord(context.Background(), rec)
 
 		if utils.FuzzyMatch(rec, test.out) != nil {
 			t.Errorf("Full Test move failed \n%v\n %v \n%v\n (should have been %v)", utils.FuzzyMatch(rec, test.out), rec, appl, test.out)
@@ -313,7 +313,7 @@ func TestUpdateFailOnGet(t *testing.T) {
 func TestProcessUnpurchasedRecord(t *testing.T) {
 	s := InitTest()
 	r := &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}
-	nr, _ := s.processRecord(r)
+	nr, _ := s.processRecord(context.Background(), r)
 
 	if nr.GetMetadata().GetCategory() != pbrc.ReleaseMetadata_PURCHASED {
 		t.Fatalf("Error in processing record: %v", nr)
@@ -323,7 +323,7 @@ func TestProcessUnpurchasedRecord(t *testing.T) {
 func TestEmptyUpdate(t *testing.T) {
 	s := InitTest()
 	r := &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PURCHASED}, Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}
-	nr, _ := s.processRecord(r)
+	nr, _ := s.processRecord(context.Background(), r)
 
 	if nr != nil {
 		t.Fatalf("Error in processing record: %v", nr)
@@ -375,5 +375,21 @@ func TestBandcamp(t *testing.T) {
 
 	if rec.GetMetadata().GoalFolder != 1782105 {
 		t.Errorf("Folder has not been updated: %v", rec)
+	}
+}
+
+func TestIsJustCd(t *testing.T) {
+	s := InitTest()
+	rec := &pbrc.Record{Release: &pbgd.Release{Formats: []*pbgd.Format{&pbgd.Format{Name: "CD"}}}}
+	if !s.isJustCd(context.Background(), rec) {
+		t.Errorf("Bad record")
+	}
+}
+
+func TestIsNotJustCd(t *testing.T) {
+	s := InitTest()
+	rec := &pbrc.Record{Release: &pbgd.Release{Formats: []*pbgd.Format{&pbgd.Format{Name: "CD"}, &pbgd.Format{Name: "LP"}}}}
+	if s.isJustCd(context.Background(), rec) {
+		t.Errorf("Bad record")
 	}
 }

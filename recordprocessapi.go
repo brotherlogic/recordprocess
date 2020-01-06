@@ -28,7 +28,7 @@ func (s *Server) Force(ctx context.Context, req *pb.ForceRequest) (*pb.ForceResp
 		return nil, err
 	}
 
-	update, result := s.processRecord(record)
+	update, result := s.processRecord(ctx, record)
 	if update != nil {
 		err := s.getter.update(ctx, update)
 		return &pb.ForceResponse{Result: update}, err
