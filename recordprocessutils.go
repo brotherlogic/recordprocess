@@ -21,6 +21,10 @@ type getter interface {
 }
 
 func (s *Server) isJustCd(ctx context.Context, record *pbrc.Record) bool {
+	if len(record.GetRelease().GetFormats()) == 0 {
+		return false
+	}
+
 	for _, format := range record.GetRelease().GetFormats() {
 		if format.GetName() != "CD" {
 			return false
@@ -217,7 +221,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (*pbrc.Recor
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PREPARE_TO_SELL {
 
-		if r.GetMetadata().LastStockCheck < time.Now().AddDate(-1, 0, 0).Unix() && r.GetMetadata().Match != pbrc.ReleaseMetadata_FULL_MATCH {
+		if (r.GetMetadata().LastStockCheck < time.Now().AddDate(-1, 0, 0).Unix() && r.GetMetadata().Match != pbrc.ReleaseMetadata_FULL_MATCH && !s.isJustCd(ctx, r)) && r.GetMetadata().Match != pbrc.ReleaseMetadata_FULL_MATCH {
 			r.GetMetadata().Category = pbrc.ReleaseMetadata_ASSESS_FOR_SALE
 			return r, "Asessing for sale"
 		}
