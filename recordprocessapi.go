@@ -31,7 +31,7 @@ func (s *Server) Force(ctx context.Context, req *pb.ForceRequest) (*pb.ForceResp
 	update, result := s.processRecord(ctx, record)
 	if update != nil {
 		err := s.getter.update(ctx, update)
-		return &pb.ForceResponse{Result: update}, err
+		return &pb.ForceResponse{Result: update, Reason: result}, err
 	}
 
 	return nil, fmt.Errorf("Unable to process: %v", result)
