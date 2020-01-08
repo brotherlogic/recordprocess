@@ -109,6 +109,7 @@ func (p prodGetter) moveToSold(ctx context.Context, r *pbrc.Record) {
 func Init() *Server {
 	s := &Server{GoServer: &goserver.GoServer{}}
 	s.getter = &prodGetter{s.DialMaster}
+	s.config = &pb.Config{}
 	s.GoServer.KSclient = *keystoreclient.GetClient(s.DialMaster)
 	return s
 }
@@ -189,7 +190,7 @@ func (s *Server) GetState() []*pbg.State {
 		numScores = int64(len(s.scores.Scores))
 	}
 	return []*pbg.State{
-		&pbg.State{Key: "last_run_time", TimeValue: s.config.LastRunTime},
+		&pbg.State{Key: "last_run_time", TimeValue: s.config.GetLastRunTime()},
 		&pbg.State{Key: "size_scores", Value: int64(proto.Size(s.scores))},
 		&pbg.State{Key: "num_scores", Value: numScores},
 		&pbg.State{Key: "update_count", Value: int64(s.updateCount)},
