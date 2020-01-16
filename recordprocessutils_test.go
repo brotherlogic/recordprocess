@@ -81,7 +81,7 @@ func InitTest() *Server {
 	s.getter = &testGetter{}
 	s.scores = &pb.Scores{}
 	s.GoServer.KSclient = *keystoreclient.GetTestClient(".testing")
-	s.config = &pb.Config{}
+	s.config = &pb.Config{NextUpdateTime: make(map[int32]int64)}
 
 	return s
 }
@@ -158,7 +158,8 @@ func TestMoveTests(t *testing.T) {
 		s := InitTest()
 		tg := testGetter{rec: test.in}
 		s.getter = &tg
-		s.processRecords(context.Background())
+		s.config.NextUpdateTime[1] = 1
+		s.processNextRecords(context.Background())
 
 		if tg.lastCategory != test.out {
 			t.Fatalf("Full move failed \n%v\n vs. \n%v\n (should have been %v (from %v))", test.in, tg.lastCategory, test.out, tg.rec)
@@ -184,6 +185,9 @@ func TestUpdate(t *testing.T) {
 	s := InitTest()
 	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{Id: 10, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}}
 	s.getter = &tg
+	s.config.NextUpdateTime[1] = 1
+	s.processNextRecords(context.Background())
+
 	s.processRecords(context.Background())
 
 	if tg.lastCategory != pbrc.ReleaseMetadata_PURCHASED {
@@ -196,7 +200,9 @@ func TestUpdateWithFailonRecordGet(t *testing.T) {
 	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{Id: 10, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}}
 	tg.getFail = true
 	s.getter = &tg
-	err := s.processRecords(context.Background())
+
+	s.config.NextUpdateTime[1] = 1
+	err := s.processNextRecords(context.Background())
 
 	if err == nil {
 		t.Errorf("Did not fail")
@@ -209,94 +215,23 @@ func TestMultiUpdate(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{InstanceId: 10, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}}
 		s.getter = &tg
+		s.config.NextUpdateTime[1] = 1
+		s.processNextRecords(context.Background())
+
 		s.processRecords(context.Background())
 	}
 
 	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{InstanceId: 11, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}}
 	s.getter = &tg
+	s.config.NextUpdateTime[1] = 1
+	s.processNextRecords(context.Background())
+
 	s.processRecords(context.Background())
 
 	if s.updateCount != 0 {
 		t.Errorf("Error in update count: %v", s.updateCount)
 	}
 
-}
-
-func TestUpdateToUnlistened(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().Unix()}}}
-	s.getter = &tg
-	s.processRecords(context.Background())
-
-	if tg.lastCategory != pbrc.ReleaseMetadata_UNLISTENED {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
-	}
-}
-
-func TestUpdateToStaged(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().Unix()}}}
-	s.getter = &tg
-	s.processRecords(context.Background())
-
-	if tg.lastCategory != pbrc.ReleaseMetadata_STAGED {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
-	}
-}
-
-func TestUpdateToFreshman(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(0, -4, 0).Unix()}}}
-	s.getter = &tg
-	s.processRecords(context.Background())
-
-	if tg.lastCategory != pbrc.ReleaseMetadata_FRESHMAN {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
-	}
-}
-
-func TestUpdateToProfessor(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(-3, -1, 0).Unix()}}}
-	s.getter = &tg
-	s.processRecords(context.Background())
-
-	if tg.lastCategory != pbrc.ReleaseMetadata_PROFESSOR {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
-	}
-}
-
-func TestUpdateToPostdoc(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}}
-	s.getter = &tg
-	s.processRecords(context.Background())
-
-	if tg.lastCategory != pbrc.ReleaseMetadata_POSTDOC {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
-	}
-}
-
-func TestUpdateToGraduate(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(-1, -1, 0).Unix()}}}
-	s.getter = &tg
-	s.processRecords(context.Background())
-
-	if tg.lastCategory != pbrc.ReleaseMetadata_GRADUATE {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
-	}
-}
-
-func TestUpdateToSophmore(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(0, -7, 0).Unix()}}}
-	s.getter = &tg
-	s.processRecords(context.Background())
-
-	if tg.lastCategory != pbrc.ReleaseMetadata_SOPHMORE {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
-	}
 }
 
 func TestUpdateFailOnGet(t *testing.T) {
@@ -330,11 +265,22 @@ func TestEmptyUpdate(t *testing.T) {
 	}
 }
 
+func TestEmptyUpdateOnly(t *testing.T) {
+	s := InitTest()
+	nr := s.processNextRecords(context.Background())
+
+	if nr != nil {
+		t.Fatalf("Error in processing record: %v", nr)
+	}
+}
+
 func TestPromoteToStaged(t *testing.T) {
 	s := InitTest()
 	rec := &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812802, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_UNLISTENED, DateAdded: time.Now().Unix()}}
 	tg := testGetter{rec: rec}
 	s.getter = &tg
+	s.config.NextUpdateTime[1] = 1
+	s.processNextRecords(context.Background())
 	s.processRecords(context.Background())
 
 	if rec.GetMetadata().GetCategory() != pbrc.ReleaseMetadata_STAGED {
@@ -347,6 +293,9 @@ func TestClearRatingOnPrepToSell(t *testing.T) {
 	rec := &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812802, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PREPARE_TO_SELL, DateAdded: time.Now().Unix(), LastStockCheck: time.Now().Unix()}}
 	tg := testGetter{rec: rec}
 	s.getter = &tg
+	s.config.NextUpdateTime[1] = 1
+	s.processNextRecords(context.Background())
+
 	s.processRecords(context.Background())
 
 	if rec.GetMetadata().SetRating != -1 {
@@ -359,6 +308,9 @@ func TestClearRatingOnStagedToSell(t *testing.T) {
 	rec := &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812802, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_STAGED_TO_SELL, DateAdded: time.Now().Unix(), LastStockCheck: time.Now().Unix()}}
 	tg := testGetter{rec: rec}
 	s.getter = &tg
+	s.config.NextUpdateTime[1] = 1
+	s.processNextRecords(context.Background())
+
 	s.processRecords(context.Background())
 
 	if rec.GetMetadata().SetRating != -1 {
@@ -371,6 +323,9 @@ func TestBandcamp(t *testing.T) {
 	rec := &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1782105, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PREPARE_TO_SELL, DateAdded: time.Now().Unix(), LastStockCheck: time.Now().Unix()}}
 	tg := testGetter{rec: rec}
 	s.getter = &tg
+	s.config.NextUpdateTime[1] = 1
+	s.processNextRecords(context.Background())
+
 	s.processRecords(context.Background())
 
 	if rec.GetMetadata().GoalFolder != 1782105 {
@@ -391,5 +346,66 @@ func TestIsNotJustCd(t *testing.T) {
 	rec := &pbrc.Record{Release: &pbgd.Release{Formats: []*pbgd.Format{&pbgd.Format{Name: "CD"}, &pbgd.Format{Name: "LP"}}}}
 	if s.isJustCd(context.Background(), rec) {
 		t.Errorf("Bad record")
+	}
+}
+
+func TestUpdateToUnlistened(t *testing.T) {
+	s := InitTest()
+	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().Unix()}}}
+	s.getter = &tg
+	s.config.NextUpdateTime[1] = 1
+	s.processNextRecords(context.Background())
+
+	if tg.lastCategory != pbrc.ReleaseMetadata_UNLISTENED {
+		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
+	}
+}
+
+func TestUpdateToStaged(t *testing.T) {
+	s := InitTest()
+	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().Unix()}}}
+	s.getter = &tg
+	s.config.NextUpdateTime[1] = 1
+	s.processNextRecords(context.Background())
+
+	if tg.lastCategory != pbrc.ReleaseMetadata_STAGED {
+		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
+	}
+}
+
+func TestUpdateToFreshman(t *testing.T) {
+	s := InitTest()
+	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(0, -4, 0).Unix()}}}
+	s.getter = &tg
+	s.config.NextUpdateTime[1] = 1
+	s.processNextRecords(context.Background())
+
+	if tg.lastCategory != pbrc.ReleaseMetadata_FRESHMAN {
+		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
+	}
+}
+
+func TestUpdateToProfessor(t *testing.T) {
+	s := InitTest()
+	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(-3, -1, 0).Unix()}}}
+	s.getter = &tg
+	s.config.NextUpdateTime[1] = 1
+	s.processNextRecords(context.Background())
+
+	if tg.lastCategory != pbrc.ReleaseMetadata_PROFESSOR {
+		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
+	}
+}
+
+func TestUpdateToPostdoc(t *testing.T) {
+	s := InitTest()
+	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}}
+	s.getter = &tg
+
+	s.config.NextUpdateTime[1] = 1
+	s.processNextRecords(context.Background())
+
+	if tg.lastCategory != pbrc.ReleaseMetadata_POSTDOC {
+		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
 	}
 }
