@@ -128,8 +128,8 @@ func (s *Server) saveScores(ctx context.Context) {
 	s.KSclient.Save(ctx, KEY, s.scores)
 }
 
-func (s *Server) saveConfig(ctx context.Context) {
-	s.KSclient.Save(ctx, CONFIG, s.config)
+func (s *Server) saveConfig(ctx context.Context) error {
+	return s.KSclient.Save(ctx, CONFIG, s.config)
 }
 
 func (s *Server) readScores(ctx context.Context) error {
@@ -193,6 +193,7 @@ func (s *Server) GetState() []*pbg.State {
 		numScores = int64(len(s.scores.Scores))
 	}
 	return []*pbg.State{
+		&pbg.State{Key: "queue_size", Value: int64(len(s.config.GetNextUpdateTime()))},
 		&pbg.State{Key: "last_run_time", TimeValue: s.config.GetLastRunTime()},
 		&pbg.State{Key: "size_scores", Value: int64(proto.Size(s.scores))},
 		&pbg.State{Key: "num_scores", Value: numScores},
@@ -224,5 +225,6 @@ func main() {
 	}
 
 	server.RegisterRepeatingTask(server.processRecords, "process_records", time.Minute*5)
+	server.RegisterRepeatingTask(server.processNextRecords, "process_records", time.Minute)
 	server.Serve()
 }

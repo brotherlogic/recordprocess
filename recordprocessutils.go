@@ -56,59 +56,58 @@ func (s *Server) saveRecordScore(ctx context.Context, record *pbrc.Record) bool 
 }
 
 func (s *Server) processRecords(ctx context.Context) error {
-	s.updates++
-	startTime := time.Now()
-	scoresUpdated := false
 	records, err := s.getter.getRecords(ctx, s.config.LastRunTime)
-
-	s.Log(fmt.Sprintf("Found %v records to update", len(records)))
-
 	if err != nil {
 		return err
 	}
 
-	count := int64(0)
-	s.recordsInUpdate = int64(len(records))
 	for _, instanceID := range records {
-		record, err := s.getter.getRecord(ctx, instanceID)
-		if err != nil {
-			return err
-		}
-		count++
-		scoresUpdated = s.saveRecordScore(ctx, record) || scoresUpdated
-		pre := proto.Clone(record.GetMetadata())
-		update, rule := s.processRecord(ctx, record)
+		s.config.NextUpdateTime[instanceID] = time.Now().Unix()
+	}
 
-		if update != nil {
-			s.Log(fmt.Sprintf("APPL %v -> %v -> %v", pre, rule, update.GetMetadata()))
+	return s.saveConfig(ctx)
+}
 
-			if int64(update.GetRelease().InstanceId) == s.lastUpdate {
-				s.updateCount++
-				if s.updateCount > 20 {
-					s.RaiseIssue(ctx, "Stuck Process", fmt.Sprintf("%v is stuck in process [Last rule applied: %v]", update.GetRelease().Id, rule), false)
-				}
-			} else {
-				s.updateCount = 0
+func (s *Server) processNextRecords(ctx context.Context) error {
+	for instanceID, timev := range s.config.NextUpdateTime {
+		if time.Unix(timev, 0).Before(time.Now()) {
+			record, err := s.getter.getRecord(ctx, instanceID)
+			if err != nil {
+				return err
 			}
-			s.lastUpdate = int64(update.GetRelease().InstanceId)
+			scoresUpdated := s.saveRecordScore(ctx, record)
+			pre := proto.Clone(record.GetMetadata())
+			update, rule := s.processRecord(ctx, record)
 
-			s.Log(fmt.Sprintf("Updating %v and %v", update.GetRelease().Title, update.GetRelease().InstanceId))
-			err := s.getter.update(ctx, update)
-			s.Log(fmt.Sprintf("FAILURE TO UPDATE: %v", err))
-			break
+			if update != nil {
+				s.Log(fmt.Sprintf("APPL %v -> %v -> %v", pre, rule, update.GetMetadata()))
+
+				if int64(update.GetRelease().InstanceId) == s.lastUpdate {
+					s.updateCount++
+					if s.updateCount > 20 {
+						s.RaiseIssue(ctx, "Stuck Process", fmt.Sprintf("%v is stuck in process [Last rule applied: %v]", update.GetRelease().Id, rule), false)
+					}
+				} else {
+					s.updateCount = 0
+				}
+				s.lastUpdate = int64(update.GetRelease().InstanceId)
+
+				s.Log(fmt.Sprintf("Updating %v and %v", update.GetRelease().Title, update.GetRelease().InstanceId))
+				err := s.getter.update(ctx, update)
+				s.Log(fmt.Sprintf("FAILURE TO UPDATE: %v", err))
+			}
+
+			s.lastProc = time.Now()
+			delete(s.config.NextUpdateTime, instanceID)
+
+			s.config.LastRunTime = time.Now().Unix()
+			if scoresUpdated {
+				s.saveScores(ctx)
+				s.saveConfig(ctx)
+			}
+			return nil
 		}
 	}
-
-	s.lastProc = time.Now()
-	s.lastCount = count
-	s.lastProcDuration = time.Now().Sub(startTime)
-
-	s.config.LastRunTime = time.Now().Unix()
-	if scoresUpdated {
-		s.saveScores(ctx)
-		s.saveConfig(ctx)
-	}
-
 	return nil
 }
 
