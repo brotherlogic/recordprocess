@@ -103,9 +103,8 @@ func (s *Server) processNextRecords(ctx context.Context) error {
 			s.config.LastRunTime = time.Now().Unix()
 			if scoresUpdated {
 				s.saveScores(ctx)
-				s.saveConfig(ctx)
 			}
-			return nil
+			return s.saveConfig(ctx)
 		}
 	}
 	return nil
