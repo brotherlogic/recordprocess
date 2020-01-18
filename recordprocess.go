@@ -174,9 +174,6 @@ func (s *Server) Mote(ctx context.Context, master bool) error {
 		err := s.readScores(ctx)
 		if err == nil {
 			err = s.readConfig(ctx)
-			if err == nil {
-				s.config.LastRunTime = time.Unix(s.config.LastRunTime, 0).AddDate(0, -1, 0).Unix()
-			}
 		}
 
 		return err
@@ -225,6 +222,6 @@ func main() {
 	}
 
 	server.RegisterRepeatingTask(server.processRecords, "process_records", time.Minute*5)
-	server.RegisterRepeatingTask(server.processNextRecords, "process_records", time.Minute)
+	server.RegisterRepeatingTask(server.processNextRecords, "process_records", time.Second*5)
 	server.Serve()
 }
