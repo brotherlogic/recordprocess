@@ -61,6 +61,7 @@ func (s *Server) processRecords(ctx context.Context) error {
 		return err
 	}
 
+	s.Log(fmt.Sprintf("Adding %v records", len(records)))
 	for _, instanceID := range records {
 		s.config.NextUpdateTime[instanceID] = time.Now().Unix()
 	}
