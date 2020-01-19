@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/brotherlogic/goserver"
@@ -39,6 +40,7 @@ type Server struct {
 	recordsInUpdate  int64
 	lastUpdate       int64
 	updateCount      int
+	configMutex      *sync.Mutex
 }
 
 type prodGetter struct {
@@ -107,7 +109,10 @@ func (p prodGetter) moveToSold(ctx context.Context, r *pbrc.Record) {
 
 // Init builds the server
 func Init() *Server {
-	s := &Server{GoServer: &goserver.GoServer{}}
+	s := &Server{
+		GoServer:    &goserver.GoServer{},
+		configMutex: &sync.Mutex{},
+	}
 	s.getter = &prodGetter{s.DialMaster}
 	s.config = &pb.Config{}
 	s.GoServer.KSclient = *keystoreclient.GetClient(s.DialMaster)
@@ -129,6 +134,8 @@ func (s *Server) saveScores(ctx context.Context) {
 }
 
 func (s *Server) saveConfig(ctx context.Context) error {
+	s.configMutex.Lock()
+	defer s.configMutex.Unlock()
 	return s.KSclient.Save(ctx, CONFIG, s.config)
 }
 
