@@ -130,6 +130,8 @@ func (s *Server) ReportHealth() bool {
 }
 
 func (s *Server) saveScores(ctx context.Context) {
+	s.configMutex.Lock()
+	defer s.configMutex.Unlock()
 	s.KSclient.Save(ctx, KEY, s.scores)
 }
 
