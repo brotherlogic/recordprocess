@@ -138,7 +138,8 @@ func (s *Server) saveScores(ctx context.Context) {
 func (s *Server) saveConfig(ctx context.Context) error {
 	s.configMutex.Lock()
 	defer s.configMutex.Unlock()
-	return s.KSclient.Save(ctx, CONFIG, s.config)
+	err := s.KSclient.Save(ctx, CONFIG, s.config)
+	return err
 }
 
 func (s *Server) readScores(ctx context.Context) error {
