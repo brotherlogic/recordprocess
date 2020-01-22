@@ -170,6 +170,8 @@ func (s *Server) readConfig(ctx context.Context) error {
 		s.config.NextUpdateTime = make(map[int32]int64)
 	}
 
+	s.Log(fmt.Sprintf("Read %v", len(s.config.NextUpdateTime)))
+
 	return nil
 }
 
