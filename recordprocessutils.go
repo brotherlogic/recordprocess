@@ -104,7 +104,9 @@ func (s *Server) processNextRecords(ctx context.Context) error {
 			}
 
 			s.lastProc = time.Now()
+			s.configMutex.Lock()
 			delete(s.config.NextUpdateTime, instanceID)
+			s.configMutex.Unlock()
 
 			if scoresUpdated {
 				s.saveScores(ctx)
