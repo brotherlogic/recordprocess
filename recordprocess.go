@@ -156,7 +156,7 @@ func (s *Server) readScores(ctx context.Context) error {
 
 func (s *Server) readConfig(ctx context.Context) error {
 	config := &pb.Config{}
-	data, _, err := s.KSclient.Read(ctx, KEY, config)
+	data, _, err := s.KSclient.Read(ctx, CONFIG, config)
 
 	if err != nil {
 		return err
@@ -169,8 +169,6 @@ func (s *Server) readConfig(ctx context.Context) error {
 	if s.config.NextUpdateTime == nil {
 		s.config.NextUpdateTime = make(map[int32]int64)
 	}
-
-	s.Log(fmt.Sprintf("Read %v", len(s.config.NextUpdateTime)))
 
 	return nil
 }
@@ -238,6 +236,6 @@ func main() {
 	}
 
 	server.RegisterRepeatingTask(server.processRecords, "process_records", time.Minute*5)
-	server.RegisterRepeatingTask(server.processNextRecords, "process_records", time.Second*5)
+	server.RegisterRepeatingTask(server.processNextRecords, "process_next_records", time.Second*5)
 	server.Serve()
 }
