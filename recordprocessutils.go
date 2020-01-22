@@ -62,9 +62,11 @@ func (s *Server) processRecords(ctx context.Context) error {
 	}
 
 	s.Log(fmt.Sprintf("Adding %v records", len(records)))
+	s.configMutex.Lock()
 	for _, instanceID := range records {
 		s.config.NextUpdateTime[instanceID] = time.Now().Unix()
 	}
+	s.configMutex.Unlock()
 
 	return s.saveConfig(ctx)
 }
