@@ -164,6 +164,8 @@ func (s *Server) readConfig(ctx context.Context) error {
 
 	s.config = data.(*pb.Config)
 
+	s.configMutex.Lock()
+	defer s.configMutex.Unlock()
 	if s.config.NextUpdateTime == nil {
 		s.config.NextUpdateTime = make(map[int32]int64)
 	}
@@ -199,6 +201,8 @@ func (s *Server) GetState() []*pbg.State {
 	if s.scores != nil {
 		numScores = int64(len(s.scores.Scores))
 	}
+	s.configMutex.Lock()
+	defer s.configMutex.Unlock()
 	return []*pbg.State{
 		&pbg.State{Key: "queue_size", Value: int64(len(s.config.GetNextUpdateTime()))},
 		&pbg.State{Key: "last_run_time", TimeValue: s.config.GetLastRunTime()},
