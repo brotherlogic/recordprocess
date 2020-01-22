@@ -61,7 +61,9 @@ func (s *Server) processRecords(ctx context.Context) error {
 		return err
 	}
 
-	s.Log(fmt.Sprintf("Adding %v records", len(records)))
+	if len(records) > 100 {
+		s.RaiseIssue(ctx, "Errr", fmt.Sprintf("Big addition to next update time: %v", len(records)), false)
+	}
 	s.configMutex.Lock()
 	for _, instanceID := range records {
 		s.config.NextUpdateTime[instanceID] = time.Now().Unix()
