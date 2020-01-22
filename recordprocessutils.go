@@ -68,6 +68,7 @@ func (s *Server) processRecords(ctx context.Context) error {
 	for _, instanceID := range records {
 		s.config.NextUpdateTime[instanceID] = time.Now().Unix()
 	}
+	s.config.LastRunTime = time.Now().Unix()
 	s.configMutex.Unlock()
 
 	return s.saveConfig(ctx)
@@ -105,7 +106,6 @@ func (s *Server) processNextRecords(ctx context.Context) error {
 			s.lastProc = time.Now()
 			delete(s.config.NextUpdateTime, instanceID)
 
-			s.config.LastRunTime = time.Now().Unix()
 			if scoresUpdated {
 				s.saveScores(ctx)
 			}
