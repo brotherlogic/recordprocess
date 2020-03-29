@@ -21,9 +21,17 @@ type testGetter struct {
 	rec          *pbrc.Record
 	sold         *pbrc.Record
 	getFail      bool
+	repeat       int
 }
 
 func (t *testGetter) getRecords(ctx context.Context, ti int64) ([]int32, error) {
+	if t.repeat > 0 {
+		ret := []int32{}
+		for i := 0; i < t.repeat; i++ {
+			ret = append(ret, t.rec.GetRelease().InstanceId)
+		}
+		return ret, nil
+	}
 	return []int32{t.rec.GetRelease().InstanceId}, nil
 }
 
@@ -141,6 +149,7 @@ var movetests = []struct {
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1243, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_SOPHMORE, DateAdded: time.Now().AddDate(0, -13, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_GRADUATE},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1244, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PRE_GRADUATE, DateAdded: time.Now().AddDate(0, -13, 0).Unix()}}, pbrc.ReleaseMetadata_GRADUATE},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1245, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_GRADUATE, DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_POSTDOC},
+	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1245, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_LISTED_TO_SELL, DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}, pbrc.ReleaseMetadata_SALE_ISSUE},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1243, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_POSTDOC, DateAdded: time.Now().AddDate(-3, -1, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_PROFESSOR},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1243, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PROFESSOR, DateAdded: time.Now().AddDate(-4, -1, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_DISTINGUISHED},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1246, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{FilePath: "1234", Category: pbrc.ReleaseMetadata_RIP_THEN_SELL, DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}, pbrc.ReleaseMetadata_PREPARE_TO_SELL},
@@ -184,6 +193,20 @@ func TestSaveRecordTwice(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	s := InitTest()
 	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{Id: 10, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}}
+	s.getter = &tg
+	s.config.NextUpdateTime[1] = 1
+	s.processNextRecords(context.Background())
+
+	s.processRecords(context.Background())
+
+	if tg.lastCategory != pbrc.ReleaseMetadata_PURCHASED {
+		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
+	}
+}
+
+func TestBigUpdate(t *testing.T) {
+	s := InitTest()
+	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{Id: 10, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}, repeat: 200}
 	s.getter = &tg
 	s.config.NextUpdateTime[1] = 1
 	s.processNextRecords(context.Background())
