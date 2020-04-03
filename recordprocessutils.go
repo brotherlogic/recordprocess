@@ -189,11 +189,6 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (*pbrc.Recor
 		return r, "Sold"
 	}
 
-	if r.GetMetadata().Category == pbrc.ReleaseMetadata_SOLD && r.GetMetadata().SalePrice > 0 {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_SOLD_ARCHIVE
-		return r, "Sold"
-	}
-
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_SOLD && r.GetMetadata().SaleId > 0 {
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_LISTED_TO_SELL
 		return r, "Listed to Sell"
