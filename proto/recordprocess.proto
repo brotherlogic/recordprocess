@@ -18,6 +18,7 @@ message RecordScore {
   int32 rating = 2;
   recordcollection.ReleaseMetadata.Category category = 3;
   int64 score_time = 4;
+  string rule_applied = 5;
 }
 
 message GetScoreRequest {

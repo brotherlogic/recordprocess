@@ -87,6 +87,13 @@ func (s *Server) processNextRecords(ctx context.Context) error {
 
 			if update != nil {
 				s.Log(fmt.Sprintf("APPL %v -> %v -> %v", pre, rule, update.GetMetadata()))
+				s.scores.Scores = append(s.scores.Scores,
+					&pb.RecordScore{
+						InstanceId:  record.GetRelease().GetInstanceId(),
+						RuleApplied: rule,
+						Category:    update.GetMetadata().GetCategory(),
+						ScoreTime:   time.Now().Unix(),
+					})
 
 				if int64(update.GetRelease().InstanceId) == s.lastUpdate {
 					s.updateCount++
