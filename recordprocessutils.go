@@ -148,7 +148,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (*pbrc.Recor
 		r.Metadata = &pbrc.ReleaseMetadata{}
 	}
 
-	if r.GetRelease().FolderId == 1782105 && r.GetMetadata().GoalFolder != 1782105 {
+	if r.GetRelease().FolderId == 1782105 && (r.GetMetadata().GoalFolder != 1782105 || r.GetMetadata().Category != pbrc.ReleaseMetadata_BANDCAMP) {
 		r.GetMetadata().GoalFolder = 1782105
 		r.GetMetadata().Category = pbrc.ReleaseMetadata_BANDCAMP
 		return r, "Bandcamp"
