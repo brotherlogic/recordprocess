@@ -1,8 +1,10 @@
 syntax = "proto3";
 
-package recordprocessor;
+package recordprocess;
 
 import "github.com/brotherlogic/recordcollection/proto/recordcollection.proto";
+
+option go_package = ".;godiscogs";
 
 message Scores {
   repeated RecordScore scores = 1;
