@@ -4,10 +4,11 @@
 // 	protoc        (unknown)
 // source: recordprocess.proto
 
-package godiscogs
+package proto
 
 import (
 	context "context"
+	proto1 "github.com/brotherlogic/recordcollection/proto"
 	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -136,11 +137,11 @@ type RecordScore struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	InstanceId  int32                    `protobuf:"varint,1,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
-	Rating      int32                    `protobuf:"varint,2,opt,name=rating,proto3" json:"rating,omitempty"`
-	Category    ReleaseMetadata_Category `protobuf:"varint,3,opt,name=category,proto3,enum=recordcollection.ReleaseMetadata_Category" json:"category,omitempty"`
-	ScoreTime   int64                    `protobuf:"varint,4,opt,name=score_time,json=scoreTime,proto3" json:"score_time,omitempty"`
-	RuleApplied string                   `protobuf:"bytes,5,opt,name=rule_applied,json=ruleApplied,proto3" json:"rule_applied,omitempty"`
+	InstanceId  int32                           `protobuf:"varint,1,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
+	Rating      int32                           `protobuf:"varint,2,opt,name=rating,proto3" json:"rating,omitempty"`
+	Category    proto1.ReleaseMetadata_Category `protobuf:"varint,3,opt,name=category,proto3,enum=recordcollection.ReleaseMetadata_Category" json:"category,omitempty"`
+	ScoreTime   int64                           `protobuf:"varint,4,opt,name=score_time,json=scoreTime,proto3" json:"score_time,omitempty"`
+	RuleApplied string                          `protobuf:"bytes,5,opt,name=rule_applied,json=ruleApplied,proto3" json:"rule_applied,omitempty"`
 }
 
 func (x *RecordScore) Reset() {
@@ -189,11 +190,11 @@ func (x *RecordScore) GetRating() int32 {
 	return 0
 }
 
-func (x *RecordScore) GetCategory() ReleaseMetadata_Category {
+func (x *RecordScore) GetCategory() proto1.ReleaseMetadata_Category {
 	if x != nil {
 		return x.Category
 	}
-	return ReleaseMetadata_UNKNOWN
+	return proto1.ReleaseMetadata_UNKNOWN
 }
 
 func (x *RecordScore) GetScoreTime() int64 {
@@ -356,8 +357,8 @@ type ForceResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Result *Record `protobuf:"bytes,1,opt,name=result,proto3" json:"result,omitempty"`
-	Reason string  `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	Result *proto1.Record `protobuf:"bytes,1,opt,name=result,proto3" json:"result,omitempty"`
+	Reason string         `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
 }
 
 func (x *ForceResponse) Reset() {
@@ -392,7 +393,7 @@ func (*ForceResponse) Descriptor() ([]byte, []int) {
 	return file_recordprocess_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *ForceResponse) GetResult() *Record {
+func (x *ForceResponse) GetResult() *proto1.Record {
 	if x != nil {
 		return x.Result
 	}
@@ -472,7 +473,9 @@ var file_recordprocess_proto_rawDesc = []byte{
 	0x63, 0x65, 0x73, 0x73, 0x2e, 0x46, 0x6f, 0x72, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
 	0x74, 0x1a, 0x1c, 0x2e, 0x72, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x70, 0x72, 0x6f, 0x63, 0x65, 0x73,
 	0x73, 0x2e, 0x46, 0x6f, 0x72, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22,
-	0x00, 0x42, 0x0d, 0x5a, 0x0b, 0x2e, 0x3b, 0x67, 0x6f, 0x64, 0x69, 0x73, 0x63, 0x6f, 0x67, 0x73,
+	0x00, 0x42, 0x2d, 0x5a, 0x2b, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f,
+	0x62, 0x72, 0x6f, 0x74, 0x68, 0x65, 0x72, 0x6c, 0x6f, 0x67, 0x69, 0x63, 0x2f, 0x72, 0x65, 0x63,
+	0x6f, 0x72, 0x64, 0x70, 0x72, 0x6f, 0x63, 0x65, 0x73, 0x73, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f,
 	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
@@ -498,8 +501,8 @@ var file_recordprocess_proto_goTypes = []interface{}{
 	(*ForceRequest)(nil),     // 5: recordprocess.ForceRequest
 	(*ForceResponse)(nil),    // 6: recordprocess.ForceResponse
 	nil, // 7: recordprocess.Config.NextUpdateTimeEntry
-	(ReleaseMetadata_Category)(0), // 8: recordcollection.ReleaseMetadata.Category
-	(*Record)(nil),                // 9: recordcollection.Record
+	(proto1.ReleaseMetadata_Category)(0), // 8: recordcollection.ReleaseMetadata.Category
+	(*proto1.Record)(nil),                // 9: recordcollection.Record
 }
 var file_recordprocess_proto_depIdxs = []int32{
 	2, // 0: recordprocess.Scores.scores:type_name -> recordprocess.RecordScore
@@ -523,7 +526,6 @@ func file_recordprocess_proto_init() {
 	if File_recordprocess_proto != nil {
 		return
 	}
-	file_github_com_brotherlogic_recordcollection_proto_recordcollection_proto_init()
 	if !protoimpl.UnsafeEnabled {
 		file_recordprocess_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Scores); i {
