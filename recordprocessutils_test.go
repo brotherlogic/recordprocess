@@ -114,6 +114,7 @@ func TestFullTests(t *testing.T) {
 		_, appl := s.processRecord(context.Background(), rec)
 
 		if utils.FuzzyMatch(rec, test.out) != nil {
+			t.Errorf("MATCH FAIL: %v", utils.FuzzyMatch(rec, test.out))
 			t.Errorf("Full Test move failed \n%v\n %v \n%v\n (should have been %v)", utils.FuzzyMatch(rec, test.out), rec, appl, test.out)
 		}
 	}

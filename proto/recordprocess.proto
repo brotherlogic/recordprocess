@@ -4,7 +4,7 @@ package recordprocess;
 
 import "github.com/brotherlogic/recordcollection/proto/recordcollection.proto";
 
-option go_package = ".;godiscogs";
+option go_package = "github.com/brotherlogic/recordprocess/proto";
 
 message Scores {
   repeated RecordScore scores = 1;
