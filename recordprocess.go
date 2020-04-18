@@ -14,6 +14,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
+	gdpb "github.com/brotherlogic/godiscogs"
 	pbg "github.com/brotherlogic/goserver/proto"
 	pbrc "github.com/brotherlogic/recordcollection/proto"
 	pb "github.com/brotherlogic/recordprocess/proto"
@@ -80,7 +81,7 @@ func (p prodGetter) getRecord(ctx context.Context, instanceID int32) (*pbrc.Reco
 	return resp.GetRecord(), nil
 }
 
-func (p prodGetter) update(ctx context.Context, r *pbrc.Record) error {
+func (p prodGetter) update(ctx context.Context, instanceID int32, cat pbrc.ReleaseMetadata_Category, reason string) error {
 	conn, err := p.dial("recordcollection")
 	if err != nil {
 		return err
@@ -88,7 +89,7 @@ func (p prodGetter) update(ctx context.Context, r *pbrc.Record) error {
 	defer conn.Close()
 
 	client := pbrc.NewRecordCollectionServiceClient(conn)
-	_, err = client.UpdateRecord(ctx, &pbrc.UpdateRecordRequest{Requestor: "recordprocess", Update: r})
+	_, err = client.UpdateRecord(ctx, &pbrc.UpdateRecordRequest{Reason: reason, Requestor: "recordprocess", Update: &pbrc.Record{Release: &gdpb.Release{InstanceId: instanceID}, Metadata: &pbrc.ReleaseMetadata{Category: cat}}})
 	if err != nil {
 		return err
 	}
