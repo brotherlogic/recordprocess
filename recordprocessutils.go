@@ -17,7 +17,6 @@ type getter interface {
 	getRecords(ctx context.Context, t int64) ([]int32, error)
 	getRecord(ctx context.Context, instanceID int32) (*pbrc.Record, error)
 	update(ctx context.Context, instanceID int32, category pbrc.ReleaseMetadata_Category, reason string) error
-	moveToSold(ctx context.Context, r *pbrc.Record)
 }
 
 func (s *Server) isJustCd(ctx context.Context, record *pbrc.Record) bool {

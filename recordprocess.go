@@ -96,18 +96,6 @@ func (p prodGetter) update(ctx context.Context, instanceID int32, cat pbrc.Relea
 	return nil
 }
 
-func (p prodGetter) moveToSold(ctx context.Context, r *pbrc.Record) {
-	conn, err := p.dial("recordcollection")
-	if err != nil {
-		return
-	}
-	defer conn.Close()
-
-	client := pbrc.NewRecordCollectionServiceClient(conn)
-	r.GetMetadata().Category = pbrc.ReleaseMetadata_SOLD
-	client.UpdateRecord(ctx, &pbrc.UpdateRecordRequest{Requestor: "recordprocess", Update: r})
-}
-
 // Init builds the server
 func Init() *Server {
 	s := &Server{
