@@ -36,7 +36,7 @@ message ForceRequest {
 }
 
 message ForceResponse {
-  recordcollection.Record result = 1;
+  recordcollection.ReleaseMetadata.Category result = 1;
   string reason = 2;
 }
 

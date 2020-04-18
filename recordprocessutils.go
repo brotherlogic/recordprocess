@@ -16,7 +16,7 @@ import (
 type getter interface {
 	getRecords(ctx context.Context, t int64) ([]int32, error)
 	getRecord(ctx context.Context, instanceID int32) (*pbrc.Record, error)
-	update(ctx context.Context, r *pbrc.Record) error
+	update(ctx context.Context, instanceID int32, category pbrc.ReleaseMetadata_Category, reason string) error
 	moveToSold(ctx context.Context, r *pbrc.Record)
 }
 
@@ -85,28 +85,28 @@ func (s *Server) processNextRecords(ctx context.Context) error {
 			pre := proto.Clone(record.GetMetadata())
 			update, rule := s.processRecord(ctx, record)
 
-			if update != nil {
-				s.Log(fmt.Sprintf("APPL %v -> %v -> %v", pre, rule, update.GetMetadata()))
+			if update != pbrc.ReleaseMetadata_UNKNOWN {
+				s.Log(fmt.Sprintf("APPL %v -> %v -> %v", pre, rule, update))
 				s.scores.Scores = append(s.scores.Scores,
 					&pb.RecordScore{
 						InstanceId:  record.GetRelease().GetInstanceId(),
 						RuleApplied: rule,
-						Category:    update.GetMetadata().GetCategory(),
+						Category:    update,
 						ScoreTime:   time.Now().Unix(),
 					})
 
-				if int64(update.GetRelease().InstanceId) == s.lastUpdate {
+				if int64(record.GetRelease().InstanceId) == s.lastUpdate {
 					s.updateCount++
 					if s.updateCount > 20 {
-						s.RaiseIssue(ctx, "Stuck Process", fmt.Sprintf("%v is stuck in process [Last rule applied: %v]", update.GetRelease().Id, rule), false)
+						s.RaiseIssue(ctx, "Stuck Process", fmt.Sprintf("%v is stuck in process [Last rule applied: %v]", record.GetRelease().Id, rule), false)
 					}
 				} else {
 					s.updateCount = 0
 				}
-				s.lastUpdate = int64(update.GetRelease().InstanceId)
+				s.lastUpdate = int64(record.GetRelease().InstanceId)
 
-				s.Log(fmt.Sprintf("Updating %v and %v", update.GetRelease().Title, update.GetRelease().InstanceId))
-				err := s.getter.update(ctx, update)
+				s.Log(fmt.Sprintf("Updating %v and %v", record.GetRelease().Title, record.GetRelease().InstanceId))
+				err := s.getter.update(ctx, record.GetRelease().GetInstanceId(), update, rule)
 				s.Log(fmt.Sprintf("FAILURE TO UPDATE: %v", err))
 			}
 
@@ -136,80 +136,52 @@ func recordNeedsRip(r *pbrc.Record) bool {
 	return hasCD && r.GetMetadata().FilePath == ""
 }
 
-func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (*pbrc.Record, string) {
+func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.ReleaseMetadata_Category, string) {
 	s.Log(fmt.Sprintf("Processing %v -> %v", r.GetRelease().GetInstanceId(), r.GetRelease().GetTitle()))
 
 	// Don't process a record that has a pending score
 	if r.GetMetadata() != nil && r.GetMetadata().SetRating != 0 {
-		return nil, "Pending Score"
+		return pbrc.ReleaseMetadata_UNKNOWN, "Pending Score"
 	}
 
-	if r.GetMetadata() == nil {
-		r.Metadata = &pbrc.ReleaseMetadata{}
-	}
-
-	if r.GetRelease().FolderId == 1782105 && (r.GetMetadata().GoalFolder != 1782105 || r.GetMetadata().Category != pbrc.ReleaseMetadata_BANDCAMP) {
-		r.GetMetadata().GoalFolder = 1782105
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_BANDCAMP
-		return r, "Bandcamp"
-	}
-
-	if r.GetMetadata().GoalFolder == 268147 && r.GetMetadata().Category != pbrc.ReleaseMetadata_DIGITAL {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_DIGITAL
-		return r, "Digital"
-	}
-
-	// If the record has no labels move it to NO_LABELS
-	if len(r.GetRelease().Labels) == 0 {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_NO_LABELS
-		r.GetMetadata().Purgatory = pbrc.Purgatory_NEEDS_LABELS
-		return r, "No Labels"
-	}
-
-	if r.GetMetadata().Category == pbrc.ReleaseMetadata_NO_LABELS && len(r.GetRelease().Labels) > 0 {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_FRESHMAN
-		r.GetMetadata().Purgatory = pbrc.Purgatory_ALL_GOOD
-		return r, "Found Labels"
+	if r.GetMetadata().GetGoalFolder() == 268147 && r.GetMetadata().Category != pbrc.ReleaseMetadata_DIGITAL {
+		return pbrc.ReleaseMetadata_DIGITAL, "Digital"
 	}
 
 	// Deal with parents records
 	if r.GetRelease().FolderId == 1727264 && r.GetMetadata().Category == pbrc.ReleaseMetadata_PARENTS && r.GetMetadata().GoalFolder != 1727264 {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_FRESHMAN
-		return r, "OutOfParents"
+		return pbrc.ReleaseMetadata_PRE_FRESHMAN, "OutOfParents"
 	}
 
 	if r.GetRelease().FolderId == 1727264 && r.GetMetadata().Category != pbrc.ReleaseMetadata_PARENTS && (r.GetMetadata().GoalFolder == 1727264 || r.GetMetadata().GoalFolder == 0) {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_PARENTS
-		return r, "Parents"
+		return pbrc.ReleaseMetadata_PARENTS, "Parents"
 	}
 
 	// If the record is in google play, set the category to GOOGLE_PLAY
-	if (r.GetRelease().FolderId == 1433217 || r.GetMetadata().GoalFolder == 1433217) && r.GetMetadata().Category != pbrc.ReleaseMetadata_GOOGLE_PLAY {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_GOOGLE_PLAY
-		r.GetMetadata().GoalFolder = 1433217
-		return r, "Google Play"
+	if (r.GetRelease().GetFolderId() == 1433217 || r.GetMetadata().GetGoalFolder() == 1433217) && r.GetMetadata().GetCategory() != pbrc.ReleaseMetadata_GOOGLE_PLAY {
+		return pbrc.ReleaseMetadata_GOOGLE_PLAY, "Google Play"
+	}
+
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN {
+		return pbrc.ReleaseMetadata_PURCHASED, "Purchased"
 	}
 
 	if (r.GetMetadata().Category == pbrc.ReleaseMetadata_LISTED_TO_SELL ||
 		r.GetMetadata().Category == pbrc.ReleaseMetadata_SOLD_OFFLINE ||
 		r.GetMetadata().Category == pbrc.ReleaseMetadata_STALE_SALE) && r.GetMetadata().SaleState == pbgd.SaleState_SOLD {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_SOLD_ARCHIVE
-		return r, "Sold"
+		return pbrc.ReleaseMetadata_SOLD_ARCHIVE, "Sold"
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_SOLD && r.GetMetadata().SaleId > 0 {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_LISTED_TO_SELL
-		return r, "Listed to Sell"
+		return pbrc.ReleaseMetadata_LISTED_TO_SELL, "Listed to Sell"
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_LISTED_TO_SELL && r.GetMetadata().GetSaleId() == 0 {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_SALE_ISSUE
-		return r, "Sale issue - no id"
+		return pbrc.ReleaseMetadata_SALE_ISSUE, "Sale issue - no id"
 	}
 
 	if r.GetMetadata().SaleId < 0 && r.GetMetadata().Category == pbrc.ReleaseMetadata_LISTED_TO_SELL {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_UNLISTENED
-		return r, "Marking unlistened"
+		return pbrc.ReleaseMetadata_UNLISTENED, "Marking unlistened"
 	}
 
 	if r.GetMetadata().SaleId > 0 && (r.GetMetadata().Category != pbrc.ReleaseMetadata_SOLD &&
@@ -221,196 +193,138 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (*pbrc.Recor
 		r.GetMetadata().Category != pbrc.ReleaseMetadata_STAGED_TO_SELL &&
 		r.GetMetadata().Category != pbrc.ReleaseMetadata_ASSESS_FOR_SALE &&
 		r.GetMetadata().Category != pbrc.ReleaseMetadata_PREPARE_TO_SELL) {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_LISTED_TO_SELL
-		return r, "Listed to Sell"
+		return pbrc.ReleaseMetadata_LISTED_TO_SELL, "Listed to Sell"
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_RIP_THEN_SELL && !recordNeedsRip(r) {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_PREPARE_TO_SELL
-		return r, "Preping for sale"
+		return pbrc.ReleaseMetadata_PREPARE_TO_SELL, "Preping for sale"
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_ASSESS_FOR_SALE && (r.GetMetadata().LastStockCheck > time.Now().AddDate(-1, 0, 0).Unix() || r.GetMetadata().Match == pbrc.ReleaseMetadata_FULL_MATCH || s.isJustCd(ctx, r)) {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_PREPARE_TO_SELL
+		return pbrc.ReleaseMetadata_PREPARE_TO_SELL, "ASSESSED_PREP_FOR_SALE"
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PREPARE_TO_SELL {
 
 		if (r.GetMetadata().LastStockCheck < time.Now().AddDate(-1, 0, 0).Unix() && r.GetMetadata().Match != pbrc.ReleaseMetadata_FULL_MATCH && !s.isJustCd(ctx, r)) && r.GetMetadata().Match != pbrc.ReleaseMetadata_FULL_MATCH {
-			r.GetMetadata().Category = pbrc.ReleaseMetadata_ASSESS_FOR_SALE
-			return r, "Asessing for sale"
+			return pbrc.ReleaseMetadata_ASSESS_FOR_SALE, "Asessing for sale"
 		}
 
 		if recordNeedsRip(r) {
-			r.GetMetadata().Category = pbrc.ReleaseMetadata_RIP_THEN_SELL
-			return r, "Ripping then selling"
+			return pbrc.ReleaseMetadata_RIP_THEN_SELL, "Ripping then selling"
 		}
 
-		if r.GetRelease().Rating > 0 {
-			if r.GetMetadata().SetRating == 0 {
-				r.GetMetadata().SetRating = -1
-				return r, "Clearing Rating"
-			}
-		} else {
-			r.GetMetadata().Category = pbrc.ReleaseMetadata_STAGED_TO_SELL
-			return r, "Staging to Sell"
+		if r.GetRelease().Rating <= 0 {
+			return pbrc.ReleaseMetadata_STAGED_TO_SELL, "Staging to Sell"
 		}
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_DIGITAL && r.GetMetadata().GoalFolder != 268147 && r.GetMetadata().GoalFolder != 0 {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_ASSESS
-		return r, "Assessing"
+		return pbrc.ReleaseMetadata_ASSESS, "Assessing"
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_STAGED_TO_SELL && r.GetRelease().Rating > 0 {
 		if r.GetRelease().Rating <= 3 {
-			r.GetMetadata().Category = pbrc.ReleaseMetadata_SOLD
-			return r, "Sold"
+			return pbrc.ReleaseMetadata_SOLD, "Sold"
 		}
 
 		if r.GetRelease().Rating == 5 {
-			r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_FRESHMAN
-			return r, "Returning to fold"
+			return pbrc.ReleaseMetadata_PRE_FRESHMAN, "Returning to fold"
 		}
-
-		r.GetMetadata().SetRating = -1
-		return r, "Clearing Rating when Staged"
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PURCHASED && r.GetMetadata().Cost > 0 {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_UNLISTENED
-		return r, "New Record"
+		return pbrc.ReleaseMetadata_UNLISTENED, "New Record"
 	}
 
 	if r.GetRelease().FolderId == 1 && r.GetMetadata().Category != pbrc.ReleaseMetadata_PURCHASED && r.GetMetadata().GoalFolder <= 1 {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_PURCHASED
-		return r, "Uncategorized record"
-	}
-
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN {
-		if r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -3, 0).Unix()) {
-			if r.GetRelease().Rating == 0 {
-				r.GetMetadata().Category = pbrc.ReleaseMetadata_UNLISTENED
-				return r, "Not yet listened"
-			}
-			r.GetMetadata().Category = pbrc.ReleaseMetadata_STAGED
-			return r, "Staged"
-		}
+		return pbrc.ReleaseMetadata_PURCHASED, "Uncategorized record"
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNLISTENED {
 		if r.GetRelease().Rating > 0 {
-			r.GetMetadata().Category = pbrc.ReleaseMetadata_STAGED
-			return r, "Staged"
+			return pbrc.ReleaseMetadata_STAGED, "Staged"
 		}
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_FRESHMAN && r.GetMetadata().GetDateAdded() > time.Now().AddDate(0, -3, 0).Unix() {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_UNLISTENED
-		return r, "PRE_FRESHMAN wrong"
+		return pbrc.ReleaseMetadata_UNLISTENED, "PRE_FRESHMAN wrong"
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_FRESHMAN && r.GetRelease().Rating > 0 {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_UNKNOWN
-	}
-
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_FRESHMAN {
 		if r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -6, 0).Unix()) && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -3, 0).Unix()) {
-			r.GetMetadata().Category = pbrc.ReleaseMetadata_FRESHMAN
-			return r, "FRESHMAN"
+			return pbrc.ReleaseMetadata_FRESHMAN, "FRESHMAN"
 		}
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_DISTINGUISHED && r.GetRelease().Rating > 0) {
 		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-4, 0, 0).Unix()) {
-			r.GetMetadata().Category = pbrc.ReleaseMetadata_DISTINGUISHED
-			return r, "DIST"
+			return pbrc.ReleaseMetadata_DISTINGUISHED, "DIST"
 		}
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_PROFESSOR && r.GetRelease().Rating > 0) {
 		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-3, 0, 0).Unix()) {
-			r.GetMetadata().Category = pbrc.ReleaseMetadata_PROFESSOR
-			return r, "PROF"
+			return pbrc.ReleaseMetadata_PROFESSOR, "PROF"
 		}
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_POSTDOC && r.GetRelease().Rating > 0) {
 		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-2, 0, 0).Unix()) {
-			r.GetMetadata().Category = pbrc.ReleaseMetadata_POSTDOC
-			return r, "POSTDOC"
+			return pbrc.ReleaseMetadata_POSTDOC, "POSTDOC"
 		}
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_GRADUATE && r.GetRelease().Rating > 0) {
 		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-1, 0, 0).Unix()) {
-			r.GetMetadata().Category = pbrc.ReleaseMetadata_GRADUATE
-			return r, "GRAD"
+			return pbrc.ReleaseMetadata_GRADUATE, "GRAD"
 		}
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_SOPHMORE && r.GetRelease().Rating > 0) {
 		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -6, 0).Unix()) {
-			r.GetMetadata().Category = pbrc.ReleaseMetadata_SOPHMORE
-			return r, "SOPHMORE"
+			return pbrc.ReleaseMetadata_SOPHMORE, "SOPHMORE"
 		}
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL && r.GetRelease().Rating > 0) {
 		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -1, 0).Unix()) {
-			r.GetMetadata().Category = pbrc.ReleaseMetadata_HIGH_SCHOOL
-			return r, "HIGH SCHOOL"
+			return pbrc.ReleaseMetadata_HIGH_SCHOOL, "HIGH SCHOOL"
 		}
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_STAGED && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -1, 0).Unix()) {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL
-		r.GetMetadata().SetRating = -1
-		return r, "PRE HS"
+		return pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL, "PRE HS"
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_HIGH_SCHOOL && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -3, 0).Unix()) {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_FRESHMAN
-		r.GetMetadata().SetRating = -1
-		return r, "PRE F"
+		return pbrc.ReleaseMetadata_PRE_FRESHMAN, "PRE F"
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_FRESHMAN && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -6, 0).Unix()) {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_SOPHMORE
-		r.GetMetadata().SetRating = -1
-		return r, "PRE S"
+		return pbrc.ReleaseMetadata_PRE_SOPHMORE, "PRE S"
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_SOPHMORE && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-1, 0, 0).Unix()) {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_GRADUATE
-		r.GetMetadata().SetRating = -1
-		return r, "PRE G"
+		return pbrc.ReleaseMetadata_PRE_GRADUATE, "PRE G"
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_GRADUATE && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-2, 0, 0).Unix()) {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_POSTDOC
-		r.GetMetadata().SetRating = -1
-		return r, "PRE P"
+		return pbrc.ReleaseMetadata_PRE_POSTDOC, "PRE P"
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_POSTDOC && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-3, 0, 0).Unix()) {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_PROFESSOR
-		r.GetMetadata().SetRating = -1
-		return r, "PRE PREOG"
+		return pbrc.ReleaseMetadata_PRE_PROFESSOR, "PRE PREOG"
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PROFESSOR && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-4, 0, 0).Unix()) {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_DISTINGUISHED
-		r.GetMetadata().SetRating = -1
-		return r, "PRE DISTIN"
+		return pbrc.ReleaseMetadata_PRE_DISTINGUISHED, "PRE DISTIN"
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_ASSESS && r.GetMetadata().GetPurgatory() == pbrc.Purgatory_NEEDS_STOCK_CHECK &&
 		(time.Now().Sub(time.Unix(r.GetMetadata().GetLastStockCheck(), 0)) < time.Hour*24*7*4) {
-		r.GetMetadata().Category = pbrc.ReleaseMetadata_PRE_FRESHMAN
-		r.GetMetadata().Purgatory = -1
-		return r, "ASSESSED"
+		return pbrc.ReleaseMetadata_PRE_FRESHMAN, "ASSESSED"
 	}
 
-	return nil, "No rules applied"
+	return pbrc.ReleaseMetadata_UNKNOWN, "No rules applied"
 }

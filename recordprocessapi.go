@@ -5,6 +5,7 @@ import (
 
 	"golang.org/x/net/context"
 
+	pbrc "github.com/brotherlogic/recordcollection/proto"
 	pb "github.com/brotherlogic/recordprocess/proto"
 )
 
@@ -29,8 +30,8 @@ func (s *Server) Force(ctx context.Context, req *pb.ForceRequest) (*pb.ForceResp
 	}
 
 	update, result := s.processRecord(ctx, record)
-	if update != nil {
-		err := s.getter.update(ctx, update)
+	if update != pbrc.ReleaseMetadata_UNKNOWN {
+		err := s.getter.update(ctx, record.GetRelease().GetInstanceId(), update, result)
 		return &pb.ForceResponse{Result: update, Reason: result}, err
 	}
 

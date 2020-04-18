@@ -42,8 +42,8 @@ func (t *testGetter) getRecord(ctx context.Context, instanceID int32) (*pbrc.Rec
 	return t.rec, nil
 }
 
-func (t *testGetter) update(ctx context.Context, r *pbrc.Record) error {
-	t.lastCategory = r.GetMetadata().Category
+func (t *testGetter) update(ctx context.Context, instanceID int32, cat pbrc.ReleaseMetadata_Category, reason string) error {
+	t.lastCategory = cat
 	return nil
 }
 
@@ -70,9 +70,9 @@ func (t testFailGetter) getRecord(ctx context.Context, instanceID int32) (*pbrc.
 	return nil, errors.New("Built to fail")
 }
 
-func (t testFailGetter) update(ctx context.Context, r *pbrc.Record) error {
+func (t testFailGetter) update(ctx context.Context, instanceID int32, cat pbrc.ReleaseMetadata_Category, reason string) error {
 	if !t.grf {
-		t.lastCategory = r.GetMetadata().GetCategory()
+		t.lastCategory = cat
 		return nil
 	}
 	return errors.New("Built to fail")
@@ -126,13 +126,12 @@ var movetests = []struct {
 }{
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1362206, Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_ASSESS, Purgatory: pbrc.Purgatory_NEEDS_STOCK_CHECK, LastStockCheck: time.Now().Unix(), GoalFolder: 242017, Cost: 12}}, pbrc.ReleaseMetadata_PRE_FRESHMAN},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1727264, Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PARENTS, GoalFolder: 242017, Cost: 12}}, pbrc.ReleaseMetadata_PRE_FRESHMAN},
+	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_LISTED_TO_SELL, Cost: 12, GoalFolder: 242017}}, pbrc.ReleaseMetadata_SALE_ISSUE},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_LISTED_TO_SELL, SaleId: -1, Cost: 12, GoalFolder: 242017}}, pbrc.ReleaseMetadata_UNLISTENED},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PURCHASED, Cost: 12, GoalFolder: 268147}}, pbrc.ReleaseMetadata_DIGITAL},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PURCHASED, Cost: 12}}, pbrc.ReleaseMetadata_UNLISTENED},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1112, Rating: 0, Formats: []*pbgd.Format{&pbgd.Format{Name: "12"}}, Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PROFESSOR, SaleId: 123}}, pbrc.ReleaseMetadata_LISTED_TO_SELL},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1112, Rating: 0, Formats: []*pbgd.Format{&pbgd.Format{Name: "CD"}}, Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PREPARE_TO_SELL, LastStockCheck: time.Now().Unix()}}, pbrc.ReleaseMetadata_RIP_THEN_SELL},
-	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1111, Rating: 0}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_GRADUATE}}, pbrc.ReleaseMetadata_NO_LABELS},
-	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1111, Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}, Rating: 0}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_NO_LABELS}}, pbrc.ReleaseMetadata_PRE_FRESHMAN},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1111, Rating: 0}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_DIGITAL}}, pbrc.ReleaseMetadata_UNKNOWN},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1235, Rating: 0}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_DIGITAL, GoalFolder: 1235}}, pbrc.ReleaseMetadata_ASSESS},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1234, Rating: 0}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PREPARE_TO_SELL, LastStockCheck: time.Now().Unix()}}, pbrc.ReleaseMetadata_STAGED_TO_SELL},
@@ -141,24 +140,28 @@ var movetests = []struct {
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1236, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_STAGED_TO_SELL}}, pbrc.ReleaseMetadata_PRE_FRESHMAN},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1237, Rating: 3}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_STAGED_TO_SELL}}, pbrc.ReleaseMetadata_SOLD},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1238, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{SetRating: 5}}, pbrc.ReleaseMetadata_UNKNOWN},
-	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1239, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PRE_FRESHMAN, DateAdded: time.Now().AddDate(-10, 0, 0).Unix()}}, pbrc.ReleaseMetadata_DISTINGUISHED},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1240}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_STAGED, DateAdded: time.Now().AddDate(0, -3, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1240, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL, DateAdded: time.Now().AddDate(0, -3, 0).Unix()}}, pbrc.ReleaseMetadata_HIGH_SCHOOL},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1240}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_HIGH_SCHOOL, DateAdded: time.Now().AddDate(0, -4, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_FRESHMAN},
+	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1241}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PRE_FRESHMAN, DateAdded: time.Now().AddDate(0, -4, 0).Unix()}}, pbrc.ReleaseMetadata_FRESHMAN},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1241}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_FRESHMAN, DateAdded: time.Now().AddDate(0, -7, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_SOPHMORE},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1242, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PRE_SOPHMORE, DateAdded: time.Now().AddDate(0, -7, 0).Unix()}}, pbrc.ReleaseMetadata_SOPHMORE},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1243, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_SOPHMORE, DateAdded: time.Now().AddDate(0, -13, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_GRADUATE},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1244, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PRE_GRADUATE, DateAdded: time.Now().AddDate(0, -13, 0).Unix()}}, pbrc.ReleaseMetadata_GRADUATE},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1245, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_GRADUATE, DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_POSTDOC},
-	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1245, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_LISTED_TO_SELL, DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}, pbrc.ReleaseMetadata_SALE_ISSUE},
+	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1242, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PRE_POSTDOC, DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}, pbrc.ReleaseMetadata_POSTDOC},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1243, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_POSTDOC, DateAdded: time.Now().AddDate(-3, -1, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_PROFESSOR},
+	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1242, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PRE_PROFESSOR, DateAdded: time.Now().AddDate(-3, -1, 0).Unix()}}, pbrc.ReleaseMetadata_PROFESSOR},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1243, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PROFESSOR, DateAdded: time.Now().AddDate(-4, -1, 0).Unix()}}, pbrc.ReleaseMetadata_PRE_DISTINGUISHED},
+	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1239, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PRE_DISTINGUISHED, DateAdded: time.Now().AddDate(-10, 0, 0).Unix()}}, pbrc.ReleaseMetadata_DISTINGUISHED},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1246, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{FilePath: "1234", Category: pbrc.ReleaseMetadata_RIP_THEN_SELL, DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}, pbrc.ReleaseMetadata_PREPARE_TO_SELL},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1247, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{SaleId: 1234, FilePath: "1234", Category: pbrc.ReleaseMetadata_SOLD, DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}, pbrc.ReleaseMetadata_LISTED_TO_SELL},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1249, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{SaleId: 1234, FilePath: "1234", Category: pbrc.ReleaseMetadata_PREPARE_TO_SELL, DateAdded: time.Now().AddDate(-2, -1, 0).Unix(), SalePrice: 1234}}, pbrc.ReleaseMetadata_ASSESS_FOR_SALE},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1249, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{SaleId: 1234, FilePath: "1234", Category: pbrc.ReleaseMetadata_ASSESS_FOR_SALE, DateAdded: time.Now().AddDate(-2, -1, 0).Unix(), SalePrice: 1234, LastStockCheck: time.Now().Unix()}}, pbrc.ReleaseMetadata_PREPARE_TO_SELL},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1249, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{SaleId: 1234, FilePath: "1234", Category: pbrc.ReleaseMetadata_LISTED_TO_SELL, SaleState: pbgd.SaleState_SOLD, DateAdded: time.Now().AddDate(-2, -1, 0).Unix(), SalePrice: 1234, LastStockCheck: time.Now().Unix()}}, pbrc.ReleaseMetadata_SOLD_ARCHIVE},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1244, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PRE_FRESHMAN, DateAdded: time.Now().AddDate(0, -1, 0).Unix()}}, pbrc.ReleaseMetadata_UNLISTENED},
+	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{SaleId: -1, Category: pbrc.ReleaseMetadata_POSTDOC, DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}, pbrc.ReleaseMetadata_PURCHASED},
+	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 12, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_UNLISTENED, DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}, pbrc.ReleaseMetadata_STAGED},
 }
 
 func TestMoveTests(t *testing.T) {
@@ -171,7 +174,7 @@ func TestMoveTests(t *testing.T) {
 		s.processNextRecords(context.Background())
 
 		if tg.lastCategory != test.out {
-			t.Fatalf("Full move failed \n%v\n vs. \n%v\n (should have been %v (from %v))", test.in, tg.lastCategory, test.out, tg.rec)
+			t.Errorf("Full move failed \n%v\n vs. \n%v\n (should have been %v (from %v))", test.in, tg.lastCategory, test.out, tg.rec)
 		}
 	}
 }
@@ -273,7 +276,7 @@ func TestProcessUnpurchasedRecord(t *testing.T) {
 	r := &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}
 	nr, _ := s.processRecord(context.Background(), r)
 
-	if nr.GetMetadata().GetCategory() != pbrc.ReleaseMetadata_PURCHASED {
+	if nr != pbrc.ReleaseMetadata_PURCHASED {
 		t.Fatalf("Error in processing record: %v", nr)
 	}
 }
@@ -283,7 +286,7 @@ func TestEmptyUpdate(t *testing.T) {
 	r := &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PURCHASED}, Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}
 	nr, _ := s.processRecord(context.Background(), r)
 
-	if nr != nil {
+	if nr != pbrc.ReleaseMetadata_UNKNOWN {
 		t.Fatalf("Error in processing record: %v", nr)
 	}
 }
@@ -294,65 +297,6 @@ func TestEmptyUpdateOnly(t *testing.T) {
 
 	if nr != nil {
 		t.Fatalf("Error in processing record: %v", nr)
-	}
-}
-
-func TestPromoteToStaged(t *testing.T) {
-	s := InitTest()
-	rec := &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812802, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_UNLISTENED, DateAdded: time.Now().Unix()}}
-	tg := testGetter{rec: rec}
-	s.getter = &tg
-	s.config.NextUpdateTime[1] = 1
-	s.processNextRecords(context.Background())
-	s.processRecords(context.Background())
-
-	if rec.GetMetadata().GetCategory() != pbrc.ReleaseMetadata_STAGED {
-		t.Errorf("Folder has not been updated: %v", rec)
-	}
-}
-
-func TestClearRatingOnPrepToSell(t *testing.T) {
-	s := InitTest()
-	rec := &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812802, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PREPARE_TO_SELL, DateAdded: time.Now().Unix(), LastStockCheck: time.Now().Unix()}}
-	tg := testGetter{rec: rec}
-	s.getter = &tg
-	s.config.NextUpdateTime[1] = 1
-	s.processNextRecords(context.Background())
-
-	s.processRecords(context.Background())
-
-	if rec.GetMetadata().SetRating != -1 {
-		t.Errorf("Folder has not been updated: %v", rec)
-	}
-}
-
-func TestClearRatingOnStagedToSell(t *testing.T) {
-	s := InitTest()
-	rec := &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812802, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_STAGED_TO_SELL, DateAdded: time.Now().Unix(), LastStockCheck: time.Now().Unix()}}
-	tg := testGetter{rec: rec}
-	s.getter = &tg
-	s.config.NextUpdateTime[1] = 1
-	s.processNextRecords(context.Background())
-
-	s.processRecords(context.Background())
-
-	if rec.GetMetadata().SetRating != -1 {
-		t.Errorf("Folder has not been updated: %v", rec)
-	}
-}
-
-func TestBandcamp(t *testing.T) {
-	s := InitTest()
-	rec := &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1782105, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PREPARE_TO_SELL, DateAdded: time.Now().Unix(), LastStockCheck: time.Now().Unix()}}
-	tg := testGetter{rec: rec}
-	s.getter = &tg
-	s.config.NextUpdateTime[1] = 1
-	s.processNextRecords(context.Background())
-
-	s.processRecords(context.Background())
-
-	if rec.GetMetadata().GoalFolder != 1782105 {
-		t.Errorf("Folder has not been updated: %v", rec)
 	}
 }
 
@@ -369,66 +313,5 @@ func TestIsNotJustCd(t *testing.T) {
 	rec := &pbrc.Record{Release: &pbgd.Release{Formats: []*pbgd.Format{&pbgd.Format{Name: "CD"}, &pbgd.Format{Name: "LP"}}}}
 	if s.isJustCd(context.Background(), rec) {
 		t.Errorf("Bad record")
-	}
-}
-
-func TestUpdateToUnlistened(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().Unix()}}}
-	s.getter = &tg
-	s.config.NextUpdateTime[1] = 1
-	s.processNextRecords(context.Background())
-
-	if tg.lastCategory != pbrc.ReleaseMetadata_UNLISTENED {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
-	}
-}
-
-func TestUpdateToStaged(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().Unix()}}}
-	s.getter = &tg
-	s.config.NextUpdateTime[1] = 1
-	s.processNextRecords(context.Background())
-
-	if tg.lastCategory != pbrc.ReleaseMetadata_STAGED {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
-	}
-}
-
-func TestUpdateToFreshman(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(0, -4, 0).Unix()}}}
-	s.getter = &tg
-	s.config.NextUpdateTime[1] = 1
-	s.processNextRecords(context.Background())
-
-	if tg.lastCategory != pbrc.ReleaseMetadata_FRESHMAN {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
-	}
-}
-
-func TestUpdateToProfessor(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(-3, -1, 0).Unix()}}}
-	s.getter = &tg
-	s.config.NextUpdateTime[1] = 1
-	s.processNextRecords(context.Background())
-
-	if tg.lastCategory != pbrc.ReleaseMetadata_PROFESSOR {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
-	}
-}
-
-func TestUpdateToPostdoc(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 812, Rating: 4}, Metadata: &pbrc.ReleaseMetadata{DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}}
-	s.getter = &tg
-
-	s.config.NextUpdateTime[1] = 1
-	s.processNextRecords(context.Background())
-
-	if tg.lastCategory != pbrc.ReleaseMetadata_POSTDOC {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
 	}
 }
