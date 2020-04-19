@@ -147,6 +147,12 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_DIGITAL, "Digital"
 	}
 
+	if r.GetMetadata().GetGoalFolder() == 1782105 &&
+		(r.GetMetadata().Category == pbrc.ReleaseMetadata_DIGITAL ||
+			r.GetMetadata().Category == pbrc.ReleaseMetadata_BANDCAMP) {
+		return pbrc.ReleaseMetadata_UNLISTENED, "BandcampOut"
+	}
+
 	// Deal with parents records
 	if r.GetRelease().FolderId == 1727264 && r.GetMetadata().Category == pbrc.ReleaseMetadata_PARENTS && r.GetMetadata().GoalFolder != 1727264 {
 		return pbrc.ReleaseMetadata_PRE_FRESHMAN, "OutOfParents"
