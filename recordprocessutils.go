@@ -149,7 +149,8 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 
 	if r.GetMetadata().GetGoalFolder() == 1782105 &&
 		(r.GetMetadata().Category == pbrc.ReleaseMetadata_DIGITAL ||
-			r.GetMetadata().Category == pbrc.ReleaseMetadata_BANDCAMP) {
+			r.GetMetadata().Category == pbrc.ReleaseMetadata_BANDCAMP ||
+			r.GetMetadata().Category == pbrc.ReleaseMetadata_UNKNOWN) {
 		return pbrc.ReleaseMetadata_UNLISTENED, "BandcampOut"
 	}
 
