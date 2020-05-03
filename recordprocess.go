@@ -16,6 +16,7 @@ import (
 
 	gdpb "github.com/brotherlogic/godiscogs"
 	pbg "github.com/brotherlogic/goserver/proto"
+	"github.com/brotherlogic/goserver/utils"
 	pbrc "github.com/brotherlogic/recordcollection/proto"
 	pb "github.com/brotherlogic/recordprocess/proto"
 )
@@ -209,6 +210,8 @@ func (s *Server) GetState() []*pbg.State {
 func main() {
 	var quiet = flag.Bool("quiet", false, "Show all output")
 	flag.Parse()
+
+	utils.BuildContext("what", "what")
 
 	//Turn off logging
 	if *quiet {
