@@ -257,7 +257,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_UNLISTENED, "PRE_FRESHMAN wrong"
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_FRESHMAN {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_FRESHMAN && r.GetRelease().Rating > 0 {
 		if r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -6, 0).Unix()) && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -3, 0).Unix()) {
 			return pbrc.ReleaseMetadata_FRESHMAN, "FRESHMAN"
 		}
