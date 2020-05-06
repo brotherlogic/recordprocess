@@ -24,7 +24,7 @@ type testGetter struct {
 	repeat       int
 }
 
-func (t *testGetter) getRecords(ctx context.Context, ti int64) ([]int32, error) {
+func (t *testGetter) getRecords(ctx context.Context, ti int64, c int) ([]int32, error) {
 	if t.repeat > 0 {
 		ret := []int32{}
 		for i := 0; i < t.repeat; i++ {
@@ -56,7 +56,7 @@ type testFailGetter struct {
 	lastCategory pbrc.ReleaseMetadata_Category
 }
 
-func (t testFailGetter) getRecords(ctx context.Context, ti int64) ([]int32, error) {
+func (t testFailGetter) getRecords(ctx context.Context, ti int64, c int) ([]int32, error) {
 	if t.grf {
 		return []int32{1}, nil
 	}
