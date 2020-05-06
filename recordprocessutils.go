@@ -14,7 +14,7 @@ import (
 )
 
 type getter interface {
-	getRecords(ctx context.Context, t int64) ([]int32, error)
+	getRecords(ctx context.Context, t int64, c int) ([]int32, error)
 	getRecord(ctx context.Context, instanceID int32) (*pbrc.Record, error)
 	update(ctx context.Context, instanceID int32, category pbrc.ReleaseMetadata_Category, reason string) error
 }
@@ -55,7 +55,7 @@ func (s *Server) saveRecordScore(ctx context.Context, record *pbrc.Record) bool 
 }
 
 func (s *Server) processRecords(ctx context.Context) error {
-	records, err := s.getter.getRecords(ctx, s.config.LastRunTime)
+	records, err := s.getter.getRecords(ctx, s.config.LastRunTime, len(s.config.GetNextUpdateTime()))
 	if err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func (s *Server) processNextRecords(ctx context.Context) error {
 
 			s.lastProc = time.Now()
 			s.configMutex.Lock()
-			delete(s.config.NextUpdateTime, instanceID)
+			s.config.NextUpdateTime[instanceID] = time.Now().Add(time.Hour * 24 * 7).Unix()
 			s.configMutex.Unlock()
 
 			if scoresUpdated {
