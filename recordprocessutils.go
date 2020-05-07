@@ -235,7 +235,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		}
 
 		if r.GetRelease().Rating == 5 {
-			return pbrc.ReleaseMetadata_PRE_FRESHMAN, "Returning to fold"
+			return pbrc.ReleaseMetadata_FRESHMAN, "Returning to fold"
 		}
 	}
 
