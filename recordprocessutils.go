@@ -333,7 +333,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_PRE_DISTINGUISHED, "PRE DISTIN"
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_ASSESS && r.GetMetadata().GetPurgatory() == pbrc.Purgatory_NEEDS_STOCK_CHECK &&
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_ASSESS &&
 		(time.Now().Sub(time.Unix(r.GetMetadata().GetLastStockCheck(), 0)) < time.Hour*24*7*4) {
 		return pbrc.ReleaseMetadata_PRE_FRESHMAN, "ASSESSED"
 	}
