@@ -11,6 +11,8 @@ import (
 	pbrc "github.com/brotherlogic/recordcollection/proto"
 	pb "github.com/brotherlogic/recordprocess/proto"
 	"github.com/golang/protobuf/proto"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 type getter interface {
@@ -73,7 +75,22 @@ func (s *Server) processRecords(ctx context.Context) error {
 	return s.saveConfig(ctx)
 }
 
+var (
+	backlog = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordprocess_backlog",
+		Help: "The size of the print queue",
+	})
+)
+
 func (s *Server) processNextRecords(ctx context.Context) error {
+	count := float64(0)
+	for _, timev := range s.config.NextUpdateTime {
+		if time.Unix(timev, 0).Before(time.Now()) {
+			count++
+		}
+	}
+	backlog.Set(count)
+
 	for instanceID, timev := range s.config.NextUpdateTime {
 		if time.Unix(timev, 0).Before(time.Now()) {
 			record, err := s.getter.getRecord(ctx, instanceID)
