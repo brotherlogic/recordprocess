@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/brotherlogic/goserver"
-	"github.com/brotherlogic/keystore/client"
 	"github.com/golang/protobuf/proto"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -45,11 +44,11 @@ type Server struct {
 }
 
 type prodGetter struct {
-	dial func(server string) (*grpc.ClientConn, error)
+	dial func(ctx context.Context, server string) (*grpc.ClientConn, error)
 }
 
 func (p prodGetter) getRecords(ctx context.Context, t int64, count int) ([]int32, error) {
-	conn, err := p.dial("recordcollection")
+	conn, err := p.dial(ctx, "recordcollection")
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +69,7 @@ func (p prodGetter) getRecords(ctx context.Context, t int64, count int) ([]int32
 }
 
 func (p prodGetter) getRecord(ctx context.Context, instanceID int32) (*pbrc.Record, error) {
-	conn, err := p.dial("recordcollection")
+	conn, err := p.dial(ctx, "recordcollection")
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +85,7 @@ func (p prodGetter) getRecord(ctx context.Context, instanceID int32) (*pbrc.Reco
 }
 
 func (p prodGetter) update(ctx context.Context, instanceID int32, cat pbrc.ReleaseMetadata_Category, reason string) error {
-	conn, err := p.dial("recordcollection")
+	conn, err := p.dial(ctx, "recordcollection")
 	if err != nil {
 		return err
 	}
@@ -106,9 +105,8 @@ func Init() *Server {
 		GoServer:    &goserver.GoServer{},
 		configMutex: &sync.Mutex{},
 	}
-	s.getter = &prodGetter{s.DialMaster}
+	s.getter = &prodGetter{s.FDialServer}
 	s.config = &pb.Config{}
-	s.GoServer.KSclient = *keystoreclient.GetClient(s.DialMaster)
 	return s
 }
 
