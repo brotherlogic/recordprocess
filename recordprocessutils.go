@@ -63,7 +63,7 @@ func (s *Server) processRecords(ctx context.Context) error {
 	}
 
 	if len(records) > 100 {
-		s.RaiseIssue(ctx, "Errr", fmt.Sprintf("Big addition to next update time[from %v]: %v", s.config.LastRunTime, len(records)), false)
+		s.RaiseIssue("Errr", fmt.Sprintf("Big addition to next update time[from %v]: %v", s.config.LastRunTime, len(records)))
 	}
 	s.configMutex.Lock()
 	for _, instanceID := range records {
@@ -114,7 +114,7 @@ func (s *Server) processNextRecords(ctx context.Context) error {
 				if int64(record.GetRelease().InstanceId) == s.lastUpdate {
 					s.updateCount++
 					if s.updateCount > 20 {
-						s.RaiseIssue(ctx, "Stuck Process", fmt.Sprintf("%v is stuck in process [Last rule applied: %v]", record.GetRelease().Id, rule), false)
+						s.RaiseIssue("Stuck Process", fmt.Sprintf("%v is stuck in process [Last rule applied: %v]", record.GetRelease().Id, rule))
 					}
 				} else {
 					s.updateCount = 0

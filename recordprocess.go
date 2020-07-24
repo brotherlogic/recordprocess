@@ -16,6 +16,7 @@ import (
 	gdpb "github.com/brotherlogic/godiscogs"
 	pbg "github.com/brotherlogic/goserver/proto"
 	pbrc "github.com/brotherlogic/recordcollection/proto"
+	rcpb "github.com/brotherlogic/recordcollection/proto"
 	pb "github.com/brotherlogic/recordprocess/proto"
 )
 
@@ -113,6 +114,7 @@ func Init() *Server {
 // DoRegister does RPC registration
 func (s *Server) DoRegister(server *grpc.Server) {
 	pb.RegisterScoreServiceServer(server, s)
+	rcpb.RegisterClientUpdateServiceServer(server, s)
 }
 
 // ReportHealth alerts if we're not healthy
@@ -221,12 +223,10 @@ func main() {
 	server.PrepServer()
 	server.Register = server
 
-	err := server.RegisterServerV2("recordprocess", false, false)
+	err := server.RegisterServerV2("recordprocess", false, true)
 	if err != nil {
 		return
 	}
 
-	server.RegisterRepeatingTask(server.processRecords, "process_records", time.Minute*5)
-	server.RegisterRepeatingTask(server.processNextRecords, "process_next_records", time.Second*5)
 	server.Serve()
 }

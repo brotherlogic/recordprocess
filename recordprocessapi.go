@@ -37,3 +37,19 @@ func (s *Server) Force(ctx context.Context, req *pb.ForceRequest) (*pb.ForceResp
 
 	return nil, fmt.Errorf("Unable to process: %v", result)
 }
+
+//ClientUpdate forces a move
+func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest) (*pbrc.ClientUpdateResponse, error) {
+	record, err := s.getter.getRecord(ctx, in.InstanceId)
+	if err != nil {
+		return nil, err
+	}
+
+	update, result := s.processRecord(ctx, record)
+	if update != pbrc.ReleaseMetadata_UNKNOWN {
+		err := s.getter.update(ctx, record.GetRelease().GetInstanceId(), update, result)
+		return &pbrc.ClientUpdateResponse{}, err
+	}
+
+	return nil, fmt.Errorf("Unable to process: %v", result)
+}
