@@ -111,7 +111,7 @@ func TestFullTests(t *testing.T) {
 		rec := test.in
 		tg := testGetter{rec: test.in}
 		s.getter = &tg
-		_, appl := s.processRecord(context.Background(), rec)
+		_, _, appl := s.processRecord(context.Background(), rec)
 
 		if utils.FuzzyMatch(rec, test.out) != nil {
 			t.Errorf("MATCH FAIL: %v", utils.FuzzyMatch(rec, test.out))
@@ -276,7 +276,7 @@ func TestUpdateFailOnGet(t *testing.T) {
 func TestProcessUnpurchasedRecord(t *testing.T) {
 	s := InitTest()
 	r := &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}
-	nr, _ := s.processRecord(context.Background(), r)
+	nr, _, _ := s.processRecord(context.Background(), r)
 
 	if nr != pbrc.ReleaseMetadata_PURCHASED {
 		t.Fatalf("Error in processing record: %v", nr)
@@ -286,7 +286,7 @@ func TestProcessUnpurchasedRecord(t *testing.T) {
 func TestEmptyUpdate(t *testing.T) {
 	s := InitTest()
 	r := &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PURCHASED}, Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}
-	nr, _ := s.processRecord(context.Background(), r)
+	nr, _, _ := s.processRecord(context.Background(), r)
 
 	if nr != pbrc.ReleaseMetadata_UNKNOWN {
 		t.Fatalf("Error in processing record: %v", nr)
