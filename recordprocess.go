@@ -128,11 +128,8 @@ func (s *Server) saveScores(ctx context.Context) {
 	s.KSclient.Save(ctx, KEY, s.scores)
 }
 
-func (s *Server) saveConfig(ctx context.Context) error {
-	s.configMutex.Lock()
-	defer s.configMutex.Unlock()
-	err := s.KSclient.Save(ctx, CONFIG, s.config)
-	return err
+func (s *Server) saveConfig(ctx context.Context, config *pb.Config) error {
+	return s.KSclient.Save(ctx, CONFIG, config)
 }
 
 func (s *Server) readScores(ctx context.Context) error {
@@ -147,43 +144,36 @@ func (s *Server) readScores(ctx context.Context) error {
 	return nil
 }
 
-func (s *Server) readConfig(ctx context.Context) error {
+func (s *Server) readConfig(ctx context.Context) (*pb.Config, error) {
 	config := &pb.Config{}
 	data, _, err := s.KSclient.Read(ctx, CONFIG, config)
 
 	if err != nil {
+		return nil, err
+	}
+
+	config = data.(*pb.Config)
+
+	return config, nil
+}
+
+func (s *Server) updateTime(ctx context.Context, iid int32, ti int64) error {
+	config, err := s.readConfig(ctx)
+	if err != nil {
 		return err
 	}
 
-	s.config = data.(*pb.Config)
-
-	s.configMutex.Lock()
-	defer s.configMutex.Unlock()
-	if s.config.NextUpdateTime == nil {
-		s.config.NextUpdateTime = make(map[int32]int64)
-	}
-
-	return nil
+	config.NextUpdateTime[iid] = ti
+	return s.saveConfig(ctx, config)
 }
 
 // Shutdown the server
 func (s *Server) Shutdown(ctx context.Context) error {
-	s.saveScores(ctx)
-	s.saveConfig(ctx)
 	return nil
 }
 
 // Mote promotes/demotes this server
 func (s *Server) Mote(ctx context.Context, master bool) error {
-	if master {
-		err := s.readScores(ctx)
-		if err == nil {
-			err = s.readConfig(ctx)
-		}
-
-		return err
-	}
-
 	return nil
 }
 

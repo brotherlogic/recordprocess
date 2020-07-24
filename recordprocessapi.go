@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"golang.org/x/net/context"
 
@@ -29,7 +30,7 @@ func (s *Server) Force(ctx context.Context, req *pb.ForceRequest) (*pb.ForceResp
 		return nil, err
 	}
 
-	update, result := s.processRecord(ctx, record)
+	update, _, result := s.processRecord(ctx, record)
 	if update != pbrc.ReleaseMetadata_UNKNOWN {
 		err := s.getter.update(ctx, record.GetRelease().GetInstanceId(), update, result)
 		return &pb.ForceResponse{Result: update, Reason: result}, err
@@ -45,10 +46,13 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 		return nil, err
 	}
 
-	update, result := s.processRecord(ctx, record)
+	update, ti, result := s.processRecord(ctx, record)
 	if update != pbrc.ReleaseMetadata_UNKNOWN {
 		err := s.getter.update(ctx, record.GetRelease().GetInstanceId(), update, result)
-		return &pbrc.ClientUpdateResponse{}, err
+		if err != nil {
+			return nil, err
+		}
+		return &pbrc.ClientUpdateResponse{}, s.updateTime(ctx, in.InstanceId, time.Now().Add(time.Duration(ti)*time.Hour*24*7*30).Unix())
 	}
 
 	return nil, fmt.Errorf("Unable to process: %v", result)
