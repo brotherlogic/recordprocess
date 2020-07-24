@@ -33,7 +33,7 @@ func main() {
 	}
 
 	client := pb.NewScoreServiceClient(conn)
-	ctx, cancel := utils.ManualContext("recordprocess-cli", "recordprocess-cli", time.Minute)
+	ctx, cancel := utils.ManualContext("recordprocess-cli", "recordprocess-cli", time.Minute, true)
 	defer cancel()
 	switch os.Args[1] {
 	case "get":
