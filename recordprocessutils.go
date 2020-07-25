@@ -153,8 +153,6 @@ func recordNeedsRip(r *pbrc.Record) bool {
 }
 
 func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.ReleaseMetadata_Category, int, string) {
-	s.Log(fmt.Sprintf("Processing %v -> %v", r.GetRelease().GetInstanceId(), r.GetRelease().GetTitle()))
-
 	// Don't process a record that has a pending score
 	if r.GetMetadata() != nil && (r.GetMetadata().SetRating != 0 || r.GetMetadata().Dirty) {
 		return pbrc.ReleaseMetadata_UNKNOWN, -1, "Pending Score"
