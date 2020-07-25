@@ -55,5 +55,5 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 		return &pbrc.ClientUpdateResponse{}, s.updateTime(ctx, in.InstanceId, time.Now().Add(time.Duration(ti)*time.Hour*24*7*30).Unix())
 	}
 
-	return nil, fmt.Errorf("Unable to process: %v", result)
+	return &pbrc.ClientUpdateResponse{}, nil
 }
