@@ -47,6 +47,7 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 	}
 
 	update, ti, result := s.processRecord(ctx, record)
+	s.Log(fmt.Sprintf("%v -> %v, %v", record.GetRelease().GetTitle(), update, result))
 	if update != pbrc.ReleaseMetadata_UNKNOWN {
 		err := s.getter.update(ctx, record.GetRelease().GetInstanceId(), update, result)
 		if err != nil {
