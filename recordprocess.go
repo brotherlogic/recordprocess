@@ -10,11 +10,14 @@ import (
 
 	"github.com/brotherlogic/goserver"
 	"github.com/golang/protobuf/proto"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	gdpb "github.com/brotherlogic/godiscogs"
 	pbg "github.com/brotherlogic/goserver/proto"
+	"github.com/brotherlogic/goserver/utils"
 	pbrc "github.com/brotherlogic/recordcollection/proto"
 	rcpb "github.com/brotherlogic/recordcollection/proto"
 	pb "github.com/brotherlogic/recordprocess/proto"
@@ -200,6 +203,18 @@ func (s *Server) GetState() []*pbg.State {
 	}
 }
 
+var (
+	size = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordprocess_queue",
+		Help: "The amount of potential salve value",
+	})
+
+	nextUpdateTime = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordprocess_nextupdatetime",
+		Help: "The time of the next recordprocess update",
+	})
+)
+
 func main() {
 	var quiet = flag.Bool("quiet", false, "Show all output")
 	flag.Parse()
@@ -217,6 +232,22 @@ func main() {
 	if err != nil {
 		return
 	}
+
+	ctx, cancel := utils.ManualContext("recordproc", "recordproc", time.Minute, false)
+	config, err := server.readConfig(ctx)
+	cancel()
+	if err != nil {
+		log.Fatalf("Unable to read config")
+	}
+
+	size.Set(float64(len(config.GetNextUpdateTime())))
+	min := time.Now().Unix()
+	for _, val := range config.GetNextUpdateTime() {
+		if val < min {
+			min = val
+		}
+	}
+	nextUpdateTime.Set(float64(min))
 
 	server.Serve()
 }
