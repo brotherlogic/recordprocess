@@ -213,6 +213,11 @@ var (
 		Name: "recordprocess_nextupdatetime",
 		Help: "The time of the next recordprocess update",
 	})
+
+	lastUpdateTime = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "recordprocess_lastupdatetime",
+		Help: "The time of the last recordprocess update",
+	})
 )
 
 func main() {
@@ -242,12 +247,18 @@ func main() {
 
 	size.Set(float64(len(config.GetNextUpdateTime())))
 	min := time.Now().Unix()
+	max := int64(0)
 	for _, val := range config.GetNextUpdateTime() {
 		if val < min {
 			min = val
 		}
+
+		if val > max {
+			max = val
+		}
 	}
 	nextUpdateTime.Set(float64(min))
+	lastUpdateTime.Set(float64(max))
 
 	server.Serve()
 }
