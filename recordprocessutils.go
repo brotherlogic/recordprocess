@@ -8,6 +8,7 @@ import (
 	"golang.org/x/net/context"
 
 	pbgd "github.com/brotherlogic/godiscogs"
+	"github.com/brotherlogic/goserver/utils"
 	pbrc "github.com/brotherlogic/recordcollection/proto"
 	pb "github.com/brotherlogic/recordprocess/proto"
 	"github.com/golang/protobuf/proto"
@@ -19,6 +20,30 @@ type getter interface {
 	getRecords(ctx context.Context, t int64, c int) ([]int32, error)
 	getRecord(ctx context.Context, instanceID int32) (*pbrc.Record, error)
 	update(ctx context.Context, instanceID int32, category pbrc.ReleaseMetadata_Category, reason string) error
+}
+
+func (s *Server) runLoop() {
+	ctx, cancel := utils.ManualContext("rp-loop", "rp-loop", time.Minute, true)
+	defer cancel()
+
+	config, err := s.readConfig(ctx)
+	if err != nil {
+		s.Log(fmt.Sprintf("Unable to process: %v", err))
+		return
+	}
+
+	bt := time.Now().Unix()
+	bid := int32(-1)
+	for id, t := range config.GetNextUpdateTime() {
+		if t < bt {
+			bt = t
+			bid = id
+		}
+	}
+
+	if bid > 0 {
+		s.Log(fmt.Sprintf("Running process on: %v", bid))
+	}
 }
 
 func (s *Server) isJustCd(ctx context.Context, record *pbrc.Record) bool {

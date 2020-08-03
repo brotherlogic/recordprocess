@@ -220,6 +220,26 @@ var (
 	})
 )
 
+func (s *Server) procLoop() {
+	for true {
+		s.runElectLoop()
+
+		//Wait 1 minute between runs
+		time.Sleep(time.Minute)
+	}
+}
+
+func (s *Server) runElectLoop() {
+	cf, err := s.Elect()
+	defer cf()
+
+	if err == nil {
+		s.runLoop()
+	} else {
+		s.Log(fmt.Sprintf("Unable to elect: %v", err))
+	}
+}
+
 func main() {
 	var quiet = flag.Bool("quiet", false, "Show all output")
 	flag.Parse()
@@ -259,6 +279,8 @@ func main() {
 	}
 	nextUpdateTime.Set(float64(min))
 	lastUpdateTime.Set(float64(max))
+
+	go server.procLoop()
 
 	server.Serve()
 }
