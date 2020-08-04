@@ -132,6 +132,7 @@ func (s *Server) saveScores(ctx context.Context) {
 }
 
 func (s *Server) saveConfig(ctx context.Context, config *pb.Config) error {
+	s.setVarz(config)
 	return s.KSclient.Save(ctx, CONFIG, config)
 }
 
@@ -240,6 +241,24 @@ func (s *Server) runElectLoop() {
 	}
 }
 
+func (s *Server) setVarz(config *pb.Config) {
+	size.Set(float64(len(config.GetNextUpdateTime())))
+	min := time.Now().Unix()
+	max := int64(0)
+	for _, val := range config.GetNextUpdateTime() {
+		if val < min {
+			min = val
+		}
+
+		if val > max {
+			max = val
+		}
+	}
+	nextUpdateTime.Set(float64(min))
+	lastUpdateTime.Set(float64(max))
+
+}
+
 func main() {
 	var quiet = flag.Bool("quiet", false, "Show all output")
 	flag.Parse()
@@ -264,21 +283,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unable to read config")
 	}
-
-	size.Set(float64(len(config.GetNextUpdateTime())))
-	min := time.Now().Unix()
-	max := int64(0)
-	for _, val := range config.GetNextUpdateTime() {
-		if val < min {
-			min = val
-		}
-
-		if val > max {
-			max = val
-		}
-	}
-	nextUpdateTime.Set(float64(min))
-	lastUpdateTime.Set(float64(max))
+	server.setVarz(config)
 
 	go server.procLoop()
 
