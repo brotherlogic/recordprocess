@@ -42,7 +42,8 @@ func (s *Server) runLoop() {
 	}
 
 	if bid > 0 {
-		s.Log(fmt.Sprintf("Running process on: %v", bid))
+		_, err := s.ClientUpdate(ctx, &pbrc.ClientUpdateRequest{InstanceId: bid})
+		s.Log(fmt.Sprintf("Updated %v -> %v", bid, err))
 	}
 }
 
