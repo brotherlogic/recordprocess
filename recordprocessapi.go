@@ -53,13 +53,11 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 		if err != nil {
 			return nil, err
 		}
-		if ti >= 0 {
-			return &pbrc.ClientUpdateResponse{}, s.updateTime(ctx, in.InstanceId, time.Now().Add(time.Duration(ti)*time.Hour*24*7*30).Unix())
-		}
-
-		return &pbrc.ClientUpdateResponse{}, s.updateTime(ctx, in.InstanceId, time.Now().Add(time.Hour*24*7).Unix())
-
 	}
 
-	return &pbrc.ClientUpdateResponse{}, nil
+	if ti >= 0 {
+		return &pbrc.ClientUpdateResponse{}, s.updateTime(ctx, in.InstanceId, time.Now().Add(time.Duration(ti)*time.Hour*24*7*30).Unix())
+	}
+
+	return &pbrc.ClientUpdateResponse{}, s.updateTime(ctx, in.InstanceId, time.Now().Add(time.Hour*24*7).Unix())
 }
