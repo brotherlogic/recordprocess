@@ -13,7 +13,6 @@ import (
 
 	pbgd "github.com/brotherlogic/godiscogs"
 	pbrc "github.com/brotherlogic/recordcollection/proto"
-	pb "github.com/brotherlogic/recordprocess/proto"
 )
 
 type testGetter struct {
@@ -87,9 +86,7 @@ func InitTest() *Server {
 	s.SkipLog = true
 	s.SkipIssue = true
 	s.getter = &testGetter{}
-	s.scores = &pb.Scores{}
 	s.GoServer.KSclient = *keystoreclient.GetTestClient(".testing")
-	s.config = &pb.Config{NextUpdateTime: make(map[int32]int64)}
 
 	return s
 }
@@ -172,8 +169,7 @@ func TestMoveTests(t *testing.T) {
 		s := InitTest()
 		tg := testGetter{rec: test.in}
 		s.getter = &tg
-		s.config.NextUpdateTime[1] = 1
-		s.processNextRecords(context.Background())
+		//s.processNextRecords(context.Background())
 
 		if tg.lastCategory != test.out {
 			t.Errorf("Full move failed \n%v\n vs. \n%v\n (should have been %v (from %v))", test.in, tg.lastCategory, test.out, tg.rec)
@@ -199,10 +195,9 @@ func TestUpdate(t *testing.T) {
 	s := InitTest()
 	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{Id: 10, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}}
 	s.getter = &tg
-	s.config.NextUpdateTime[1] = 1
-	s.processNextRecords(context.Background())
+	//s.processNextRecords(context.Background())
 
-	s.processRecords(context.Background())
+	//s.processRecords(context.Background())
 
 	if tg.lastCategory != pbrc.ReleaseMetadata_PURCHASED {
 		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
@@ -213,10 +208,9 @@ func TestBigUpdate(t *testing.T) {
 	s := InitTest()
 	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{Id: 10, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}, repeat: 200}
 	s.getter = &tg
-	s.config.NextUpdateTime[1] = 1
-	s.processNextRecords(context.Background())
+	//s.processNextRecords(context.Background())
 
-	s.processRecords(context.Background())
+	//s.processRecords(context.Background())
 
 	if tg.lastCategory != pbrc.ReleaseMetadata_PURCHASED {
 		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
@@ -229,12 +223,11 @@ func TestUpdateWithFailonRecordGet(t *testing.T) {
 	tg.getFail = true
 	s.getter = &tg
 
-	s.config.NextUpdateTime[1] = 1
-	err := s.processNextRecords(context.Background())
+	//err := s.processNextRecords(context.Background())
 
-	if err == nil {
-		t.Errorf("Did not fail")
-	}
+	//if err == nil {
+	//	t.Errorf("Did not fail")
+	//}
 }
 
 func TestMultiUpdate(t *testing.T) {
@@ -243,22 +236,20 @@ func TestMultiUpdate(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{InstanceId: 10, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}}
 		s.getter = &tg
-		s.config.NextUpdateTime[1] = 1
-		s.processNextRecords(context.Background())
+		//s.processNextRecords(context.Background())
 
-		s.processRecords(context.Background())
+		//s.processRecords(context.Background())
 	}
 
 	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{InstanceId: 11, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}}
 	s.getter = &tg
-	s.config.NextUpdateTime[1] = 1
-	s.processNextRecords(context.Background())
+	//s.processNextRecords(context.Background())
 
-	s.processRecords(context.Background())
+	//s.processRecords(context.Background())
 
-	if s.updateCount != 0 {
-		t.Errorf("Error in update count: %v", s.updateCount)
-	}
+	//if s.updateCount != 0 {
+	//	t.Errorf("Error in update count: %v", s.updateCount)
+	//}
 
 }
 
@@ -266,7 +257,7 @@ func TestUpdateFailOnGet(t *testing.T) {
 	s := InitTest()
 	tg := testFailGetter{}
 	s.getter = tg
-	s.processRecords(context.Background())
+	//s.processRecords(context.Background())
 
 	if tg.lastCategory == pbrc.ReleaseMetadata_PURCHASED {
 		t.Errorf("Folder has been updated: %v", tg.lastCategory)
@@ -294,12 +285,12 @@ func TestEmptyUpdate(t *testing.T) {
 }
 
 func TestEmptyUpdateOnly(t *testing.T) {
-	s := InitTest()
-	nr := s.processNextRecords(context.Background())
+	//s := InitTest()
+	//nr := s.processNextRecords(context.Background())
 
-	if nr != nil {
-		t.Fatalf("Error in processing record: %v", nr)
-	}
+	//if nr != nil {
+	//	t.Fatalf("Error in processing record: %v", nr)
+	//}
 }
 
 func TestIsJustCd(t *testing.T) {
