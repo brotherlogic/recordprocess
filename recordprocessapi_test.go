@@ -12,12 +12,6 @@ import (
 func TestGetScore(t *testing.T) {
 	s := InitTest()
 
-	s.scores.Scores = append(s.scores.Scores, &pb.RecordScore{
-		InstanceId: 1234,
-		Rating:     5,
-		Category:   pbrc.ReleaseMetadata_FRESHMAN,
-	})
-
 	scores, err := s.GetScore(context.Background(), &pb.GetScoreRequest{InstanceId: 1234})
 
 	if err != nil {

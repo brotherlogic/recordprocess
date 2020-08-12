@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"sync"
 	"time"
 
 	"github.com/brotherlogic/goserver"
-	"github.com/golang/protobuf/proto"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"golang.org/x/net/context"
@@ -34,17 +32,7 @@ const (
 //Server main server type
 type Server struct {
 	*goserver.GoServer
-	config           *pb.Config
-	getter           getter
-	lastProc         time.Time
-	lastCount        int64
-	lastProcDuration time.Duration
-	scores           *pb.Scores
-	updates          int64
-	recordsInUpdate  int64
-	lastUpdate       int64
-	updateCount      int
-	configMutex      *sync.Mutex
+	getter getter
 }
 
 type prodGetter struct {
@@ -106,11 +94,9 @@ func (p prodGetter) update(ctx context.Context, instanceID int32, cat pbrc.Relea
 // Init builds the server
 func Init() *Server {
 	s := &Server{
-		GoServer:    &goserver.GoServer{},
-		configMutex: &sync.Mutex{},
+		GoServer: &goserver.GoServer{},
 	}
 	s.getter = &prodGetter{s.FDialServer}
-	s.config = &pb.Config{}
 	return s
 }
 
@@ -125,18 +111,16 @@ func (s *Server) ReportHealth() bool {
 	return true
 }
 
-func (s *Server) saveScores(ctx context.Context) {
-	s.configMutex.Lock()
-	defer s.configMutex.Unlock()
-	s.KSclient.Save(ctx, KEY, s.scores)
-}
+//func (s *Server) saveScores(ctx context.Context) {
+//	s.KSclient.Save(ctx, KEY, s.scores)
+//}
 
 func (s *Server) saveConfig(ctx context.Context, config *pb.Config) error {
 	s.setVarz(config)
 	return s.KSclient.Save(ctx, CONFIG, config)
 }
 
-func (s *Server) readScores(ctx context.Context) error {
+/*func (s *Server) readScores(ctx context.Context) error {
 	scores := &pb.Scores{}
 	data, _, err := s.KSclient.Read(ctx, KEY, scores)
 
@@ -146,7 +130,7 @@ func (s *Server) readScores(ctx context.Context) error {
 
 	s.scores = data.(*pb.Scores)
 	return nil
-}
+}*/
 
 func (s *Server) readConfig(ctx context.Context) (*pb.Config, error) {
 	config := &pb.Config{}
@@ -183,25 +167,7 @@ func (s *Server) Mote(ctx context.Context, master bool) error {
 
 // GetState gets the state of the server
 func (s *Server) GetState() []*pbg.State {
-
-	numScores := int64(0)
-	if s.scores != nil {
-		numScores = int64(len(s.scores.Scores))
-	}
-	s.configMutex.Lock()
-	defer s.configMutex.Unlock()
-	return []*pbg.State{
-		&pbg.State{Key: "queue_size", Value: int64(len(s.config.GetNextUpdateTime()))},
-		&pbg.State{Key: "last_run_time", TimeValue: s.config.GetLastRunTime()},
-		&pbg.State{Key: "size_scores", Value: int64(proto.Size(s.scores))},
-		&pbg.State{Key: "num_scores", Value: numScores},
-		&pbg.State{Key: "update_count", Value: int64(s.updateCount)},
-		&pbg.State{Key: "last_proc", TimeValue: s.lastProc.Unix(), Value: s.lastCount},
-		&pbg.State{Key: "last_proc_time", Text: fmt.Sprintf("%v", s.lastProcDuration)},
-		&pbg.State{Key: "updates", Value: s.updates},
-		&pbg.State{Key: "records_in_update", Value: s.recordsInUpdate},
-		&pbg.State{Key: "last_record", Value: s.lastUpdate},
-	}
+	return []*pbg.State{}
 }
 
 var (

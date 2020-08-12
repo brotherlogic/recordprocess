@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"golang.org/x/net/context"
@@ -10,8 +9,6 @@ import (
 	pbgd "github.com/brotherlogic/godiscogs"
 	"github.com/brotherlogic/goserver/utils"
 	pbrc "github.com/brotherlogic/recordcollection/proto"
-	pb "github.com/brotherlogic/recordprocess/proto"
-	"github.com/golang/protobuf/proto"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
@@ -63,7 +60,7 @@ func (s *Server) isJustCd(ctx context.Context, record *pbrc.Record) bool {
 
 func (s *Server) saveRecordScore(ctx context.Context, record *pbrc.Record) bool {
 	found := false
-	for _, score := range s.scores.GetScores() {
+	/*for _, score := range s.scores.GetScores() {
 		if score.GetCategory() == record.GetMetadata().GetCategory() && score.GetInstanceId() == record.GetRelease().InstanceId {
 			found = true
 			break
@@ -77,28 +74,9 @@ func (s *Server) saveRecordScore(ctx context.Context, record *pbrc.Record) bool 
 			Category:   record.GetMetadata().GetCategory(),
 			ScoreTime:  time.Now().Unix(),
 		})
-	}
+	}*/
 
 	return !found
-}
-
-func (s *Server) processRecords(ctx context.Context) error {
-	records, err := s.getter.getRecords(ctx, s.config.LastRunTime, len(s.config.GetNextUpdateTime()))
-	if err != nil {
-		return err
-	}
-
-	if len(records) > 100 {
-		s.RaiseIssue("Errr", fmt.Sprintf("Big addition to next update time[from %v]: %v", s.config.LastRunTime, len(records)))
-	}
-	s.configMutex.Lock()
-	for _, instanceID := range records {
-		s.config.NextUpdateTime[instanceID] = time.Now().Unix()
-	}
-	s.config.LastRunTime = time.Now().Unix()
-	s.configMutex.Unlock()
-
-	return nil
 }
 
 var (
@@ -107,64 +85,6 @@ var (
 		Help: "The size of the print queue",
 	})
 )
-
-func (s *Server) processNextRecords(ctx context.Context) error {
-	count := float64(0)
-	for _, timev := range s.config.NextUpdateTime {
-		if time.Unix(timev, 0).Before(time.Now()) {
-			count++
-		}
-	}
-	backlog.Set(count)
-
-	for instanceID, timev := range s.config.NextUpdateTime {
-		if time.Unix(timev, 0).Before(time.Now()) {
-			record, err := s.getter.getRecord(ctx, instanceID)
-			if err != nil {
-				return err
-			}
-			scoresUpdated := s.saveRecordScore(ctx, record)
-			pre := proto.Clone(record.GetMetadata())
-			update, _, rule := s.processRecord(ctx, record)
-
-			if update != pbrc.ReleaseMetadata_UNKNOWN {
-				s.Log(fmt.Sprintf("APPL %v -> %v -> %v", pre, rule, update))
-				s.scores.Scores = append(s.scores.Scores,
-					&pb.RecordScore{
-						InstanceId:  record.GetRelease().GetInstanceId(),
-						RuleApplied: rule,
-						Category:    update,
-						ScoreTime:   time.Now().Unix(),
-					})
-
-				if int64(record.GetRelease().InstanceId) == s.lastUpdate {
-					s.updateCount++
-					if s.updateCount > 20 {
-						s.RaiseIssue("Stuck Process", fmt.Sprintf("%v is stuck in process [Last rule applied: %v]", record.GetRelease().Id, rule))
-					}
-				} else {
-					s.updateCount = 0
-				}
-				s.lastUpdate = int64(record.GetRelease().InstanceId)
-
-				s.Log(fmt.Sprintf("Updating %v and %v", record.GetRelease().Title, record.GetRelease().InstanceId))
-				err := s.getter.update(ctx, record.GetRelease().GetInstanceId(), update, rule)
-				s.Log(fmt.Sprintf("FAILURE TO UPDATE: %v", err))
-			}
-
-			s.lastProc = time.Now()
-			s.configMutex.Lock()
-			s.config.NextUpdateTime[instanceID] = time.Now().Add(time.Hour * 24 * 7).Unix()
-			s.configMutex.Unlock()
-
-			if scoresUpdated {
-				s.saveScores(ctx)
-			}
-			return nil
-		}
-	}
-	return nil
-}
 
 func recordNeedsRip(r *pbrc.Record) bool {
 	hasCD := false
