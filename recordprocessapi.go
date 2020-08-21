@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"golang.org/x/net/context"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	pbrc "github.com/brotherlogic/recordcollection/proto"
 	pb "github.com/brotherlogic/recordprocess/proto"
@@ -43,6 +45,17 @@ func (s *Server) Force(ctx context.Context, req *pb.ForceRequest) (*pb.ForceResp
 func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest) (*pbrc.ClientUpdateResponse, error) {
 	record, err := s.getter.getRecord(ctx, in.InstanceId)
 	if err != nil {
+		code := status.Convert(err).Code()
+
+		// This record has been deleted - remove it from processing
+		if code == codes.OutOfRange {
+			config, err := s.readConfig(ctx)
+			if err == nil {
+				delete(config.NextUpdateTime, in.InstanceId)
+				return &pbrc.ClientUpdateResponse{}, s.saveConfig(ctx, config)
+			}
+
+		}
 		return nil, err
 	}
 
