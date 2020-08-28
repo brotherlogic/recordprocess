@@ -11,17 +11,15 @@ import (
 	pb "github.com/brotherlogic/recordprocess/proto"
 
 	//Needed to pull in gzip encoding init
-	"google.golang.org/grpc"
+
 	_ "google.golang.org/grpc/encoding/gzip"
-	"google.golang.org/grpc/resolver"
 )
 
-func init() {
-	resolver.Register(&utils.DiscoveryClientResolverBuilder{})
-}
-
 func main() {
-	conn, err := grpc.Dial("discovery:///recordprocess", grpc.WithInsecure())
+	ctx, cancel := utils.ManualContext("recordprocess-cli", "recordprocess-cli", time.Minute, true)
+	defer cancel()
+
+	conn, err := utils.LFDialServer(ctx, "recordprocess")
 	if err != nil {
 		log.Fatalf("Can't dial getter: %v", err)
 	}
@@ -33,8 +31,6 @@ func main() {
 	}
 
 	client := pb.NewScoreServiceClient(conn)
-	ctx, cancel := utils.ManualContext("recordprocess-cli", "recordprocess-cli", time.Minute, true)
-	defer cancel()
 	switch os.Args[1] {
 	case "get":
 		val, _ := strconv.Atoi(os.Args[2])

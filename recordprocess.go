@@ -120,17 +120,16 @@ func (s *Server) saveConfig(ctx context.Context, config *pb.Config) error {
 	return s.KSclient.Save(ctx, CONFIG, config)
 }
 
-/*func (s *Server) readScores(ctx context.Context) error {
+func (s *Server) readScores(ctx context.Context) (*pb.Scores, error) {
 	scores := &pb.Scores{}
 	data, _, err := s.KSclient.Read(ctx, KEY, scores)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	s.scores = data.(*pb.Scores)
-	return nil
-}*/
+	return data.(*pb.Scores), nil
+}
 
 func (s *Server) readConfig(ctx context.Context) (*pb.Config, error) {
 	config := &pb.Config{}

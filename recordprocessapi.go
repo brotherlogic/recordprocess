@@ -14,13 +14,18 @@ import (
 
 // GetScore gets the score for an instance
 func (s *Server) GetScore(ctx context.Context, req *pb.GetScoreRequest) (*pb.GetScoreResponse, error) {
+	scores, err := s.readScores(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	response := &pb.GetScoreResponse{Scores: []*pb.RecordScore{}}
 
-	/*for _, score := range s.scores.GetScores() {
+	for _, score := range scores.GetScores() {
 		if score.GetInstanceId() == req.GetInstanceId() && score.GetRating() > 0 {
 			response.Scores = append(response.Scores, score)
 		}
-	}*/
+	}
 
 	return response, nil
 }
