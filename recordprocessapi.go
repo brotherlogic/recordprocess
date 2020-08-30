@@ -39,7 +39,12 @@ func (s *Server) Force(ctx context.Context, req *pb.ForceRequest) (*pb.ForceResp
 
 	update, _, result := s.processRecord(ctx, record)
 	if update != pbrc.ReleaseMetadata_UNKNOWN {
-		err := s.getter.update(ctx, record.GetRelease().GetInstanceId(), update, result)
+		ncount := record.GetMetadata().GetSaleAttempts()
+		if update == pbrc.ReleaseMetadata_LISTED_TO_SELL {
+			ncount++
+		}
+
+		err := s.getter.update(ctx, record.GetRelease().GetInstanceId(), update, result, ncount)
 		return &pb.ForceResponse{Result: update, Reason: result}, err
 	}
 
@@ -66,7 +71,11 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 
 	update, ti, result := s.processRecord(ctx, record)
 	if update != pbrc.ReleaseMetadata_UNKNOWN {
-		err := s.getter.update(ctx, record.GetRelease().GetInstanceId(), update, result)
+		ncount := record.GetMetadata().GetSaleAttempts()
+		if update == pbrc.ReleaseMetadata_LISTED_TO_SELL {
+			ncount++
+		}
+		err := s.getter.update(ctx, record.GetRelease().GetInstanceId(), update, result, ncount)
 		s.Log(fmt.Sprintf("%v -> %v, %v => %v", record.GetRelease().GetTitle(), update, result, err))
 		if err != nil {
 			return nil, err

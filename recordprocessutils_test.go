@@ -41,7 +41,7 @@ func (t *testGetter) getRecord(ctx context.Context, instanceID int32) (*pbrc.Rec
 	return t.rec, nil
 }
 
-func (t *testGetter) update(ctx context.Context, instanceID int32, cat pbrc.ReleaseMetadata_Category, reason string) error {
+func (t *testGetter) update(ctx context.Context, instanceID int32, cat pbrc.ReleaseMetadata_Category, reason string, scount int32) error {
 	t.lastCategory = cat
 	return nil
 }
