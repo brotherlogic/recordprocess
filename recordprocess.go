@@ -12,6 +12,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	gdpb "github.com/brotherlogic/godiscogs"
 	pbg "github.com/brotherlogic/goserver/proto"
@@ -245,8 +247,9 @@ func main() {
 	ctx, cancel := utils.ManualContext("recordproc", "recordproc", time.Minute, false)
 	config, err := server.readConfig(ctx)
 	cancel()
-	if err != nil {
-		log.Fatalf("Unable to read config")
+	code := status.Convert(err).Code()
+	if code != codes.OK && code != codes.DeadlineExceeded && code != codes.NotFound {
+		log.Fatalf("Unable to read config: %v", err)
 	}
 	server.setVarz(config)
 
