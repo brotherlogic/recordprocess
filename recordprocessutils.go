@@ -167,13 +167,13 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_PREPARE_TO_SELL, -1, "Preping for sale"
 	}
 
-	if r.GetMetadata().Category == pbrc.ReleaseMetadata_ASSESS_FOR_SALE && (r.GetMetadata().LastStockCheck > time.Now().AddDate(-1, 0, 0).Unix() || r.GetMetadata().Match == pbrc.ReleaseMetadata_FULL_MATCH || s.isJustCd(ctx, r)) {
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_ASSESS_FOR_SALE && (r.GetMetadata().Match == pbrc.ReleaseMetadata_FULL_MATCH || s.isJustCd(ctx, r)) {
 		return pbrc.ReleaseMetadata_PREPARE_TO_SELL, -1, "ASSESSED_PREP_FOR_SALE"
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PREPARE_TO_SELL {
 
-		if (r.GetMetadata().LastStockCheck < time.Now().AddDate(-1, 0, 0).Unix() && r.GetMetadata().Match != pbrc.ReleaseMetadata_FULL_MATCH && !s.isJustCd(ctx, r)) && r.GetMetadata().Match != pbrc.ReleaseMetadata_FULL_MATCH {
+		if (r.GetMetadata().Match != pbrc.ReleaseMetadata_FULL_MATCH && !s.isJustCd(ctx, r)) && r.GetMetadata().Match != pbrc.ReleaseMetadata_FULL_MATCH {
 			return pbrc.ReleaseMetadata_ASSESS_FOR_SALE, -1, "Asessing for sale"
 		}
 
@@ -294,8 +294,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_PRE_DISTINGUISHED, -1, "PRE DISTIN"
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_ASSESS &&
-		(time.Now().Sub(time.Unix(r.GetMetadata().GetLastStockCheck(), 0)) < time.Hour*24*7*4) {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_ASSESS {
 		return pbrc.ReleaseMetadata_PRE_FRESHMAN, -1, "ASSESSED"
 	}
 
