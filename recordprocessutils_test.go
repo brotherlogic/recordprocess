@@ -69,7 +69,7 @@ func (t testFailGetter) getRecord(ctx context.Context, instanceID int32) (*pbrc.
 	return nil, errors.New("Built to fail")
 }
 
-func (t testFailGetter) update(ctx context.Context, instanceID int32, cat pbrc.ReleaseMetadata_Category, reason string) error {
+func (t testFailGetter) update(ctx context.Context, instanceID int32, cat pbrc.ReleaseMetadata_Category, reason string, blah int32) error {
 	if !t.grf {
 		t.lastCategory = cat
 		return nil
