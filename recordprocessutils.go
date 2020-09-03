@@ -50,7 +50,7 @@ func (s *Server) isJustCd(ctx context.Context, record *pbrc.Record) bool {
 	}
 
 	for _, format := range record.GetRelease().GetFormats() {
-		if format.GetName() != "CD" {
+		if format.GetName() != "CD" && format.GetName() != "CDr" {
 			return false
 		}
 	}
