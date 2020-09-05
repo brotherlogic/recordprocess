@@ -146,16 +146,18 @@ func (s *Server) readConfig(ctx context.Context) (*pb.Config, error) {
 	// Ensure that we have recent updates on everything
 	ids := []int32{}
 	for id, next := range config.GetNextUpdateTime() {
-		if time.Unix(next, 0).Sub(time.Now()) > time.Hour*24*3 {
+		if time.Unix(next, 0).Sub(time.Now()) > time.Hour*24*8 {
 			ids = append(ids, id)
 		}
 	}
 
-	for _, id := range ids {
+	/*	for _, id := range ids {
 		config.NextUpdateTime[id] = time.Now().Unix()
-	}
+	}*/
 
-	s.Log(fmt.Sprintf("Updated %v, -> %v", len(ids), s.saveConfig(ctx, config)))
+	if len(ids) > 0 {
+		s.RaiseIssue("Bad process setup", fmt.Sprintf("Found %v that are pretty stale", len(ids)))
+	}
 
 	return config, nil
 }
