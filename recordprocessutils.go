@@ -36,6 +36,7 @@ func (s *Server) runLoop() {
 			bt = t
 			bid = id
 		}
+
 	}
 
 	if bid > 0 {
@@ -167,7 +168,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_PREPARE_TO_SELL, -1, "Preping for sale"
 	}
 
-	if r.GetMetadata().Category == pbrc.ReleaseMetadata_ASSESS_FOR_SALE && (r.GetMetadata().Match == pbrc.ReleaseMetadata_FULL_MATCH || s.isJustCd(ctx, r)) {
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_ASSESS_FOR_SALE {
 		return pbrc.ReleaseMetadata_PREPARE_TO_SELL, -1, "ASSESSED_PREP_FOR_SALE"
 	}
 
