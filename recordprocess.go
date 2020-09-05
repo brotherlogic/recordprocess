@@ -147,12 +147,12 @@ func (s *Server) readConfig(ctx context.Context) (*pb.Config, error) {
 	ids := []int32{}
 	for id, next := range config.GetNextUpdateTime() {
 		if time.Unix(next, 0).Sub(time.Now()) > time.Hour*24*3 {
-			ids = eppend(ids, id)
+			ids = append(ids, id)
 		}
 	}
 
 	for _, id := range ids {
-		config.NextUpdateTime[id] = time.Now()
+		config.NextUpdateTime[id] = time.Now().Unix()
 	}
 
 	s.Log(fmt.Sprintf("Updated %v, -> %v", len(ids), s.saveConfig(ctx, config)))
