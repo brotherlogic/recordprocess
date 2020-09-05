@@ -174,10 +174,6 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PREPARE_TO_SELL {
 
-		if (r.GetMetadata().Match != pbrc.ReleaseMetadata_FULL_MATCH && !s.isJustCd(ctx, r)) && r.GetMetadata().Match != pbrc.ReleaseMetadata_FULL_MATCH {
-			return pbrc.ReleaseMetadata_ASSESS_FOR_SALE, -1, "Asessing for sale"
-		}
-
 		if recordNeedsRip(r) {
 			return pbrc.ReleaseMetadata_RIP_THEN_SELL, -1, "Ripping then selling"
 		}
