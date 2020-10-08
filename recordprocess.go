@@ -155,10 +155,6 @@ func (s *Server) readConfig(ctx context.Context) (*pb.Config, error) {
 		config.NextUpdateTime[id] = time.Now().Unix()
 	}*/
 
-	if len(ids) > 0 {
-		s.RaiseIssue("Bad process setup", fmt.Sprintf("Found %v that are pretty stale", len(ids)))
-	}
-
 	return config, nil
 }
 
