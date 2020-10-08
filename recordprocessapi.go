@@ -88,3 +88,13 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 
 	return &pbrc.ClientUpdateResponse{}, s.updateTime(ctx, in.InstanceId, time.Now().Add(time.Hour*24*7).Unix())
 }
+
+//Get peek into the state
+func (s *Server) Get(ctx context.Context, req *pb.GetRequest) (*pb.GetResponse, error) {
+	config, err := s.readConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetResponse{NextUpdateTime: config.GetNextUpdateTime()[req.GetInstanceId()]}, nil
+}

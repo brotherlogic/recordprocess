@@ -40,7 +40,16 @@ message ForceResponse {
   string reason = 2;
 }
 
+message GetRequest {
+  int32 instance_id = 1;
+}
+
+message GetResponse {
+  int64 next_update_time = 1;
+}
+
 service ScoreService {
   rpc GetScore(GetScoreRequest) returns (GetScoreResponse) {};
   rpc Force(ForceRequest) returns (ForceResponse) {};
+  rpc Get(GetRequest) returns (GetResponse) {};
 }
