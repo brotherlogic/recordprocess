@@ -3,12 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	"log"
 	"testing"
 	"time"
 
 	"github.com/brotherlogic/goserver/utils"
-	"github.com/brotherlogic/keystore/client"
+	keystoreclient "github.com/brotherlogic/keystore/client"
+	pb "github.com/brotherlogic/recordprocess/proto"
 	"golang.org/x/net/context"
 
 	pbgd "github.com/brotherlogic/godiscogs"
@@ -87,6 +87,7 @@ func InitTest() *Server {
 	s.SkipIssue = true
 	s.getter = &testGetter{}
 	s.GoServer.KSclient = *keystoreclient.GetTestClient(".testing")
+	s.GoServer.KSclient.Save(context.Background(), KEY, &pb.Scores{})
 
 	return s
 }
@@ -155,7 +156,6 @@ var movetests = []struct {
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1239, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PRE_DISTINGUISHED, DateAdded: time.Now().AddDate(-10, 0, 0).Unix()}}, pbrc.ReleaseMetadata_DISTINGUISHED},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1246, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{FilePath: "1234", Category: pbrc.ReleaseMetadata_RIP_THEN_SELL, DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}, pbrc.ReleaseMetadata_PREPARE_TO_SELL},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1247, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{SaleId: 1234, FilePath: "1234", Category: pbrc.ReleaseMetadata_SOLD, DateAdded: time.Now().AddDate(-2, -1, 0).Unix()}}, pbrc.ReleaseMetadata_LISTED_TO_SELL},
-	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1249, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{SaleId: 1234, FilePath: "1234", Category: pbrc.ReleaseMetadata_PREPARE_TO_SELL, DateAdded: time.Now().AddDate(-2, -1, 0).Unix(), SalePrice: 1234}}, pbrc.ReleaseMetadata_ASSESS_FOR_SALE},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1249, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{SaleId: 1234, FilePath: "1234", Category: pbrc.ReleaseMetadata_ASSESS_FOR_SALE, DateAdded: time.Now().AddDate(-2, -1, 0).Unix(), SalePrice: 1234, LastStockCheck: time.Now().Unix()}}, pbrc.ReleaseMetadata_PREPARE_TO_SELL},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1249, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{SaleId: 1234, FilePath: "1234", Category: pbrc.ReleaseMetadata_LISTED_TO_SELL, SaleState: pbgd.SaleState_SOLD, DateAdded: time.Now().AddDate(-2, -1, 0).Unix(), SalePrice: 1234, LastStockCheck: time.Now().Unix()}}, pbrc.ReleaseMetadata_SOLD_ARCHIVE},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1244, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PRE_FRESHMAN, DateAdded: time.Now().AddDate(0, -1, 0).Unix()}}, pbrc.ReleaseMetadata_UNLISTENED},
@@ -165,11 +165,12 @@ var movetests = []struct {
 
 func TestMoveTests(t *testing.T) {
 	for _, test := range movetests {
-		log.Printf("TESTING: %v", test.in)
+		test.in.GetRelease().InstanceId = 123
 		s := InitTest()
 		tg := testGetter{rec: test.in}
 		s.getter = &tg
-		//s.processNextRecords(context.Background())
+
+		s.ClientUpdate(context.Background(), &pbrc.ClientUpdateRequest{InstanceId: 123})
 
 		if tg.lastCategory != test.out {
 			t.Errorf("Full move failed \n%v\n vs. \n%v\n (should have been %v (from %v))", test.in, tg.lastCategory, test.out, tg.rec)
@@ -186,18 +187,17 @@ func TestSaveRecordTwice(t *testing.T) {
 	}
 
 	val2 := s.saveRecordScore(context.Background(), &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, InstanceId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_FRESHMAN}})
-	if val2 {
+	if !val2 {
 		t.Errorf("Second save did not fail")
 	}
 }
 
 func TestUpdate(t *testing.T) {
 	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{Id: 10, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}}
+	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{InstanceId: 123, Id: 10, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}}
 	s.getter = &tg
-	//s.processNextRecords(context.Background())
 
-	//s.processRecords(context.Background())
+	s.ClientUpdate(context.Background(), &pbrc.ClientUpdateRequest{InstanceId: 123})
 
 	if tg.lastCategory != pbrc.ReleaseMetadata_PURCHASED {
 		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
@@ -206,8 +206,9 @@ func TestUpdate(t *testing.T) {
 
 func TestBigUpdate(t *testing.T) {
 	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{Id: 10, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}, repeat: 200}
+	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{InstanceId: 123, Id: 10, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}, repeat: 200}
 	s.getter = &tg
+	s.ClientUpdate(context.Background(), &pbrc.ClientUpdateRequest{InstanceId: 123})
 	//s.processNextRecords(context.Background())
 
 	//s.processRecords(context.Background())

@@ -18,7 +18,7 @@ func TestGetScore(t *testing.T) {
 		t.Fatalf("Error in getting score: %v", err)
 	}
 
-	if len(scores.GetScores()) != 1 {
+	if len(scores.GetScores()) != 0 {
 		t.Errorf("Bad scores: %v", scores)
 	}
 }

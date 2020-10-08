@@ -69,7 +69,7 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 		return nil, err
 	}
 
-	update, _, result := s.processRecord(ctx, record)
+	update, ti, result := s.processRecord(ctx, record)
 	if update != pbrc.ReleaseMetadata_UNKNOWN {
 		ncount := record.GetMetadata().GetSaleAttempts()
 		if update == pbrc.ReleaseMetadata_STAGED_TO_SELL {
@@ -82,9 +82,9 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 		}
 	}
 
-	/*if ti >= 0 {
+	if ti >= 0 {
 		return &pbrc.ClientUpdateResponse{}, s.updateTime(ctx, in.InstanceId, time.Now().Add(time.Duration(ti)*time.Hour*24*7*30).Unix())
-	}*/
+	}
 
 	return &pbrc.ClientUpdateResponse{}, s.updateTime(ctx, in.InstanceId, time.Now().Add(time.Hour*24*7).Unix())
 }
