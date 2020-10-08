@@ -34,13 +34,11 @@ func main() {
 	switch os.Args[1] {
 	case "get":
 		val, _ := strconv.Atoi(os.Args[2])
-		res, err := client.GetScore(ctx, &pb.GetScoreRequest{InstanceId: int32(val)})
+		res, err := client.Get(ctx, &pb.GetRequest{InstanceId: int32(val)})
 		if err != nil {
 			log.Fatalf("Error on GET: %v", err)
 		}
-		for i, score := range res.GetScores() {
-			fmt.Printf("%v. [%v] -> %v,%v\n", i, time.Unix(score.ScoreTime, 0), score.Rating, score.Category)
-		}
+		fmt.Printf("%v -> %v\n", os.Args[2], time.Unix(res.GetNextUpdateTime(), 0))
 	case "force":
 		val, _ := strconv.Atoi(os.Args[2])
 		res, err := client.Force(ctx, &pb.ForceRequest{InstanceId: int32(val)})

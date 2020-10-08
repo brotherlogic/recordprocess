@@ -407,6 +407,100 @@ func (x *ForceResponse) GetReason() string {
 	return ""
 }
 
+type GetRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	InstanceId int32 `protobuf:"varint,1,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
+}
+
+func (x *GetRequest) Reset() {
+	*x = GetRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_recordprocess_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRequest) ProtoMessage() {}
+
+func (x *GetRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_recordprocess_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRequest.ProtoReflect.Descriptor instead.
+func (*GetRequest) Descriptor() ([]byte, []int) {
+	return file_recordprocess_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GetRequest) GetInstanceId() int32 {
+	if x != nil {
+		return x.InstanceId
+	}
+	return 0
+}
+
+type GetResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	NextUpdateTime int64 `protobuf:"varint,1,opt,name=next_update_time,json=nextUpdateTime,proto3" json:"next_update_time,omitempty"`
+}
+
+func (x *GetResponse) Reset() {
+	*x = GetResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_recordprocess_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetResponse) ProtoMessage() {}
+
+func (x *GetResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_recordprocess_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetResponse.ProtoReflect.Descriptor instead.
+func (*GetResponse) Descriptor() ([]byte, []int) {
+	return file_recordprocess_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetResponse) GetNextUpdateTime() int64 {
+	if x != nil {
+		return x.NextUpdateTime
+	}
+	return 0
+}
+
 var File_recordprocess_proto protoreflect.FileDescriptor
 
 var file_recordprocess_proto_rawDesc = []byte{
@@ -463,21 +557,32 @@ var file_recordprocess_proto_rawDesc = []byte{
 	0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x52, 0x65, 0x6c, 0x65, 0x61, 0x73, 0x65, 0x4d, 0x65, 0x74, 0x61,
 	0x64, 0x61, 0x74, 0x61, 0x2e, 0x43, 0x61, 0x74, 0x65, 0x67, 0x6f, 0x72, 0x79, 0x52, 0x06, 0x72,
 	0x65, 0x73, 0x75, 0x6c, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x72, 0x65, 0x61, 0x73, 0x6f, 0x6e, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x72, 0x65, 0x61, 0x73, 0x6f, 0x6e, 0x32, 0xa3, 0x01,
-	0x0a, 0x0c, 0x53, 0x63, 0x6f, 0x72, 0x65, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x4d,
-	0x0a, 0x08, 0x47, 0x65, 0x74, 0x53, 0x63, 0x6f, 0x72, 0x65, 0x12, 0x1e, 0x2e, 0x72, 0x65, 0x63,
-	0x6f, 0x72, 0x64, 0x70, 0x72, 0x6f, 0x63, 0x65, 0x73, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x53, 0x63,
-	0x6f, 0x72, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x72, 0x65, 0x63,
-	0x6f, 0x72, 0x64, 0x70, 0x72, 0x6f, 0x63, 0x65, 0x73, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x53, 0x63,
-	0x6f, 0x72, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x44, 0x0a,
-	0x05, 0x46, 0x6f, 0x72, 0x63, 0x65, 0x12, 0x1b, 0x2e, 0x72, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x70,
-	0x72, 0x6f, 0x63, 0x65, 0x73, 0x73, 0x2e, 0x46, 0x6f, 0x72, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e, 0x72, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x70, 0x72, 0x6f, 0x63,
-	0x65, 0x73, 0x73, 0x2e, 0x46, 0x6f, 0x72, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x22, 0x00, 0x42, 0x2d, 0x5a, 0x2b, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
-	0x6d, 0x2f, 0x62, 0x72, 0x6f, 0x74, 0x68, 0x65, 0x72, 0x6c, 0x6f, 0x67, 0x69, 0x63, 0x2f, 0x72,
-	0x65, 0x63, 0x6f, 0x72, 0x64, 0x70, 0x72, 0x6f, 0x63, 0x65, 0x73, 0x73, 0x2f, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x72, 0x65, 0x61, 0x73, 0x6f, 0x6e, 0x22, 0x2d, 0x0a,
+	0x0a, 0x47, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1f, 0x0a, 0x0b, 0x69,
+	0x6e, 0x73, 0x74, 0x61, 0x6e, 0x63, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05,
+	0x52, 0x0a, 0x69, 0x6e, 0x73, 0x74, 0x61, 0x6e, 0x63, 0x65, 0x49, 0x64, 0x22, 0x37, 0x0a, 0x0b,
+	0x47, 0x65, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x28, 0x0a, 0x10, 0x6e,
+	0x65, 0x78, 0x74, 0x5f, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x5f, 0x74, 0x69, 0x6d, 0x65, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0e, 0x6e, 0x65, 0x78, 0x74, 0x55, 0x70, 0x64, 0x61, 0x74,
+	0x65, 0x54, 0x69, 0x6d, 0x65, 0x32, 0xe3, 0x01, 0x0a, 0x0c, 0x53, 0x63, 0x6f, 0x72, 0x65, 0x53,
+	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x4d, 0x0a, 0x08, 0x47, 0x65, 0x74, 0x53, 0x63, 0x6f,
+	0x72, 0x65, 0x12, 0x1e, 0x2e, 0x72, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x70, 0x72, 0x6f, 0x63, 0x65,
+	0x73, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x53, 0x63, 0x6f, 0x72, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x72, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x70, 0x72, 0x6f, 0x63, 0x65,
+	0x73, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x53, 0x63, 0x6f, 0x72, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x44, 0x0a, 0x05, 0x46, 0x6f, 0x72, 0x63, 0x65, 0x12, 0x1b,
+	0x2e, 0x72, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x70, 0x72, 0x6f, 0x63, 0x65, 0x73, 0x73, 0x2e, 0x46,
+	0x6f, 0x72, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e, 0x72, 0x65,
+	0x63, 0x6f, 0x72, 0x64, 0x70, 0x72, 0x6f, 0x63, 0x65, 0x73, 0x73, 0x2e, 0x46, 0x6f, 0x72, 0x63,
+	0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x3e, 0x0a, 0x03, 0x47,
+	0x65, 0x74, 0x12, 0x19, 0x2e, 0x72, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x70, 0x72, 0x6f, 0x63, 0x65,
+	0x73, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1a, 0x2e,
+	0x72, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x70, 0x72, 0x6f, 0x63, 0x65, 0x73, 0x73, 0x2e, 0x47, 0x65,
+	0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x2d, 0x5a, 0x2b, 0x67,
+	0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x62, 0x72, 0x6f, 0x74, 0x68, 0x65,
+	0x72, 0x6c, 0x6f, 0x67, 0x69, 0x63, 0x2f, 0x72, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x70, 0x72, 0x6f,
+	0x63, 0x65, 0x73, 0x73, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -492,7 +597,7 @@ func file_recordprocess_proto_rawDescGZIP() []byte {
 	return file_recordprocess_proto_rawDescData
 }
 
-var file_recordprocess_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_recordprocess_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_recordprocess_proto_goTypes = []interface{}{
 	(*Scores)(nil),           // 0: recordprocess.Scores
 	(*Config)(nil),           // 1: recordprocess.Config
@@ -501,24 +606,28 @@ var file_recordprocess_proto_goTypes = []interface{}{
 	(*GetScoreResponse)(nil), // 4: recordprocess.GetScoreResponse
 	(*ForceRequest)(nil),     // 5: recordprocess.ForceRequest
 	(*ForceResponse)(nil),    // 6: recordprocess.ForceResponse
-	nil, // 7: recordprocess.Config.NextUpdateTimeEntry
-	(proto1.ReleaseMetadata_Category)(0), // 8: recordcollection.ReleaseMetadata.Category
+	(*GetRequest)(nil),       // 7: recordprocess.GetRequest
+	(*GetResponse)(nil),      // 8: recordprocess.GetResponse
+	nil,                      // 9: recordprocess.Config.NextUpdateTimeEntry
+	(proto1.ReleaseMetadata_Category)(0), // 10: recordcollection.ReleaseMetadata.Category
 }
 var file_recordprocess_proto_depIdxs = []int32{
-	2, // 0: recordprocess.Scores.scores:type_name -> recordprocess.RecordScore
-	7, // 1: recordprocess.Config.next_update_time:type_name -> recordprocess.Config.NextUpdateTimeEntry
-	8, // 2: recordprocess.RecordScore.category:type_name -> recordcollection.ReleaseMetadata.Category
-	2, // 3: recordprocess.GetScoreResponse.scores:type_name -> recordprocess.RecordScore
-	8, // 4: recordprocess.ForceResponse.result:type_name -> recordcollection.ReleaseMetadata.Category
-	3, // 5: recordprocess.ScoreService.GetScore:input_type -> recordprocess.GetScoreRequest
-	5, // 6: recordprocess.ScoreService.Force:input_type -> recordprocess.ForceRequest
-	4, // 7: recordprocess.ScoreService.GetScore:output_type -> recordprocess.GetScoreResponse
-	6, // 8: recordprocess.ScoreService.Force:output_type -> recordprocess.ForceResponse
-	7, // [7:9] is the sub-list for method output_type
-	5, // [5:7] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	2,  // 0: recordprocess.Scores.scores:type_name -> recordprocess.RecordScore
+	9,  // 1: recordprocess.Config.next_update_time:type_name -> recordprocess.Config.NextUpdateTimeEntry
+	10, // 2: recordprocess.RecordScore.category:type_name -> recordcollection.ReleaseMetadata.Category
+	2,  // 3: recordprocess.GetScoreResponse.scores:type_name -> recordprocess.RecordScore
+	10, // 4: recordprocess.ForceResponse.result:type_name -> recordcollection.ReleaseMetadata.Category
+	3,  // 5: recordprocess.ScoreService.GetScore:input_type -> recordprocess.GetScoreRequest
+	5,  // 6: recordprocess.ScoreService.Force:input_type -> recordprocess.ForceRequest
+	7,  // 7: recordprocess.ScoreService.Get:input_type -> recordprocess.GetRequest
+	4,  // 8: recordprocess.ScoreService.GetScore:output_type -> recordprocess.GetScoreResponse
+	6,  // 9: recordprocess.ScoreService.Force:output_type -> recordprocess.ForceResponse
+	8,  // 10: recordprocess.ScoreService.Get:output_type -> recordprocess.GetResponse
+	8,  // [8:11] is the sub-list for method output_type
+	5,  // [5:8] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_recordprocess_proto_init() }
@@ -611,6 +720,30 @@ func file_recordprocess_proto_init() {
 				return nil
 			}
 		}
+		file_recordprocess_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_recordprocess_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -618,7 +751,7 @@ func file_recordprocess_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_recordprocess_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -646,6 +779,7 @@ const _ = grpc.SupportPackageIsVersion6
 type ScoreServiceClient interface {
 	GetScore(ctx context.Context, in *GetScoreRequest, opts ...grpc.CallOption) (*GetScoreResponse, error)
 	Force(ctx context.Context, in *ForceRequest, opts ...grpc.CallOption) (*ForceResponse, error)
+	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
 }
 
 type scoreServiceClient struct {
@@ -674,10 +808,20 @@ func (c *scoreServiceClient) Force(ctx context.Context, in *ForceRequest, opts .
 	return out, nil
 }
 
+func (c *scoreServiceClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
+	out := new(GetResponse)
+	err := c.cc.Invoke(ctx, "/recordprocess.ScoreService/Get", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ScoreServiceServer is the server API for ScoreService service.
 type ScoreServiceServer interface {
 	GetScore(context.Context, *GetScoreRequest) (*GetScoreResponse, error)
 	Force(context.Context, *ForceRequest) (*ForceResponse, error)
+	Get(context.Context, *GetRequest) (*GetResponse, error)
 }
 
 // UnimplementedScoreServiceServer can be embedded to have forward compatible implementations.
@@ -689,6 +833,9 @@ func (*UnimplementedScoreServiceServer) GetScore(context.Context, *GetScoreReque
 }
 func (*UnimplementedScoreServiceServer) Force(context.Context, *ForceRequest) (*ForceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Force not implemented")
+}
+func (*UnimplementedScoreServiceServer) Get(context.Context, *GetRequest) (*GetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 
 func RegisterScoreServiceServer(s *grpc.Server, srv ScoreServiceServer) {
@@ -731,6 +878,24 @@ func _ScoreService_Force_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ScoreService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ScoreServiceServer).Get(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/recordprocess.ScoreService/Get",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ScoreServiceServer).Get(ctx, req.(*GetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _ScoreService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "recordprocess.ScoreService",
 	HandlerType: (*ScoreServiceServer)(nil),
@@ -742,6 +907,10 @@ var _ScoreService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Force",
 			Handler:    _ScoreService_Force_Handler,
+		},
+		{
+			MethodName: "Get",
+			Handler:    _ScoreService_Get_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
