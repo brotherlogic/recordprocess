@@ -197,6 +197,10 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		}
 	}
 
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PRE_VALIDATE && r.GetRelease().Rating > 0 {
+		return pbrc.ReleaseMetadata_UNKNOWN, -1, "Validated"
+	}
+
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PURCHASED && r.GetMetadata().Cost > 0 {
 		return pbrc.ReleaseMetadata_UNLISTENED, -1, "New Record"
 	}
