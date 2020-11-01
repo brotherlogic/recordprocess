@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/brotherlogic/goserver/utils"
+	pbrc "github.com/brotherlogic/recordcollection/proto"
 	pb "github.com/brotherlogic/recordprocess/proto"
 
 	//Needed to pull in gzip encoding init
@@ -40,8 +41,9 @@ func main() {
 		}
 		fmt.Printf("%v -> %v\n", os.Args[2], time.Unix(res.GetNextUpdateTime(), 0))
 	case "force":
+		client2 := pbrc.NewClientUpdateServiceClient(conn)
 		val, _ := strconv.Atoi(os.Args[2])
-		res, err := client.Force(ctx, &pb.ForceRequest{InstanceId: int32(val)})
+		res, err := client2.ClientUpdate(ctx, &pbrc.ClientUpdateRequest{InstanceId: int32(val)})
 		fmt.Printf("%v\n%v", res, err)
 
 	}
