@@ -151,10 +151,6 @@ func (s *Server) readConfig(ctx context.Context) (*pb.Config, error) {
 		}
 	}
 
-	/*	for _, id := range ids {
-		config.NextUpdateTime[id] = time.Now().Unix()
-	}*/
-
 	return config, nil
 }
 
