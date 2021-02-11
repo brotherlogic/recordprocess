@@ -96,7 +96,7 @@ func recordNeedsRip(r *pbrc.Record) bool {
 		}
 	}
 
-	return hasCD && r.GetMetadata().FilePath == ""
+	return hasCD && r.GetMetadata().CdPath == ""
 }
 
 func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.ReleaseMetadata_Category, int, string) {
