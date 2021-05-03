@@ -17,6 +17,7 @@ type getter interface {
 	getRecords(ctx context.Context, t int64, c int) ([]int32, error)
 	getRecord(ctx context.Context, instanceID int32) (*pbrc.Record, error)
 	update(ctx context.Context, instanceID int32, category pbrc.ReleaseMetadata_Category, reason string, scount int32) error
+	updateStock(ctx context.Context, rec *pbrc.Record) error
 }
 
 func (s *Server) runLoop() {

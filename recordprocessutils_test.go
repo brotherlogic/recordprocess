@@ -46,6 +46,10 @@ func (t *testGetter) update(ctx context.Context, instanceID int32, cat pbrc.Rele
 	return nil
 }
 
+func (t *testGetter) updateStock(ctx context.Context, rec *pbrc.Record) error {
+	return nil
+}
+
 func (t *testGetter) moveToSold(ctx context.Context, r *pbrc.Record) {
 	t.sold = r
 }
@@ -75,6 +79,10 @@ func (t testFailGetter) update(ctx context.Context, instanceID int32, cat pbrc.R
 		return nil
 	}
 	return errors.New("Built to fail")
+}
+
+func (t testFailGetter) updateStock(ctx context.Context, rec *pbrc.Record) error {
+	return nil
 }
 
 func (t testFailGetter) moveToSold(ctx context.Context, r *pbrc.Record) {
