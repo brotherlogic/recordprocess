@@ -93,6 +93,22 @@ func (p prodGetter) update(ctx context.Context, instanceID int32, cat pbrc.Relea
 	return nil
 }
 
+func (p prodGetter) updateStock(ctx context.Context, rec *pbrc.Record) error {
+	conn, err := p.dial(ctx, "recordcollection")
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client := pbrc.NewRecordCollectionServiceClient(conn)
+	up := &pbrc.UpdateRecordRequest{Reason: "org-stock", Update: &pbrc.Record{Release: &gdpb.Release{InstanceId: rec.GetRelease().InstanceId}, Metadata: &pbrc.ReleaseMetadata{LastStockCheck: time.Now().Unix()}}}
+	_, err = client.UpdateRecord(ctx, up)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Init builds the server
 func Init() *Server {
 	s := &Server{
