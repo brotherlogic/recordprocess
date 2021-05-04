@@ -101,7 +101,7 @@ func (p prodGetter) updateStock(ctx context.Context, rec *pbrc.Record) error {
 	defer conn.Close()
 
 	client := pbrc.NewRecordCollectionServiceClient(conn)
-	up := &pbrc.UpdateRecordRequest{Reason: "org-stock", Update: &pbrc.Record{Release: &gdpb.Release{InstanceId: rec.GetRelease().InstanceId}, Metadata: &pbrc.ReleaseMetadata{LastStockCheck: time.Now().Unix()}}}
+	up := &pbrc.UpdateRecordRequest{Reason: "stock-from-proc", Update: &pbrc.Record{Release: &gdpb.Release{InstanceId: rec.GetRelease().InstanceId}, Metadata: &pbrc.ReleaseMetadata{LastStockCheck: time.Now().Unix()}}}
 	_, err = client.UpdateRecord(ctx, up)
 	if err != nil {
 		return err
