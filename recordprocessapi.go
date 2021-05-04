@@ -82,8 +82,8 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 		}
 	}
 
-	// Always trigger an update on sales, to see if they've sold
-	if record.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_LISTED_TO_SELL {
+	// Always trigger an update on sales, to see if they've sold once a week
+	if record.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_LISTED_TO_SELL && time.Now().Sub(time.Unix(record.GetMetadata().GetLastStockCheck(), 0)) > time.Hour*24*7 {
 		err := s.getter.updateStock(ctx, record)
 		if err != nil {
 			return nil, err
