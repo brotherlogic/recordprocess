@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	ctx, cancel := utils.ManualContext("recordprocess-cli", "recordprocess-cli", time.Minute, true)
+	ctx, cancel := utils.ManualContext("recordprocess-cli", time.Minute)
 	defer cancel()
 
 	conn, err := utils.LFDialServer(ctx, "recordprocess")

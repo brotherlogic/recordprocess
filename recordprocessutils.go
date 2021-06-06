@@ -21,7 +21,7 @@ type getter interface {
 }
 
 func (s *Server) runLoop() {
-	ctx, cancel := utils.ManualContext("rp-loop", "rp-loop", time.Minute, true)
+	ctx, cancel := utils.ManualContext("rp-loop", time.Minute)
 	defer cancel()
 
 	config, err := s.readConfig(ctx)
@@ -196,6 +196,10 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		if r.GetRelease().Rating == 5 {
 			return pbrc.ReleaseMetadata_FRESHMAN, -1, "Returning to fold"
 		}
+	}
+
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_SOPHMORE {
+		return pbrc.ReleaseMetadata_IN_COLLECTION, -1, "SophmoreToIn"
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PRE_VALIDATE && r.GetRelease().Rating > 0 {

@@ -268,7 +268,7 @@ func main() {
 		return
 	}
 
-	ctx, cancel := utils.ManualContext("recordproc", "recordproc", time.Minute, false)
+	ctx, cancel := utils.ManualContext("recordproc", time.Minute)
 	config, err := server.readConfig(ctx)
 	cancel()
 	code := status.Convert(err).Code()
