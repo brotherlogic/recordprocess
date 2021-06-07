@@ -206,6 +206,10 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, -1, "PreSophmoreToPreIn"
 	}
 
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PRE_IN_COLLECTION && r.GetRelease().Rating > 0 {
+		return pbrc.ReleaseMetadata_IN_COLLECTION, -1, "PlaceInCollection"
+	}
+
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PRE_VALIDATE && r.GetRelease().Rating > 0 {
 		return pbrc.ReleaseMetadata_VALIDATE, -1, "Validated"
 	}
