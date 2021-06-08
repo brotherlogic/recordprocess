@@ -286,7 +286,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_HIGH_SCHOOL && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -3, 0).Unix()) {
-		return pbrc.ReleaseMetadata_PRE_FRESHMAN, -1, "PRE F"
+		return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, -1, "PRE IN"
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_FRESHMAN && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -6, 0).Unix()) {
