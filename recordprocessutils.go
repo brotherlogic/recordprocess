@@ -194,11 +194,12 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		}
 
 		if r.GetRelease().Rating == 5 {
-			return pbrc.ReleaseMetadata_FRESHMAN, -1, "Returning to fold"
+			return pbrc.ReleaseMetadata_IN_COLLECTION, -1, "Returning to fold"
 		}
 	}
 
-	if r.GetMetadata().Category == pbrc.ReleaseMetadata_SOPHMORE {
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_SOPHMORE ||
+		r.GetMetadata().Category == pbrc.ReleaseMetadata_FRESHMAN {
 		return pbrc.ReleaseMetadata_IN_COLLECTION, -1, "SophmoreToIn"
 	}
 
@@ -234,7 +235,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_FRESHMAN && r.GetRelease().Rating > 0 {
 		if r.GetMetadata().GetDateAdded() > (time.Now().AddDate(0, -6, 0).Unix()) && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -3, 0).Unix()) {
-			return pbrc.ReleaseMetadata_FRESHMAN, 3, "FRESHMAN"
+			return pbrc.ReleaseMetadata_IN_COLLECTION, 3, "FRESHMAN"
 		}
 	}
 
@@ -270,7 +271,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_VALIDATE || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_FRESHMAN && r.GetRelease().Rating > 0) {
 		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -3, 0).Unix()) {
-			return pbrc.ReleaseMetadata_FRESHMAN, 3, "FRESHMAN"
+			return pbrc.ReleaseMetadata_IN_COLLECTION, 3, "FRESHMAN"
 		}
 	}
 
