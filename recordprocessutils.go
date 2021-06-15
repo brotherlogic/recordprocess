@@ -199,11 +199,13 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_SOPHMORE ||
+		r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_GRADUATE ||
 		r.GetMetadata().Category == pbrc.ReleaseMetadata_FRESHMAN {
 		return pbrc.ReleaseMetadata_IN_COLLECTION, -1, "SophmoreToIn"
 	}
 
-	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PRE_SOPHMORE {
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PRE_SOPHMORE ||
+		r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_GRADUATE {
 		return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, -1, "PreSophmoreToPreIn"
 	}
 
@@ -259,7 +261,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_VALIDATE || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_GRADUATE && r.GetRelease().Rating > 0) {
 		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-1, 0, 0).Unix()) {
-			return pbrc.ReleaseMetadata_GRADUATE, 3, "GRAD"
+			return pbrc.ReleaseMetadata_IN_COLLECTION, 3, "GRAD"
 		}
 	}
 
@@ -290,11 +292,11 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_FRESHMAN && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -6, 0).Unix()) {
-		return pbrc.ReleaseMetadata_PRE_SOPHMORE, -1, "PRE S"
+		return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, -1, "PRE S"
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_SOPHMORE && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-1, 0, 0).Unix()) {
-		return pbrc.ReleaseMetadata_PRE_GRADUATE, -1, "PRE G"
+		return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, -1, "PRE G"
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_GRADUATE && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(-2, 0, 0).Unix()) {
