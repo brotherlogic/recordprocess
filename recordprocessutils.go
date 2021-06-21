@@ -202,14 +202,16 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_GRADUATE ||
 		r.GetMetadata().Category == pbrc.ReleaseMetadata_FRESHMAN ||
 		r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_POSTDOC ||
-		r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PROFESSOR {
+		r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PROFESSOR ||
+		r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_DISTINGUISHED {
 		return pbrc.ReleaseMetadata_IN_COLLECTION, -1, "MoveToIn"
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PRE_SOPHMORE ||
 		r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_GRADUATE ||
 		r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_POSTDOC ||
-		r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_PROFESSOR {
+		r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_PROFESSOR ||
+		r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_DISTINGUISHED {
 		return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, -1, "PRE TO IN"
 	}
 
