@@ -200,13 +200,15 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_SOPHMORE ||
 		r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_GRADUATE ||
-		r.GetMetadata().Category == pbrc.ReleaseMetadata_FRESHMAN {
-		return pbrc.ReleaseMetadata_IN_COLLECTION, -1, "SophmoreToIn"
+		r.GetMetadata().Category == pbrc.ReleaseMetadata_FRESHMAN ||
+		r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_POSTDOC {
+		return pbrc.ReleaseMetadata_IN_COLLECTION, -1, "MoveToIn"
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PRE_SOPHMORE ||
-		r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_GRADUATE {
-		return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, -1, "PreSophmoreToPreIn"
+		r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_GRADUATE ||
+		r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_POSTDOC {
+		return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, -1, "PRE TO IN"
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PRE_IN_COLLECTION && r.GetRelease().Rating > 0 {
