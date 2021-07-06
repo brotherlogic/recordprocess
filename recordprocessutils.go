@@ -106,6 +106,11 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_UNKNOWN, -1, "Pending Score"
 	}
 
+	// Don't process a record that is in the box
+	if r.GetMetadata() != nil && r.GetMetadata().GetBoxState() == pbrc.ReleaseMetadata_IN_THE_BOX {
+		return pbrc.ReleaseMetadata_UNKNOWN, -1, "In The Box"
+	}
+
 	if r.GetMetadata().GetGoalFolder() == 268147 && r.GetMetadata().Category != pbrc.ReleaseMetadata_DIGITAL {
 		return pbrc.ReleaseMetadata_DIGITAL, -1, "Digital"
 	}
