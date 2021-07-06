@@ -70,6 +70,12 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 	}
 
 	update, ti, result := s.processRecord(ctx, record)
+
+	// Fast return on boxed records
+	if result == "In The Box" {
+		return &pbrc.ClientUpdateResponse{}, nil
+	}
+
 	if result != "No rules applied" {
 		ncount := record.GetMetadata().GetSaleAttempts()
 		if update == pbrc.ReleaseMetadata_STAGED_TO_SELL {
