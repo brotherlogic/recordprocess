@@ -107,7 +107,9 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 	}
 
 	// Don't process a record that is in the box
-	if r.GetMetadata() != nil && r.GetMetadata().GetBoxState() == pbrc.ReleaseMetadata_IN_THE_BOX {
+	if r.GetMetadata() != nil &&
+		r.GetMetadata().GetBoxState() != pbrc.ReleaseMetadata_BOX_UNKNOWN &&
+		r.GetMetadata().GetBoxState() != pbrc.ReleaseMetadata_OUT_OF_BOX {
 		return pbrc.ReleaseMetadata_UNKNOWN, -1, "In The Box"
 	}
 
