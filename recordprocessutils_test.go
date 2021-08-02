@@ -130,6 +130,8 @@ var movetests = []struct {
 	in  *pbrc.Record
 	out pbrc.ReleaseMetadata_Category
 }{
+	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1240}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_UNKNOWN, DateAdded: time.Now().AddDate(0, -3, 0).Unix()}}, pbrc.ReleaseMetadata_ARRIVED},
+
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1362206, Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_ASSESS, Purgatory: pbrc.Purgatory_NEEDS_STOCK_CHECK, LastStockCheck: time.Now().Unix(), GoalFolder: 242017, Cost: 12}}, pbrc.ReleaseMetadata_PRE_FRESHMAN},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1727264, Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PARENTS, GoalFolder: 242017, Cost: 12}}, pbrc.ReleaseMetadata_PRE_FRESHMAN},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_LISTED_TO_SELL, Cost: 12, GoalFolder: 242017}}, pbrc.ReleaseMetadata_SALE_ISSUE},
@@ -272,16 +274,6 @@ func TestUpdateFailOnGet(t *testing.T) {
 
 	if tg.lastCategory == pbrc.ReleaseMetadata_PURCHASED {
 		t.Errorf("Folder has been updated: %v", tg.lastCategory)
-	}
-}
-
-func TestProcessUnpurchasedRecord(t *testing.T) {
-	s := InitTest()
-	r := &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}
-	nr, _, _ := s.processRecord(context.Background(), r)
-
-	if nr != pbrc.ReleaseMetadata_PURCHASED {
-		t.Fatalf("Error in processing record: %v", nr)
 	}
 }
 
