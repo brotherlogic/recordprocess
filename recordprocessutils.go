@@ -138,7 +138,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_GOOGLE_PLAY, -1, "Google Play"
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN && r.GetMetadata().GetDateAdded() > 0 {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN && r.GetMetadata().GetDateArrived() > 0 {
 		return pbrc.ReleaseMetadata_ARRIVED, -1, "Purchased"
 	}
 
