@@ -138,7 +138,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_GOOGLE_PLAY, -1, "Google Play"
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN && r.GetMetadata().GetDateArrived() > 0 {
+	if (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PURCHASED) && r.GetMetadata().GetDateArrived() > 0 {
 		return pbrc.ReleaseMetadata_ARRIVED, -1, "Purchased"
 	}
 
@@ -232,10 +232,6 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PURCHASED && r.GetMetadata().Cost > 0 {
 		return pbrc.ReleaseMetadata_UNLISTENED, -1, "New Record"
-	}
-
-	if r.GetRelease().FolderId == 1 && r.GetMetadata().Category != pbrc.ReleaseMetadata_PURCHASED && r.GetMetadata().GoalFolder <= 1 {
-		return pbrc.ReleaseMetadata_PURCHASED, -1, "Uncategorized record"
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNLISTENED {
