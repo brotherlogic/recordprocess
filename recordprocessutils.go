@@ -121,7 +121,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		(r.GetMetadata().Category == pbrc.ReleaseMetadata_DIGITAL ||
 			r.GetMetadata().Category == pbrc.ReleaseMetadata_BANDCAMP ||
 			r.GetMetadata().Category == pbrc.ReleaseMetadata_UNKNOWN) {
-		return pbrc.ReleaseMetadata_UNLISTENED, -1, "BandcampOut"
+		return pbrc.ReleaseMetadata_ARRIVED, -1, "BandcampOut"
 	}
 
 	// Deal with parents records
