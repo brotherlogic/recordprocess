@@ -7,7 +7,6 @@ import (
 	"golang.org/x/net/context"
 
 	pbgd "github.com/brotherlogic/godiscogs"
-	"github.com/brotherlogic/goserver/utils"
 	pbrc "github.com/brotherlogic/recordcollection/proto"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -20,9 +19,7 @@ type getter interface {
 	updateStock(ctx context.Context, rec *pbrc.Record) error
 }
 
-func (s *Server) runLoop() {
-	ctx, cancel := utils.ManualContext("rp-loop", time.Minute)
-	defer cancel()
+func (s *Server) runLoop(ctx context.Context) {
 
 	config, err := s.readConfig(ctx)
 	if err != nil {

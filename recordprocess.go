@@ -222,11 +222,14 @@ func (s *Server) procLoop() {
 }
 
 func (s *Server) runElectLoop() {
-	cf, err := s.Elect()
-	defer cf()
+	ctx, cancel := utils.ManualContext("rp-loop", time.Minute)
+	defer cancel()
+
+	cf, err := s.RunLockingElection(ctx, "recordprocess")
+	defer s.ReleaseLockingElection(ctx, "recordprocess", cf)
 
 	if err == nil {
-		s.runLoop()
+		s.runLoop(ctx)
 	} else {
 		s.Log(fmt.Sprintf("Unable to elect: %v", err))
 	}
