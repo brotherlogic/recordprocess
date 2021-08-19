@@ -70,6 +70,7 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 	}
 
 	update, ti, result := s.processRecord(ctx, record)
+	s.Log(fmt.Sprintf("%v -> %v, %v, %v", record.GetRelease().GetInstanceId(), update, ti, result))
 
 	// Fast return on boxed records
 	if result == "In The Box" {
