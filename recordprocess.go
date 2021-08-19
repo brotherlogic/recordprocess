@@ -213,7 +213,7 @@ var (
 )
 
 func (s *Server) procLoop() {
-	for true {
+	for {
 		s.runElectLoop()
 
 		//Wait 1 minute between runs
