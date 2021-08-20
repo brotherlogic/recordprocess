@@ -289,7 +289,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		}
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_VALIDATE || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL && r.GetRelease().Rating > 0) {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_VALIDATE && r.GetRelease().Rating > 0 {
 		return pbrc.ReleaseMetadata_STAGED, 1, "STAGED"
 	}
 
