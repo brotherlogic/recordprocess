@@ -293,6 +293,8 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_STAGED, 1, "STAGED"
 	}
 
+	s.Log(fmt.Sprintf("%v No validate? %v", r.GetRelease().GetInstanceId(), r.GetMetadata().GetCategory()))
+
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_STAGED && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -1, 0).Unix()) {
 		return pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL, -1, "PRE HS"
 	}
