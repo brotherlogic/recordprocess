@@ -182,6 +182,8 @@ github.com/brotherlogic/recordcollection v0.0.0-20210819213639-98961c7f3d84 h1:Y
 github.com/brotherlogic/recordcollection v0.0.0-20210819213639-98961c7f3d84/go.mod h1:W+iieVzlR1UgHOgaxt2ZhgynttaHLmpYDLQI9Idua4E=
 github.com/brotherlogic/recordcollection v0.0.0-20210820182746-8dbd0b982417 h1:vuz1TIdqloBW0J/FuFl/vj5c/YF+rpq2Vxmb1jOamy8=
 github.com/brotherlogic/recordcollection v0.0.0-20210820182746-8dbd0b982417/go.mod h1:W+iieVzlR1UgHOgaxt2ZhgynttaHLmpYDLQI9Idua4E=
+github.com/brotherlogic/recordcollection v0.0.0-20210821232524-1919685e525d h1:UNOvCeXSVY9/0elx/vzqjfUnJ+Dctr3R8ViX66GV2I0=
+github.com/brotherlogic/recordcollection v0.0.0-20210821232524-1919685e525d/go.mod h1:YCGCrAOK4nqlLcmnWwSu58+gsZ9AHr/2GkuGgpWXnxM=
 github.com/brotherlogic/recordfanout v0.0.0-20210805010139-e0c48ca18fbe/go.mod h1:m7wF1oHVNjtrgoyby/KBEmxygoZUmQORD4TMTU6GJDQ=
 github.com/brotherlogic/recordfanout v0.0.0-20210813195020-95d0f24ed81b/go.mod h1:WH4FmmEsksvAYZNoYLnm0tSb+BzfSOsT6u7GaCwqKPo=
 github.com/brotherlogic/recordgetter v0.0.0-20201227170856-8696381a15a9/go.mod h1:yJmhM51lcaJ2zYRD9wBuaG+u2anrS+lMMV/x9hXruaQ=
@@ -881,6 +883,8 @@ google.golang.org/genproto v0.0.0-20210819152826-bb2f42df81c9 h1:MdJH3KjoUNISwgB
 google.golang.org/genproto v0.0.0-20210819152826-bb2f42df81c9/go.mod h1:eFjDcFEctNawg4eG61bRv87N7iHBWyVhJu7u1kqDUXY=
 google.golang.org/genproto v0.0.0-20210820002220-43fce44e7af1 h1:F0WcJZXJRyfaWMXUBAGq7Ba4MWDn+yeACpeEkDUkJ1A=
 google.golang.org/genproto v0.0.0-20210820002220-43fce44e7af1/go.mod h1:eFjDcFEctNawg4eG61bRv87N7iHBWyVhJu7u1kqDUXY=
+google.golang.org/genproto v0.0.0-20210821163610-241b8fcbd6c8 h1:XosVttQUxX8erNhEruTu053/VchgYuksoS9Bj/OITjU=
+google.golang.org/genproto v0.0.0-20210821163610-241b8fcbd6c8/go.mod h1:eFjDcFEctNawg4eG61bRv87N7iHBWyVhJu7u1kqDUXY=
 google.golang.org/grpc v1.17.0/go.mod h1:6QZJwpn2B+Zp71q/5VxRsJ6NXXVCE5NRUHRo+f3cWCs=
 google.golang.org/grpc v1.19.0/go.mod h1:mqu4LbDTu4XGKhr4mRzUsmM4RtVoemTSY81AxZiDr8c=
 google.golang.org/grpc v1.20.0/go.mod h1:chYK+tFQF0nDUGJgXMSgLCQk3phJEuONr2DCgLDdAQM=

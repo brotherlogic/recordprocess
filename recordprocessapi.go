@@ -77,6 +77,10 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 		return &pbrc.ClientUpdateResponse{}, nil
 	}
 
+	if result != "No rules applied" && ti <= 0 {
+		s.RaiseIssue("Unapplied move", fmt.Sprintf("%v, %v, %v", update, ti, result))
+	}
+
 	if result != "No rules applied" && ti > 0 {
 		ncount := record.GetMetadata().GetSaleAttempts()
 		if update == pbrc.ReleaseMetadata_STAGED_TO_SELL {
