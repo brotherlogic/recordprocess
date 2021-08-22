@@ -45,6 +45,28 @@ func main() {
 		val, _ := strconv.Atoi(os.Args[2])
 		res, err := client2.ClientUpdate(ctx, &pbrc.ClientUpdateRequest{InstanceId: int32(val)})
 		fmt.Printf("%v\n%v", res, err)
+	case "fullping":
+		ctx2, cancel2 := utils.ManualContext("recordcollectioncli-"+os.Args[1], time.Hour)
+		defer cancel2()
 
+		conn2, err := utils.LFDialServer(ctx2, "recordcollection")
+		if err != nil {
+			log.Fatalf("Cannot reach rc: %v", err)
+		}
+		defer conn2.Close()
+
+		registry := pbrc.NewRecordCollectionServiceClient(conn2)
+		ids, err := registry.QueryRecords(ctx2, &pbrc.QueryRecordsRequest{Query: &pbrc.QueryRecordsRequest_FolderId{3380098}})
+		if err != nil {
+			log.Fatalf("Bad query: %v", err)
+		}
+		client2 := pbrc.NewClientUpdateServiceClient(conn)
+		for i, id := range ids.GetInstanceIds() {
+			log.Printf("PING %v -> %v", i, id)
+			ctx3, cancel3 := utils.ManualContext("fullping", time.Minute)
+			res, err := client2.ClientUpdate(ctx3, &pbrc.ClientUpdateRequest{InstanceId: int32(id)})
+			fmt.Printf("%v\n%v", res, err)
+			cancel3()
+		}
 	}
 }
