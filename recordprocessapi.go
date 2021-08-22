@@ -77,7 +77,7 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 		return &pbrc.ClientUpdateResponse{}, nil
 	}
 
-	if result != "No rules applied" {
+	if result != "No rules applied" && update != pbrc.ReleaseMetadata_UNKNOWN {
 		ncount := record.GetMetadata().GetSaleAttempts()
 		if update == pbrc.ReleaseMetadata_STAGED_TO_SELL {
 			ncount++
