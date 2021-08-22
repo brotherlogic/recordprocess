@@ -136,7 +136,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 	}
 
 	if (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PURCHASED) && r.GetMetadata().GetDateArrived() > 0 {
-		return pbrc.ReleaseMetadata_ARRIVED, -1, "Purchased"
+		return pbrc.ReleaseMetadata_ARRIVED, 1, "Purchased"
 	}
 
 	if (r.GetMetadata().Category == pbrc.ReleaseMetadata_LISTED_TO_SELL ||
