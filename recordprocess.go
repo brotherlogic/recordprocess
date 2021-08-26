@@ -14,13 +14,17 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 
 	gdpb "github.com/brotherlogic/godiscogs"
 	pbg "github.com/brotherlogic/goserver/proto"
 	"github.com/brotherlogic/goserver/utils"
+	qpb "github.com/brotherlogic/queue/proto"
 	pbrc "github.com/brotherlogic/recordcollection/proto"
 	rcpb "github.com/brotherlogic/recordcollection/proto"
+	rfpb "github.com/brotherlogic/recordfanout/proto"
 	pb "github.com/brotherlogic/recordprocess/proto"
+	google_protobuf "github.com/golang/protobuf/ptypes/any"
 )
 
 const (
@@ -250,7 +254,26 @@ func (s *Server) setVarz(config *pb.Config) {
 	}
 	nextUpdateTime.Set(float64(min))
 	lastUpdateTime.Set(float64(max))
+}
 
+func (s *Server) pushUpdate(ctx context.Context, iid int32, t time.Time) error {
+	conn, err := s.FDialServer(ctx, "queue")
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	qclient := qpb.NewQueueServiceClient(conn)
+	upup := &rfpb.FanoutRequest{
+		InstanceId: int32(iid),
+	}
+	data, _ := proto.Marshal(upup)
+	_, err = qclient.AddQueueItem(ctx, &qpb.AddQueueItemRequest{
+		QueueName: "record_fanout",
+		RunTime:   t.Unix(),
+		Payload:   &google_protobuf.Any{Value: data},
+		Key:       fmt.Sprintf("%v", iid),
+	})
+	return err
 }
 
 func main() {
@@ -279,8 +302,6 @@ func main() {
 		log.Fatalf("Unable to read config: %v", err)
 	}
 	server.setVarz(config)
-
-	go server.procLoop()
 
 	server.Serve()
 }

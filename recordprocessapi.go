@@ -99,11 +99,11 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 		}
 	}
 
-	if ti >= 0 {
-		return &pbrc.ClientUpdateResponse{}, s.updateTime(ctx, in.InstanceId, time.Now().Add(time.Duration(ti)*time.Hour*24*7*30).Unix())
+	if time.Now().Before(ti) {
+		return &pbrc.ClientUpdateResponse{}, s.pushUpdate(ctx, in.InstanceId, ti)
 	}
 
-	return &pbrc.ClientUpdateResponse{}, s.updateTime(ctx, in.InstanceId, time.Now().Add(time.Hour*24*7).Unix())
+	return &pbrc.ClientUpdateResponse{}, nil
 }
 
 //Get peek into the state
