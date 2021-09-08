@@ -282,7 +282,11 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_VALIDATE || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL && r.GetRelease().Rating > 0) {
 		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -1, 0).Unix()) {
-			return pbrc.ReleaseMetadata_HIGH_SCHOOL, time.Unix(r.GetMetadata().GetDateArrived(), 0).Add(time.Hour * 24 * 90), "HIGH SCHOOL"
+			if r.GetMetadata().GetDateArrived() > 0 {
+				return pbrc.ReleaseMetadata_HIGH_SCHOOL, time.Unix(r.GetMetadata().GetDateArrived(), 0).Add(time.Hour * 24 * 90), "HIGH SCHOOL W/ARR"
+			} else {
+				return pbrc.ReleaseMetadata_HIGH_SCHOOL, time.Unix(r.GetMetadata().GetDateAdded(), 0).Add(time.Hour * 24 * 90), "HIGH SCHOOL W/ADD"
+			}
 		}
 	}
 
