@@ -298,6 +298,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL, NO_CHANGE, "PRE HS"
 	}
 
+	s.Log(fmt.Sprintf("%v and %v", time.Unix(r.GetMetadata().GetDateAdded(), 0), time.Now().AddDate(0, -3, 0)))
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_HIGH_SCHOOL && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -3, 0).Unix()) {
 		return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, NO_CHANGE, "PRE IN"
 	}
