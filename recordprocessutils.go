@@ -230,7 +230,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNLISTENED {
 		if r.GetRelease().Rating > 0 {
-			return pbrc.ReleaseMetadata_STAGED, time.Unix(r.GetMetadata().DateArrived, 0).Add(time.Hour * 24 * 30), "Staged"
+			return pbrc.ReleaseMetadata_STAGED, time.Unix(r.GetMetadata().GetLastListenTime(), 0).Add(time.Hour * 24 * 30), "Staged"
 		}
 	}
 
@@ -281,11 +281,11 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_VALIDATE || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL && r.GetRelease().Rating > 0) {
-		if r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -1, 0).Unix()) {
+		if r.GetMetadata().GetLastListenTime() < (time.Now().AddDate(0, -1, 0).Unix()) {
 			if r.GetMetadata().GetDateArrived() > 0 {
-				return pbrc.ReleaseMetadata_HIGH_SCHOOL, time.Unix(r.GetMetadata().GetDateArrived(), 0).Add(time.Hour * 24 * 90), "HIGH SCHOOL W/ARR"
+				return pbrc.ReleaseMetadata_HIGH_SCHOOL, time.Unix(r.GetMetadata().GetLastListenTime(), 0).Add(time.Hour * 24 * 60), "HIGH SCHOOL W/ARR"
 			} else {
-				return pbrc.ReleaseMetadata_HIGH_SCHOOL, time.Unix(r.GetMetadata().GetDateAdded(), 0).Add(time.Hour * 24 * 90), "HIGH SCHOOL W/ADD"
+				return pbrc.ReleaseMetadata_HIGH_SCHOOL, time.Unix(r.GetMetadata().GetLastListenTime(), 0).Add(time.Hour * 24 * 60), "HIGH SCHOOL W/ADD"
 			}
 		}
 	}
@@ -294,12 +294,12 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_STAGED, NO_CHANGE, "STAGED"
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_STAGED && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -1, 0).Unix()) {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_STAGED && r.GetMetadata().GetLastListenTime() < (time.Now().AddDate(0, -1, 0).Unix()) {
 		return pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL, NO_CHANGE, "PRE HS"
 	}
 
 	s.Log(fmt.Sprintf("%v -> %v and %v", r.GetRelease().GetInstanceId(), time.Unix(r.GetMetadata().GetDateAdded(), 0), time.Now().AddDate(0, -3, 0)))
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_HIGH_SCHOOL && r.GetMetadata().GetDateAdded() < (time.Now().AddDate(0, -3, 0).Unix()) {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_HIGH_SCHOOL && r.GetMetadata().GetLastListenTime() < (time.Now().AddDate(0, -2, 0).Unix()) {
 		return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, NO_CHANGE, "PRE IN"
 	}
 
