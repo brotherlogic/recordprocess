@@ -56,7 +56,7 @@ func main() {
 		defer conn2.Close()
 
 		registry := pbrc.NewRecordCollectionServiceClient(conn2)
-		ids, err := registry.QueryRecords(ctx2, &pbrc.QueryRecordsRequest{Query: &pbrc.QueryRecordsRequest_FolderId{3380098}})
+		ids, err := registry.QueryRecords(ctx2, &pbrc.QueryRecordsRequest{Query: &pbrc.QueryRecordsRequest_FolderId{673768}})
 		if err != nil {
 			log.Fatalf("Bad query: %v", err)
 		}
