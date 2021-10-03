@@ -280,7 +280,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		}
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_VALIDATE || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL && r.GetRelease().Rating > 0) {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_VALIDATE || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL && r.GetRelease().Rating > 0) {
 		return pbrc.ReleaseMetadata_HIGH_SCHOOL, time.Unix(r.GetMetadata().GetLastListenTime(), 0).Add(time.Hour * 24 * 60), "HIGH SCHOOL W/ARR"
 	}
 
