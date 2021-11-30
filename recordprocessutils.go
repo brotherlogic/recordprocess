@@ -288,12 +288,12 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_STAGED, NO_CHANGE, "STAGED"
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_STAGED && r.GetMetadata().GetLastListenTime() < (time.Now().AddDate(0, -1, 0).Unix()) {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_STAGED && time.Since(time.Unix(r.GetMetadata().GetLastListenTime(), 0)) > time.Hour*24*30 {
 		return pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL, NO_CHANGE, "PRE HS"
 	}
 
 	s.Log(fmt.Sprintf("%v %v -> %v and %v", r.Metadata.GetCategory(), r.GetRelease().GetInstanceId(), time.Unix(r.GetMetadata().GetDateAdded(), 0), time.Now().AddDate(0, -3, 0)))
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_HIGH_SCHOOL && r.GetMetadata().GetLastListenTime() < (time.Now().AddDate(0, -2, 0).Unix()) {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_HIGH_SCHOOL && time.Since(time.Unix(r.GetMetadata().GetLastListenTime(), 0)) > time.Hour*24*60 {
 		return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, NO_CHANGE, "PRE IN"
 	}
 
