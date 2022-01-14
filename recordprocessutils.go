@@ -199,7 +199,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		}
 	}
 
-	if r.GetMetadata().GetGoalFolder() == 3903712 && r.GetRelease().GetRating() > 0 {
+	if r.GetMetadata().GetGoalFolder() == 3903712 && r.GetRelease().GetRating() > 0 && r.GetMetadata().GetCategory() != pbrc.ReleaseMetadata_IN_COLLECTION {
 		return pbrc.ReleaseMetadata_IN_COLLECTION, NO_CHANGE, "NatalieToIn"
 	}
 
