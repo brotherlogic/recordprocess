@@ -229,7 +229,7 @@ func (s *Server) runElectLoop() {
 	ctx, cancel := utils.ManualContext("rp-loop", time.Minute)
 	defer cancel()
 
-	cf, err := s.RunLockingElection(ctx, "recordprocess")
+	cf, err := s.RunLockingElection(ctx, "recordprocess", "locking for record processing")
 	defer s.ReleaseLockingElection(ctx, "recordprocess", cf)
 
 	if err == nil {
