@@ -4,11 +4,11 @@ go 1.13
 
 require (
 	github.com/brotherlogic/godiscogs v0.0.0-20220814182128-f8eecacc4756
-	github.com/brotherlogic/goserver v0.0.0-20220819181159-c728a3f047e7
+	github.com/brotherlogic/goserver v0.0.0-20220819191451-f33d62230933
 	github.com/brotherlogic/keystore v0.0.0-20220819190324-985dc407a45a
-	github.com/brotherlogic/logging v0.0.0-20220819190406-aaf8b44819cc // indirect
+	github.com/brotherlogic/lock v0.0.0-20220819191438-02921ede79fb // indirect
 	github.com/brotherlogic/queue v0.0.0-20220819190258-48dbb788f485
-	github.com/brotherlogic/recordcollection v0.0.0-20220819183913-42d5cb327ee0
+	github.com/brotherlogic/recordcollection v0.0.0-20220819190546-e81146d87741
 	github.com/brotherlogic/recordfanout v0.0.0-20220819190000-f2450348613f
 	github.com/golang/protobuf v1.5.2
 	github.com/prometheus/client_golang v1.13.0
