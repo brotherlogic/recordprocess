@@ -235,7 +235,7 @@ func (s *Server) runElectLoop() {
 	if err == nil {
 		s.runLoop(ctx)
 	} else {
-		s.Log(fmt.Sprintf("Unable to elect: %v", err))
+		s.CtxLog(ctx, fmt.Sprintf("Unable to elect: %v", err))
 	}
 }
 

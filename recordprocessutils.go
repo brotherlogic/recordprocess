@@ -23,7 +23,7 @@ func (s *Server) runLoop(ctx context.Context) {
 
 	config, err := s.readConfig(ctx)
 	if err != nil {
-		s.Log(fmt.Sprintf("Unable to process: %v", err))
+		s.CtxLog(ctx, fmt.Sprintf("Unable to process: %v", err))
 		return
 	}
 
@@ -39,7 +39,7 @@ func (s *Server) runLoop(ctx context.Context) {
 
 	if bid > 0 {
 		_, err := s.ClientUpdate(ctx, &pbrc.ClientUpdateRequest{InstanceId: bid})
-		s.Log(fmt.Sprintf("Updated %v -> %v", bid, err))
+		s.CtxLog(ctx, fmt.Sprintf("Updated %v -> %v", bid, err))
 	}
 }
 
@@ -296,7 +296,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL, NO_CHANGE, "PRE HS"
 	}
 
-	s.Log(fmt.Sprintf("%v %v -> %v and %v", r.Metadata.GetCategory(), r.GetRelease().GetInstanceId(), time.Unix(r.GetMetadata().GetDateAdded(), 0), time.Now().AddDate(0, -3, 0)))
+	s.CtxLog(ctx, fmt.Sprintf("%v %v -> %v and %v", r.Metadata.GetCategory(), r.GetRelease().GetInstanceId(), time.Unix(r.GetMetadata().GetDateAdded(), 0), time.Now().AddDate(0, -3, 0)))
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_HIGH_SCHOOL && time.Since(time.Unix(r.GetMetadata().GetLastListenTime(), 0)) > time.Hour*24*60 {
 		return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, NO_CHANGE, "PRE IN"
 	}

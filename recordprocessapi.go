@@ -70,7 +70,7 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 	}
 
 	update, ti, result := s.processRecord(ctx, record)
-	s.Log(fmt.Sprintf("%v -> %v, %v, %v", record.GetRelease().GetInstanceId(), update, ti, result))
+	s.CtxLog(ctx, fmt.Sprintf("%v -> %v, %v, %v", record.GetRelease().GetInstanceId(), update, ti, result))
 
 	// Fast return on boxed records
 	if result == "In The Box" {
@@ -83,7 +83,7 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 			ncount++
 		}
 		err := s.getter.update(ctx, record.GetRelease().GetInstanceId(), update, result, ncount)
-		s.Log(fmt.Sprintf("%v -> %v, %v => %v", record.GetRelease().GetTitle(), update, result, err))
+		s.CtxLog(ctx, fmt.Sprintf("%v -> %v, %v => %v", record.GetRelease().GetTitle(), update, result, err))
 		if err != nil {
 			return nil, err
 		}
