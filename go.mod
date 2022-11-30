@@ -3,6 +3,7 @@ module github.com/brotherlogic/recordprocess
 go 1.13
 
 require (
+	github.com/brotherlogic/githubcard v0.0.0-20221130084912-a87a0a593ada // indirect
 	github.com/brotherlogic/godiscogs v0.0.0-20221025153630-9ad31d9fab21
 	github.com/brotherlogic/goserver v0.0.0-20221106165541-0672428e3628
 	github.com/brotherlogic/keystore v0.0.0-20221129112009-b4e94692d1d0
