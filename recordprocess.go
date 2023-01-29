@@ -90,7 +90,21 @@ func (p prodGetter) update(ctx context.Context, instanceID int32, cat pbrc.Relea
 	defer conn.Close()
 
 	client := pbrc.NewRecordCollectionServiceClient(conn)
-	_, err = client.UpdateRecord(ctx, &pbrc.UpdateRecordRequest{Reason: reason, Requestor: "recordprocess", Update: &pbrc.Record{Release: &gdpb.Release{InstanceId: instanceID}, Metadata: &pbrc.ReleaseMetadata{Category: cat, SaleAttempts: ncount}}})
+
+	up := &pbrc.Record{
+		Release:  &gdpb.Release{InstanceId: instanceID},
+		Metadata: &pbrc.ReleaseMetadata{Category: cat, SaleAttempts: ncount},
+	}
+
+	// Reset weight when staging to sell
+	if cat == pbrc.ReleaseMetadata_STAGED_TO_SELL {
+		up.Metadata.WeightInGrams = -1
+	}
+
+	_, err = client.UpdateRecord(ctx, &pbrc.UpdateRecordRequest{
+		Reason: reason, Requestor: "recordprocess",
+		Update: up,
+	})
 	if err != nil {
 		return err
 	}
