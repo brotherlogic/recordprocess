@@ -62,7 +62,7 @@ func main() {
 		}
 		client2 := pbrc.NewClientUpdateServiceClient(conn)
 		for i, id := range ids.GetInstanceIds() {
-			log.Printf("PING %v -> %v", i, id)
+			fmt.Printf("PING %v -> %v", i, id)
 			ctx3, cancel3 := utils.ManualContext("fullping", time.Minute)
 			res, err := client2.ClientUpdate(ctx3, &pbrc.ClientUpdateRequest{InstanceId: int32(id)})
 			fmt.Printf("%v\n%v", res, err)
@@ -74,7 +74,7 @@ func main() {
 			log.Fatalf("Bad query: %v", err)
 		}
 		for i, id := range ids.GetInstanceIds() {
-			log.Printf("PING %v -> %v", i, id)
+			fmt.Printf("PING %v -> %v", i, id)
 			ctx3, cancel3 := utils.ManualContext("fullping", time.Minute)
 			res, err := client2.ClientUpdate(ctx3, &pbrc.ClientUpdateRequest{InstanceId: int32(id)})
 			fmt.Printf("%v\n%v", res, err)
