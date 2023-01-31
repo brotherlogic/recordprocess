@@ -71,7 +71,7 @@ func main() {
 
 		ids, err = registry.QueryRecords(ctx2, &pbrc.QueryRecordsRequest{Query: &pbrc.QueryRecordsRequest_FolderId{3578980}})
 		if err != nil {
-			log.Fatalf("Bad query: %v", err)
+			log.Fatalf("bad query: %v", err)
 		}
 		for i, id := range ids.GetInstanceIds() {
 			fmt.Printf("PING %v -> %v", i, id)
