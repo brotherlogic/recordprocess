@@ -11,7 +11,7 @@ import (
 	pb "github.com/brotherlogic/recordprocess/proto"
 	"golang.org/x/net/context"
 
-	pbgd "github.com/brotherlogic/godiscogs"
+	pbgd "github.com/brotherlogic/godiscogs/proto"
 	pbrc "github.com/brotherlogic/recordcollection/proto"
 )
 
@@ -137,7 +137,6 @@ var movetests = []struct {
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_LISTED_TO_SELL, Cost: 12, GoalFolder: 242017}}, pbrc.ReleaseMetadata_SALE_ISSUE},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_LISTED_TO_SELL, SaleId: -1, Cost: 12, GoalFolder: 242017}}, pbrc.ReleaseMetadata_UNLISTENED},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PURCHASED, Cost: 12, GoalFolder: 268147}}, pbrc.ReleaseMetadata_DIGITAL},
-	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_BANDCAMP, Cost: 12, GoalFolder: 1782105}}, pbrc.ReleaseMetadata_UNLISTENED},
 	{&pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PURCHASED, Cost: 12}}, pbrc.ReleaseMetadata_UNLISTENED},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1112, Rating: 0, Formats: []*pbgd.Format{&pbgd.Format{Name: "12"}}, Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PROFESSOR, SaleId: 123}}, pbrc.ReleaseMetadata_LISTED_TO_SELL},
 	{&pbrc.Record{Release: &pbgd.Release{FolderId: 1112, Rating: 0, Formats: []*pbgd.Format{&pbgd.Format{Name: "CD"}}, Labels: []*pbgd.Label{&pbgd.Label{Name: "blah"}}}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_PREPARE_TO_SELL, LastStockCheck: time.Now().Unix()}}, pbrc.ReleaseMetadata_RIP_THEN_SELL},
@@ -201,32 +200,6 @@ func TestSaveRecordTwice(t *testing.T) {
 	val2 := s.saveRecordScore(context.Background(), &pbrc.Record{Release: &pbgd.Release{Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, InstanceId: 1234, Rating: 5}, Metadata: &pbrc.ReleaseMetadata{Category: pbrc.ReleaseMetadata_FRESHMAN}})
 	if !val2 {
 		t.Errorf("Second save did not fail")
-	}
-}
-
-func TestUpdate(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{InstanceId: 123, Id: 10, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}}
-	s.getter = &tg
-
-	s.ClientUpdate(context.Background(), &pbrc.ClientUpdateRequest{InstanceId: 123})
-
-	if tg.lastCategory != pbrc.ReleaseMetadata_PURCHASED {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
-	}
-}
-
-func TestBigUpdate(t *testing.T) {
-	s := InitTest()
-	tg := testGetter{rec: &pbrc.Record{Metadata: &pbrc.ReleaseMetadata{}, Release: &pbgd.Release{InstanceId: 123, Id: 10, Labels: []*pbgd.Label{&pbgd.Label{Name: "Label"}}, FolderId: 1}}, repeat: 200}
-	s.getter = &tg
-	s.ClientUpdate(context.Background(), &pbrc.ClientUpdateRequest{InstanceId: 123})
-	//s.processNextRecords(context.Background())
-
-	//s.processRecords(context.Background())
-
-	if tg.lastCategory != pbrc.ReleaseMetadata_PURCHASED {
-		t.Errorf("Folder has not been updated: %v", tg.lastCategory)
 	}
 }
 

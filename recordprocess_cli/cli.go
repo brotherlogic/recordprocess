@@ -62,7 +62,7 @@ func main() {
 		}
 		client2 := pbrc.NewClientUpdateServiceClient(conn)
 		for i, id := range ids.GetInstanceIds() {
-			log.Printf("PING %v -> %v", i, id)
+			fmt.Printf("PING %v -> %v", i, id)
 			ctx3, cancel3 := utils.ManualContext("fullping", time.Minute)
 			res, err := client2.ClientUpdate(ctx3, &pbrc.ClientUpdateRequest{InstanceId: int32(id)})
 			fmt.Printf("%v\n%v", res, err)
@@ -71,10 +71,10 @@ func main() {
 
 		ids, err = registry.QueryRecords(ctx2, &pbrc.QueryRecordsRequest{Query: &pbrc.QueryRecordsRequest_FolderId{3578980}})
 		if err != nil {
-			log.Fatalf("Bad query: %v", err)
+			log.Fatalf("bad query: %v", err)
 		}
 		for i, id := range ids.GetInstanceIds() {
-			log.Printf("PING %v -> %v", i, id)
+			fmt.Printf("ping %v -> %v", i, id)
 			ctx3, cancel3 := utils.ManualContext("fullping", time.Minute)
 			res, err := client2.ClientUpdate(ctx3, &pbrc.ClientUpdateRequest{InstanceId: int32(id)})
 			fmt.Printf("%v\n%v", res, err)
