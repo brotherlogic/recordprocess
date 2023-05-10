@@ -253,7 +253,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_HIGH_SCHOOL, time.Unix(r.GetMetadata().GetLastListenTime(), 0).Add(time.Hour * 24 * 60), "HIGH SCHOOL W/ARR"
 	}
 
-	if (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_VALIDATE || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_SOFT_VALIDATED) || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_UNKNOWN || (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_PRE_FRESHMAN && r.GetRelease().Rating > 0) {
+	if (r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_VALIDATE || r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_SOFT_VALIDATED) && r.GetRelease().Rating > 0 {
 		return pbrc.ReleaseMetadata_IN_COLLECTION, NO_CHANGE, "VALID_TO_IN_COLLECTION"
 	}
 
