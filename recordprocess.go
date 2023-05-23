@@ -97,7 +97,7 @@ func (p prodGetter) update(ctx context.Context, instanceID int32, cat pbrc.Relea
 	}
 
 	// Reset weight when staging to sell
-	if cat == pbrc.ReleaseMetadata_SOLD {
+	if cat == pbrc.ReleaseMetadata_STAGED_TO_SELL {
 		up.Metadata.WeightInGrams = -1
 	}
 
