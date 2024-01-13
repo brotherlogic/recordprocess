@@ -127,6 +127,10 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_PARENTS, NO_CHANGE, "Parents"
 	}
 
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_SOLD && time.Since(time.Unix(r.GetMetadata().GetLastUpdateTime(), 0)) > time.Hour*48 {
+		return pbrc.ReleaseMetadata_STAGED_TO_SELL, NO_CHANGE, "Reattempting Sale"
+	}
+
 	// If the record is in google play, set the category to GOOGLE_PLAY
 	if (r.GetRelease().GetFolderId() == 1433217 || r.GetMetadata().GetGoalFolder() == 1433217) && r.GetMetadata().GetCategory() != pbrc.ReleaseMetadata_GOOGLE_PLAY {
 		return pbrc.ReleaseMetadata_GOOGLE_PLAY, NO_CHANGE, "Google Play"
