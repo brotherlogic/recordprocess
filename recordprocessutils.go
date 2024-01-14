@@ -142,7 +142,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_SOLD_ARCHIVE, NO_CHANGE, "Actually Sold"
 	}
 
-	s.CtxLog(ctx, fmt.Sprintf("HERE %v: %v, %v", r.GetRelease().GetInstanceId(), r.GetMetadata().GetCategory(), r.GetMetadata().GetSaleId()))
+	s.CtxLog(ctx, fmt.Sprintf("HERE %v: %v, %v with time %v", r.GetRelease().GetInstanceId(), r.GetMetadata().GetCategory(), r.GetMetadata().GetSaleId(), time.Since(time.Unix(r.GetMetadata().GetLastUpdateTime(), 0))))
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_SOLD && (r.GetMetadata().SaleId > 0 || r.GetMetadata().GetSoldDate() > 0) {
 		return pbrc.ReleaseMetadata_LISTED_TO_SELL, NO_CHANGE, "Listed to Sell"
 	}
