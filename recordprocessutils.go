@@ -127,7 +127,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_PARENTS, NO_CHANGE, "Parents"
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_SOLD && time.Since(time.Unix(r.GetMetadata().GetLastUpdateTime(), 0)) > time.Hour*24 {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_SOLD && time.Since(time.Unix(r.GetMetadata().GetLastUpdateTime(), 0)) > time.Hour*12 {
 		return pbrc.ReleaseMetadata_STAGED_TO_SELL, NO_CHANGE, "Reattempting Sale"
 	}
 
