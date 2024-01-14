@@ -127,10 +127,6 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_PARENTS, NO_CHANGE, "Parents"
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_SOLD && time.Since(time.Unix(r.GetMetadata().GetLastUpdateTime(), 0)) > time.Hour*12 {
-		return pbrc.ReleaseMetadata_STAGED_TO_SELL, NO_CHANGE, "Reattempting Sale"
-	}
-
 	// If the record is in google play, set the category to GOOGLE_PLAY
 	if (r.GetRelease().GetFolderId() == 1433217 || r.GetMetadata().GetGoalFolder() == 1433217) && r.GetMetadata().GetCategory() != pbrc.ReleaseMetadata_GOOGLE_PLAY {
 		return pbrc.ReleaseMetadata_GOOGLE_PLAY, NO_CHANGE, "Google Play"
@@ -149,6 +145,10 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 	s.CtxLog(ctx, fmt.Sprintf("HERE %v: %v, %v", r.GetRelease().GetInstanceId(), r.GetMetadata().GetCategory(), r.GetMetadata().GetSaleId()))
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_SOLD && (r.GetMetadata().SaleId > 0 || r.GetMetadata().GetSoldDate() > 0) {
 		return pbrc.ReleaseMetadata_LISTED_TO_SELL, NO_CHANGE, "Listed to Sell"
+	}
+
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_SOLD && time.Since(time.Unix(r.GetMetadata().GetLastUpdateTime(), 0)) > time.Hour {
+		return pbrc.ReleaseMetadata_STAGED_TO_SELL, NO_CHANGE, "Reattempting Sale"
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_LISTED_TO_SELL && r.GetMetadata().GetSaleId() == 0 {
