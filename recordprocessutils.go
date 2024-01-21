@@ -151,7 +151,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_STAGED_TO_SELL, NO_CHANGE, "Reattempting Sale"
 	}
 
-	if r.GetMetadata().Category == pbrc.ReleaseMetadata_LISTED_TO_SELL && r.GetMetadata().GetSaleId() == 0 {
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_LISTED_TO_SELL && r.GetMetadata().GetSaleId() == 2 {
 		return pbrc.ReleaseMetadata_SALE_ISSUE, NO_CHANGE, "Sale issue - no id"
 	}
 
