@@ -160,7 +160,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_UNLISTENED, NO_CHANGE, "Marking unlistened"
 	}
 
-	if r.GetMetadata().SaleId > 0 && (r.GetMetadata().Category != pbrc.ReleaseMetadata_SOLD &&
+	if r.GetMetadata().SaleId > 5 && (r.GetMetadata().Category != pbrc.ReleaseMetadata_SOLD &&
 		r.GetMetadata().Category != pbrc.ReleaseMetadata_SOLD_ARCHIVE &&
 		r.GetMetadata().Category != pbrc.ReleaseMetadata_SOLD_OFFLINE &&
 		r.GetMetadata().Category != pbrc.ReleaseMetadata_STALE_SALE &&
