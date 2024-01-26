@@ -156,6 +156,10 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_SALE_ISSUE, NO_CHANGE, "Sale issue - no id"
 	}
 
+	if r.GetMetadata().Category == pbrc.ReleaseMetadata_LISTED_TO_SELL && r.GetMetadata().GetSaleId() > 10 && r.GetMetadata().GetSaleState() == pbgd.SaleState_NOT_FOR_SALE {
+		return pbrc.ReleaseMetadata_SALE_ISSUE, NO_CHANGE, "Sale issue - not actually for sale"
+	}
+
 	if r.GetMetadata().SaleId < 0 && r.GetMetadata().Category == pbrc.ReleaseMetadata_LISTED_TO_SELL {
 		return pbrc.ReleaseMetadata_UNLISTENED, NO_CHANGE, "Marking unlistened"
 	}
