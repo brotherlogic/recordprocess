@@ -267,6 +267,9 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 	}
 
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_STAGED && time.Since(time.Unix(r.GetMetadata().GetLastListenTime(), 0)) > time.Hour*24*14 {
+		if r.GetMetadata().GetFiledUnder() == pbrc.ReleaseMetadata_FILE_CD && r.GetMetadata().GetWasParents() {
+			return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, NO_CHANGE, "FAST PIC"
+		}
 		return pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL, NO_CHANGE, "PRE HS"
 	}
 
