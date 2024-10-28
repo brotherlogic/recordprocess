@@ -266,8 +266,12 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_IN_COLLECTION, NO_CHANGE, "VALID_TO_IN_COLLECTION"
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_STAGED && time.Since(time.Unix(r.GetMetadata().GetLastListenTime(), 0)) > time.Hour*24*14 {
-		return pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL, NO_CHANGE, "PRE HS"
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_STAGED {
+		if r.GetMetadata().GetFiledUnder() == pbrc.ReleaseMetadata_FILE_7_INCH && r.GetMetadata().GetWasParents() && time.Since(time.Unix(r.GetMetadata().GetLastListenTime(), 0)) > time.Hour*24*7 {
+			return pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL, NO_CHANGE, "PRE HS"
+		} else if time.Since(time.Unix(r.GetMetadata().GetLastListenTime(), 0)) > time.Hour*24*14 {
+			return pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL, NO_CHANGE, "PRE HS"
+		}
 	}
 
 	s.CtxLog(ctx, fmt.Sprintf("%v %v -> %v and %v", r.Metadata.GetCategory(), r.GetRelease().GetInstanceId(), time.Unix(r.GetMetadata().GetDateAdded(), 0), time.Now().AddDate(0, -3, 0)))
