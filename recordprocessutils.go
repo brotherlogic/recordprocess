@@ -277,6 +277,8 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_HIGH_SCHOOL {
 		if r.GetMetadata().GetFiledUnder() == pbrc.ReleaseMetadata_FILE_12_INCH && time.Now().Month() == time.December {
 			return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, NO_CHANGE, "PRE IN"
+		} else if r.GetMetadata().GetFiledUnder() == pbrc.ReleaseMetadata_FILE_CD {
+			return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, NO_CHANGE, "PRE IN"
 		} else if time.Since(time.Unix(r.GetMetadata().GetLastListenTime(), 0)) > time.Hour*24*28 {
 			return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, NO_CHANGE, "PRE IN"
 		}
