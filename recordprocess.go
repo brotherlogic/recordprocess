@@ -35,7 +35,7 @@ const (
 	CONFIG = "github.com/brotherlogic/recordprocess/config"
 )
 
-//Server main server type
+// Server main server type
 type Server struct {
 	*goserver.GoServer
 	getter getter
@@ -105,22 +105,6 @@ func (p prodGetter) update(ctx context.Context, instanceID int32, cat pbrc.Relea
 		Reason: reason, Requestor: "recordprocess",
 		Update: up,
 	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (p prodGetter) updateStock(ctx context.Context, rec *pbrc.Record) error {
-	conn, err := p.dial(ctx, "recordcollection")
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	client := pbrc.NewRecordCollectionServiceClient(conn)
-	up := &pbrc.UpdateRecordRequest{Reason: "stock-from-proc", Update: &pbrc.Record{Release: &gdpb.Release{InstanceId: rec.GetRelease().InstanceId}, Metadata: &pbrc.ReleaseMetadata{LastStockCheck: time.Now().Unix()}}}
-	_, err = client.UpdateRecord(ctx, up)
 	if err != nil {
 		return err
 	}
