@@ -6,9 +6,9 @@ require (
 	github.com/brotherlogic/godiscogs v0.0.0-20250131163651-1e34c776a68e
 	github.com/brotherlogic/goserver v0.0.0-20250123145056-95c6fbb2310a
 	github.com/brotherlogic/keystore v0.0.0-20240508161349-814b3200b126
-	github.com/brotherlogic/queue v0.0.0-20250311064329-669d81d637c3
+	github.com/brotherlogic/queue v0.0.0-20250311085236-c470ba7a7dfa
 	github.com/brotherlogic/recordcollection v0.0.0-20250227174213-ce20ec909d87
-	github.com/brotherlogic/recordfanout v0.0.0-20250311064739-4fa804264f3e
+	github.com/brotherlogic/recordfanout v0.0.0-20250311074907-b57bbdae03c2
 	github.com/golang/protobuf v1.5.4
 	github.com/prometheus/client_golang v1.21.1
 	golang.org/x/net v0.37.0
@@ -21,12 +21,12 @@ require (
 	github.com/brotherlogic/buildserver v0.0.0-20250311055030-c139dc1d57da // indirect
 	github.com/brotherlogic/datastore v0.0.0-20250113225754-a9cab19c721e // indirect
 	github.com/brotherlogic/discovery v0.0.0-20241109204028-02908558af09 // indirect
-	github.com/brotherlogic/dstore v0.0.0-20250311074107-039693cecb83 // indirect
-	github.com/brotherlogic/githubcard v0.0.0-20250311064852-d8820d0caeb6 // indirect
+	github.com/brotherlogic/dstore v0.0.0-20250311084437-3a6143883700 // indirect
+	github.com/brotherlogic/githubcard v0.0.0-20250311074950-dfc6312c68eb // indirect
 	github.com/brotherlogic/githubridge v0.2848.0 // indirect
-	github.com/brotherlogic/gobuildslave v0.0.0-20250311071107-82d0e860a3b3 // indirect
-	github.com/brotherlogic/lock v0.0.0-20250311064539-f4df2eb4faff // indirect
-	github.com/brotherlogic/logging v0.0.0-20250311074111-d6a466101cc1 // indirect
+	github.com/brotherlogic/gobuildslave v0.0.0-20250311084811-0f3562d0c918 // indirect
+	github.com/brotherlogic/lock v0.0.0-20250311085259-768911ebb606 // indirect
+	github.com/brotherlogic/logging v0.0.0-20250311090432-def67d6a21a6 // indirect
 	github.com/brotherlogic/monitor v0.0.0-20221025152653-c10877c5f9e6 // indirect
 	github.com/brotherlogic/versionserver v0.0.0-20221025154054-c9bcd41be2f2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
