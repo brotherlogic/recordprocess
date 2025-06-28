@@ -265,7 +265,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_IN_COLLECTION, NO_CHANGE, "VALID_TO_IN_COLLECTION"
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_STAGED && time.Since(time.Unix(r.GetMetadata().GetLastListenTime(), 0)) > time.Hour*24*7 {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_STAGED && time.Since(time.Unix(r.GetMetadata().GetLastListenTime(), 0)) > time.Hour*24*30 {
 		if r.GetMetadata().GetFiledUnder() == pbrc.ReleaseMetadata_FILE_CD && r.GetMetadata().GetWasParents() {
 			return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, NO_CHANGE, "FAST PIC"
 		}
@@ -276,7 +276,7 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_HIGH_SCHOOL {
 		if r.GetMetadata().GetFiledUnder() == pbrc.ReleaseMetadata_FILE_12_INCH && time.Now().Month() == time.December {
 			return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, NO_CHANGE, "PRE IN fast"
-		} else if time.Since(time.Unix(r.GetMetadata().GetLastListenTime(), 0)) > time.Hour*24*7 {
+		} else if time.Since(time.Unix(r.GetMetadata().GetLastListenTime(), 0)) > time.Hour*24*30 {
 			return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, NO_CHANGE, "PRE IN reg"
 		}
 	}
