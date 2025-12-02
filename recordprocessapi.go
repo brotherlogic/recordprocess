@@ -51,7 +51,7 @@ func (s *Server) Force(ctx context.Context, req *pb.ForceRequest) (*pb.ForceResp
 	return nil, fmt.Errorf("Unable to process: %v", result)
 }
 
-//ClientUpdate forces a move
+// ClientUpdate forces a move
 func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest) (*pbrc.ClientUpdateResponse, error) {
 	record, err := s.getter.getRecord(ctx, in.InstanceId)
 	if err != nil {
@@ -89,16 +89,6 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 		}
 	}
 
-	// Always trigger an update on sales, to see if they've sold once a week
-	// OR it's a sold archive record and it has no sold price yet
-	if (record.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_LISTED_TO_SELL && time.Now().Sub(time.Unix(record.GetMetadata().GetLastStockCheck(), 0)) > time.Hour*24*7) ||
-		(record.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_SOLD_ARCHIVE && record.GetMetadata().GetSoldPrice() == 0) {
-		err := s.getter.updateStock(ctx, record)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	if time.Now().Before(ti) {
 		return &pbrc.ClientUpdateResponse{}, s.pushUpdate(ctx, in.InstanceId, ti)
 	}
@@ -106,7 +96,7 @@ func (s *Server) ClientUpdate(ctx context.Context, in *pbrc.ClientUpdateRequest)
 	return &pbrc.ClientUpdateResponse{}, nil
 }
 
-//Get peek into the state
+// Get peek into the state
 func (s *Server) Get(ctx context.Context, req *pb.GetRequest) (*pb.GetResponse, error) {
 	config, err := s.readConfig(ctx)
 	if err != nil {

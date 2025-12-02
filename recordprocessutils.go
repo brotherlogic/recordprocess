@@ -16,7 +16,6 @@ type getter interface {
 	getRecords(ctx context.Context, t int64, c int) ([]int32, error)
 	getRecord(ctx context.Context, instanceID int32) (*pbrc.Record, error)
 	update(ctx context.Context, instanceID int32, category pbrc.ReleaseMetadata_Category, reason string, scount int32) error
-	updateStock(ctx context.Context, rec *pbrc.Record) error
 }
 
 func (s *Server) runLoop(ctx context.Context) {
@@ -266,14 +265,14 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 		return pbrc.ReleaseMetadata_IN_COLLECTION, NO_CHANGE, "VALID_TO_IN_COLLECTION"
 	}
 
-	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_STAGED && time.Since(time.Unix(r.GetMetadata().GetLastListenTime(), 0)) > time.Hour*24*14 {
+	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_STAGED && time.Since(time.Unix(r.GetMetadata().GetLastListenTime(), 0)) > time.Hour*24*30 {
 		if r.GetMetadata().GetFiledUnder() == pbrc.ReleaseMetadata_FILE_CD && r.GetMetadata().GetWasParents() {
 			return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, NO_CHANGE, "FAST PIC"
 		}
 		return pbrc.ReleaseMetadata_PRE_HIGH_SCHOOL, NO_CHANGE, "PRE HS"
 	}
 
-	s.CtxLog(ctx, fmt.Sprintf("%v %v -> %v and %v", r.Metadata.GetCategory(), r.GetRelease().GetInstanceId(), time.Unix(r.GetMetadata().GetDateAdded(), 0), time.Now().AddDate(0, -3, 0)))
+	s.CtxLog(ctx, fmt.Sprintf("%v %v -> %v and %v", r.Metadata.GetCategory(), r.GetRelease().GetInstanceId(), time.Unix(r.GetMetadata().GetDateAdded(), 0), time.Unix(r.GetMetadata().GetLastListenTime(), 0)))
 	if r.GetMetadata().GetCategory() == pbrc.ReleaseMetadata_HIGH_SCHOOL {
 		if r.GetMetadata().GetFiledUnder() == pbrc.ReleaseMetadata_FILE_12_INCH && time.Now().Month() == time.December && time.Since(time.Unix(r.GetMetadata().GetLastListenTime(), 0)) > time.Hour*24 {
 			return pbrc.ReleaseMetadata_PRE_IN_COLLECTION, NO_CHANGE, "PRE IN"
