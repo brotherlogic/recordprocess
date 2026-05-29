@@ -23,25 +23,25 @@ type testGetter struct {
 	repeat       int
 }
 
-func (t *testGetter) getRecords(ctx context.Context, ti int64, c int) ([]int32, error) {
+func (t *testGetter) getRecords(ctx context.Context, ti int64, c int) ([]int64, error) {
 	if t.repeat > 0 {
-		ret := []int32{}
+		ret := []int64{}
 		for i := 0; i < t.repeat; i++ {
 			ret = append(ret, t.rec.GetRelease().InstanceId)
 		}
 		return ret, nil
 	}
-	return []int32{t.rec.GetRelease().InstanceId}, nil
+	return []int64{t.rec.GetRelease().InstanceId}, nil
 }
 
-func (t *testGetter) getRecord(ctx context.Context, instanceID int32) (*pbrc.Record, error) {
+func (t *testGetter) getRecord(ctx context.Context, instanceID int64) (*pbrc.Record, error) {
 	if t.getFail {
 		return nil, fmt.Errorf("Built to fail")
 	}
 	return t.rec, nil
 }
 
-func (t *testGetter) update(ctx context.Context, instanceID int32, cat pbrc.ReleaseMetadata_Category, reason string, scount int32) error {
+func (t *testGetter) update(ctx context.Context, instanceID int64, cat pbrc.ReleaseMetadata_Category, reason string, scount int32) error {
 	t.lastCategory = cat
 	return nil
 }
@@ -59,21 +59,21 @@ type testFailGetter struct {
 	lastCategory pbrc.ReleaseMetadata_Category
 }
 
-func (t testFailGetter) getRecords(ctx context.Context, ti int64, c int) ([]int32, error) {
+func (t testFailGetter) getRecords(ctx context.Context, ti int64, c int) ([]int64, error) {
 	if t.grf {
-		return []int32{1}, nil
+		return []int64{1}, nil
 	}
 	return nil, errors.New("Built to fail")
 }
 
-func (t testFailGetter) getRecord(ctx context.Context, instanceID int32) (*pbrc.Record, error) {
+func (t testFailGetter) getRecord(ctx context.Context, instanceID int64) (*pbrc.Record, error) {
 	if t.grf {
 		return &pbrc.Record{}, nil
 	}
 	return nil, errors.New("Built to fail")
 }
 
-func (t testFailGetter) update(ctx context.Context, instanceID int32, cat pbrc.ReleaseMetadata_Category, reason string, blah int32) error {
+func (t testFailGetter) update(ctx context.Context, instanceID int64, cat pbrc.ReleaseMetadata_Category, reason string, blah int32) error {
 	if !t.grf {
 		t.lastCategory = cat
 		return nil

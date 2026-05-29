@@ -13,9 +13,9 @@ import (
 )
 
 type getter interface {
-	getRecords(ctx context.Context, t int64, c int) ([]int32, error)
-	getRecord(ctx context.Context, instanceID int32) (*pbrc.Record, error)
-	update(ctx context.Context, instanceID int32, category pbrc.ReleaseMetadata_Category, reason string, scount int32) error
+	getRecords(ctx context.Context, t int64, c int) ([]int64, error)
+	getRecord(ctx context.Context, instanceID int64) (*pbrc.Record, error)
+	update(ctx context.Context, instanceID int64, category pbrc.ReleaseMetadata_Category, reason string, scount int32) error
 }
 
 func (s *Server) runLoop(ctx context.Context) {
@@ -27,7 +27,7 @@ func (s *Server) runLoop(ctx context.Context) {
 	}
 
 	bt := time.Now().Unix()
-	bid := int32(-1)
+	bid := int64(-1)
 	for id, t := range config.GetNextUpdateTime() {
 		if t < bt {
 			bt = t
