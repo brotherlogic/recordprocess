@@ -45,7 +45,7 @@ type prodGetter struct {
 	dial func(ctx context.Context, server string) (*grpc.ClientConn, error)
 }
 
-func (p prodGetter) getRecords(ctx context.Context, t int64, count int) ([]int32, error) {
+func (p prodGetter) getRecords(ctx context.Context, t int64, count int) ([]int64, error) {
 	conn, err := p.dial(ctx, "recordcollection")
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (p prodGetter) getRecords(ctx context.Context, t int64, count int) ([]int32
 	return resp.GetInstanceIds(), nil
 }
 
-func (p prodGetter) getRecord(ctx context.Context, instanceID int32) (*pbrc.Record, error) {
+func (p prodGetter) getRecord(ctx context.Context, instanceID int64) (*pbrc.Record, error) {
 	conn, err := p.dial(ctx, "recordcollection")
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (p prodGetter) getRecord(ctx context.Context, instanceID int32) (*pbrc.Reco
 	return resp.GetRecord(), nil
 }
 
-func (p prodGetter) update(ctx context.Context, instanceID int32, cat pbrc.ReleaseMetadata_Category, reason string, ncount int32) error {
+func (p prodGetter) update(ctx context.Context, instanceID int64, cat pbrc.ReleaseMetadata_Category, reason string, ncount int32) error {
 	conn, err := p.dial(ctx, "recordcollection")
 	if err != nil {
 		return err
@@ -162,7 +162,7 @@ func (s *Server) readConfig(ctx context.Context) (*pb.Config, error) {
 	config = data.(*pb.Config)
 
 	// Ensure that we have recent updates on everything
-	ids := []int32{}
+	ids := []int64{}
 	for id, next := range config.GetNextUpdateTime() {
 		if time.Unix(next, 0).Sub(time.Now()) > time.Hour*24*8 {
 			ids = append(ids, id)
@@ -172,7 +172,7 @@ func (s *Server) readConfig(ctx context.Context) (*pb.Config, error) {
 	return config, nil
 }
 
-func (s *Server) updateTime(ctx context.Context, iid int32, ti int64) error {
+func (s *Server) updateTime(ctx context.Context, iid int64, ti int64) error {
 	config, err := s.readConfig(ctx)
 	if err != nil {
 		return err
@@ -254,7 +254,7 @@ func (s *Server) setVarz(config *pb.Config) {
 	lastUpdateTime.Set(float64(max))
 }
 
-func (s *Server) pushUpdate(ctx context.Context, iid int32, t time.Time) error {
+func (s *Server) pushUpdate(ctx context.Context, iid int64, t time.Time) error {
 	conn, err := s.FDialServer(ctx, "queue")
 	if err != nil {
 		return err
@@ -262,7 +262,7 @@ func (s *Server) pushUpdate(ctx context.Context, iid int32, t time.Time) error {
 	defer conn.Close()
 	qclient := qpb.NewQueueServiceClient(conn)
 	upup := &rfpb.FanoutRequest{
-		InstanceId: int32(iid),
+		InstanceId: int64(iid),
 	}
 	data, _ := proto.Marshal(upup)
 	_, err = qclient.AddQueueItem(ctx, &qpb.AddQueueItemRequest{

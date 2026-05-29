@@ -35,7 +35,7 @@ func main() {
 	switch os.Args[1] {
 	case "get":
 		val, _ := strconv.Atoi(os.Args[2])
-		res, err := client.Get(ctx, &pb.GetRequest{InstanceId: int32(val)})
+		res, err := client.Get(ctx, &pb.GetRequest{InstanceId: int64(val)})
 		if err != nil {
 			log.Fatalf("Error on GET: %v", err)
 		}
@@ -43,7 +43,7 @@ func main() {
 	case "force":
 		client2 := pbrc.NewClientUpdateServiceClient(conn)
 		val, _ := strconv.Atoi(os.Args[2])
-		res, err := client2.ClientUpdate(ctx, &pbrc.ClientUpdateRequest{InstanceId: int32(val)})
+		res, err := client2.ClientUpdate(ctx, &pbrc.ClientUpdateRequest{InstanceId: int64(val)})
 		fmt.Printf("%v\n%v", res, err)
 	case "fullping":
 		ctx2, cancel2 := utils.ManualContext("recordcollectioncli-"+os.Args[1], time.Hour)
@@ -64,7 +64,7 @@ func main() {
 		for i, id := range ids.GetInstanceIds() {
 			fmt.Printf("PING %v -> %v", i, id)
 			ctx3, cancel3 := utils.ManualContext("fullping", time.Minute)
-			res, err := client2.ClientUpdate(ctx3, &pbrc.ClientUpdateRequest{InstanceId: int32(id)})
+			res, err := client2.ClientUpdate(ctx3, &pbrc.ClientUpdateRequest{InstanceId: int64(id)})
 			fmt.Printf("%v\n%v", res, err)
 			cancel3()
 		}
@@ -76,7 +76,7 @@ func main() {
 		for i, id := range ids.GetInstanceIds() {
 			fmt.Printf("ping %v -> %v", i, id)
 			ctx3, cancel3 := utils.ManualContext("fullping", time.Minute)
-			res, err := client2.ClientUpdate(ctx3, &pbrc.ClientUpdateRequest{InstanceId: int32(id)})
+			res, err := client2.ClientUpdate(ctx3, &pbrc.ClientUpdateRequest{InstanceId: int64(id)})
 			fmt.Printf("%v\n%v", res, err)
 			cancel3()
 		}
