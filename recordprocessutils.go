@@ -184,6 +184,9 @@ func (s *Server) processRecord(ctx context.Context, r *pbrc.Record) (pbrc.Releas
 	}
 
 	if r.GetMetadata().Category == pbrc.ReleaseMetadata_PREPARE_TO_SELL {
+		if r.GetMetadata().GetTakenToStore() {
+			return pbrc.ReleaseMetadata_SOLD_ARCHIVE, NO_CHANGE, "Taken to store"
+		}
 
 		if recordNeedsRip(r) {
 			return pbrc.ReleaseMetadata_RIP_THEN_SELL, NO_CHANGE, "Ripping then selling"
